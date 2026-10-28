@@ -3,19 +3,42 @@
 from __future__ import annotations
 
 import http.client
+import math
 import re
 import socket
 import time
 from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, quote_plus, urlencode, urlsplit
 
 from .contracts import parse_json
 from .errors import A2APIError, contract_error
 from .execution import Budget
 from .ir import ExecutionContext, Operation
-from .pointers import resolve
+from .pointers import resolve, tokens
+
+
+@dataclass(frozen=True)
+class HTTPQueryParameter:
+    pointer: str
+    required: bool = False
+    explode: bool = True
+
+    def __post_init__(self) -> None:
+        tokens(self.pointer)
+        if type(self.required) is not bool or type(self.explode) is not bool:
+            raise contract_error("Query parameter required/explode must be booleans")
+
+
+def _query_scalar(value: object) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str) or type(value) is int:
+        return str(value)
+    if isinstance(value, float) and math.isfinite(value):
+        return str(value)
+    raise A2APIError("INVALID_INPUT", "Query values must be finite scalars or arrays of scalars.", status=422)
 
 
 @dataclass(frozen=True)
@@ -24,6 +47,8 @@ class HTTPRoute:
     path: str
     path_parameters: Mapping[str, str] = field(default_factory=dict)
     headers: Mapping[str, str] = field(default_factory=dict)
+    query_parameters: Mapping[str, HTTPQueryParameter] = field(default_factory=dict)
+    response_envelope: str | None = None
 
     def __post_init__(self) -> None:
         parsed = urlsplit(self.base_url)
@@ -41,8 +66,14 @@ class HTTPRoute:
             raise contract_error("HTTP path placeholders do not match their parameter bindings")
         if any(k.lower() in {"host", "x-a2api-actor", "x-a2api-tenant"} for k in self.headers):
             raise contract_error("Deployment headers cannot override trusted routing/context")
+        if any(not isinstance(name, str) or not name or not isinstance(binding, HTTPQueryParameter)
+               for name, binding in self.query_parameters.items()):
+            raise contract_error("Query bindings must map names to HTTPQueryParameter values")
+        if self.response_envelope is not None and (not isinstance(self.response_envelope, str) or not self.response_envelope):
+            raise contract_error("Response envelope must be a nonempty field name")
         object.__setattr__(self, "path_parameters", MappingProxyType(dict(self.path_parameters)))
         object.__setattr__(self, "headers", MappingProxyType(dict(self.headers)))
+        object.__setattr__(self, "query_parameters", MappingProxyType(dict(self.query_parameters)))
 
 
 class HTTPAdapter:
@@ -63,9 +94,33 @@ class HTTPAdapter:
         path = route.path
         for name, pointer in route.path_parameters.items():
             value = resolve(arguments, pointer)
-            if not isinstance(value, (str, int)) or isinstance(value, bool) or str(value) in (".", ".."):
-                raise A2APIError("INVALID_INPUT", "HTTP path arguments must be scalar identifiers.", status=422)
-            path = path.replace("{" + name + "}", quote(str(value), safe=""))
+            text = _query_scalar(value)
+            if text in (".", ".."):
+                raise A2APIError("INVALID_INPUT", "HTTP path arguments cannot be relative path segments.", status=422)
+            path = path.replace("{" + name + "}", quote(text, safe=""))
+        query = []
+        for name, binding in route.query_parameters.items():
+            try:
+                value = resolve(arguments, binding.pointer)
+            except A2APIError as error:
+                if error.code != "MAPPING_ERROR":
+                    raise
+                if binding.required:
+                    raise A2APIError("INVALID_INPUT", "A required query parameter is absent.", status=422) from None
+                continue
+            if isinstance(value, (list, tuple)):
+                values = [_query_scalar(item) for item in value]
+                if not values:
+                    raise A2APIError("INVALID_INPUT", "Empty query arrays have no representation in this form profile.", status=422)
+                if binding.explode:
+                    query.extend(urlencode({name: item}) for item in values)
+                else:
+                    # Delimiters remain literal; reserved characters inside each item are encoded.
+                    query.append(quote_plus(name) + "=" + ",".join(quote_plus(item) for item in values))
+            else:
+                query.append(urlencode({name: _query_scalar(value)}))
+        if query:
+            path += "?" + "&".join(query)
         parsed = urlsplit(route.base_url)
         call_deadline = min(budget.deadline, time.monotonic() + timeout_ms / 1000)
 
@@ -111,7 +166,8 @@ class HTTPAdapter:
             if response.length not in (None, 0):
                 raise A2APIError("INVALID_RESPONSE", "Backend response ended before its declared length.", status=502)
             try:
-                return parse_json(body.decode("utf-8"))
+                payload = parse_json(body.decode("utf-8"))
+                return {route.response_envelope: payload} if route.response_envelope is not None else payload
             except (ValueError, UnicodeError):
                 raise A2APIError("INVALID_RESPONSE", "Backend did not return strict UTF-8 JSON.", status=502) from None
         except (TimeoutError, socket.timeout):

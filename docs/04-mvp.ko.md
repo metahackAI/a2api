@@ -3,6 +3,7 @@
 구현일: 2026-10-28 · Python 3.11+ · 조회 전용
 
 추가한 stdio MCP binding과 에이전트 연결은 [MCP 브리지 안내](05-mcp-bridge.ko.md)에 정리했다.
+명세에서 비활성 IR을 생성하는 기능과 대규모 GitHub 샘플은 [OpenAPI importer 안내](06-openapi-importer.ko.md)에 정리했다. 실행 가능한 MVP의 닫힌 schema profile과 가져온 초안의 `openapi-draft` profile을 구분한다.
 
 ## 실행
 
@@ -147,4 +148,4 @@ POST /invoke
 
 Python 3.14.4 / jsonschema 4.19.2 환경에서 실제 loopback HTTP를 사용하는 자동 테스트 40개와 CLI demo를 실행해 통과했다. 테스트는 정상·빈 배송·동시 호출, 계약/의미 ID 오류, 권한, schema drift, 관계 불일치, timeout, 크기 제한, 잘못된 JSON, redirect, cursor를 포함한다. wheel 패키지도 빌드하고 소스 폴더 밖에서 데모를 실행해 리소스 포함 여부를 확인했다.
 
-전체 프로토콜 초안 중 변경 작업·prepare/commit·멱등 키·부분 결과·장기 실행 저장·조회/취소·OpenAPI importer·일반 정책 엔진·LLM 성능 평가는 아직 구현하지 않았다. 표준 라이브러리 HTTP gateway는 로컬 시연용이며 운영 배포에는 별도 서버와 인증 통합이 필요하다.
+전체 프로토콜 초안 중 변경 작업·prepare/commit·멱등 키·부분 결과·장기 실행 저장·조회/취소·일반 정책 엔진·LLM 성능 평가는 아직 구현하지 않았다. OpenAPI importer는 비활성 초안 생성과 HTTP 적합성 검증까지 구현했다. 표준 라이브러리 HTTP gateway는 로컬 시연용이며 운영 배포에는 별도 서버와 인증 통합이 필요하다.

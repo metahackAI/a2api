@@ -1,0 +1,1277 @@
+{
+  "a2api": "0.1.0-draft.1",
+  "binding": {
+    "output": {
+      "result": {
+        "from": "step",
+        "pointer": "/result",
+        "step": "fetch"
+      }
+    },
+    "steps": [
+      {
+        "id": "fetch",
+        "input": {},
+        "operationId": "meta/get"
+      }
+    ],
+    "type": "composition"
+  },
+  "contextRequirements": [
+    "actor",
+    "tenant"
+  ],
+  "effects": {
+    "externalWrites": true,
+    "kind": "unknown"
+  },
+  "enabled": false,
+  "errors": [
+    "INVALID_INPUT",
+    "SCHEMA_MISMATCH",
+    "PERMISSION_DENIED",
+    "DEADLINE_EXCEEDED"
+  ],
+  "examples": [
+    {
+      "expectedDecision": "review_required",
+      "userIntent": "Get GitHub meta information"
+    }
+  ],
+  "execution": {
+    "backendTimeoutMs": 1500,
+    "deadlineMs": 5000,
+    "failureMode": "stop",
+    "maxBackendCalls": 1,
+    "maxRetries": 0,
+    "mode": "synchronous",
+    "successCondition": "all_required_steps_succeeded_and_output_valid"
+  },
+  "id": "github.meta.get",
+  "inputSchema": {
+    "$defs": {
+      "ref_9df4b9c763ae194346ad": {
+        "description": "Api Overview",
+        "properties": {
+          "actions": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "actions_macos": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "api": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "codespaces": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "commit_signing_keys": {
+            "example": [
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "copilot": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dependabot": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "domains": {
+            "properties": {
+              "actions": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "actions_inbound": {
+                "properties": {
+                  "full_domains": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "wildcard_domains": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "artifact_attestations": {
+                "properties": {
+                  "services": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "trust_domain": {
+                    "example": [
+                      "example"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "codespaces": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "copilot": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "packages": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "storage": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "website": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "git": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "github_enterprise_importer": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "hooks": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "importer": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "packages": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pages": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shared_ingress": {
+            "description": "Public destination IP ranges in CIDR notation for shared GitHub-managed ingress infrastructure.\nThese ranges may serve multiple GitHub services and are not outbound source ranges.\nUse them alongside the relevant product-specific network requirements.\nOmitted when no ranges are available.",
+            "example": [
+              "192.0.2.1/32"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ssh_key_fingerprints": {
+            "properties": {
+              "SHA256_DSA": {
+                "type": "string"
+              },
+              "SHA256_ECDSA": {
+                "type": "string"
+              },
+              "SHA256_ED25519": {
+                "type": "string"
+              },
+              "SHA256_RSA": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "ssh_keys": {
+            "example": [
+              "ssh-ed25519 ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "verifiable_password_authentication": {
+            "example": true,
+            "type": "boolean"
+          },
+          "web": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "verifiable_password_authentication"
+        ],
+        "title": "Api Overview",
+        "type": "object"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {},
+    "required": [],
+    "type": "object"
+  },
+  "intent": {
+    "avoidWhen": [
+      "Before business semantics, authorization and effects have been reviewed."
+    ],
+    "summary": "Get GitHub meta information\nReturns meta information about GitHub, including a list of GitHub's IP addresses. For more information, see \"[About GitHub's IP addresses](https://docs.github.com/articles/about-github-s-ip-addresses/).\"\n\nThe API's response also includes a list of GitHub's domain names, and the public keys used by GitHub to sign commits made through the web UI.\n\nThe values shown in the documentation's response are example values. You must always query the API directly to get the latest values.\n\n> [!NOTE]\n> This endpoint returns both IPv4 and IPv6 addresses. However, not all features support IPv6. You should refer to the specific documentation for each feature to determine if IPv6 is supported.",
+    "useWhen": [
+      "Get GitHub meta information"
+    ]
+  },
+  "lifecycle": "draft",
+  "operations": [
+    {
+      "effects": {
+        "externalWrites": true,
+        "kind": "unknown"
+      },
+      "id": "meta/get",
+      "inputSchema": {
+        "$defs": {
+          "ref_9df4b9c763ae194346ad": {
+            "description": "Api Overview",
+            "properties": {
+              "actions": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "actions_macos": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "api": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "codespaces": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "commit_signing_keys": {
+                "example": [
+                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "copilot": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "dependabot": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "domains": {
+                "properties": {
+                  "actions": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "actions_inbound": {
+                    "properties": {
+                      "full_domains": {
+                        "items": {
+                          "example": [
+                            "example.com"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "wildcard_domains": {
+                        "items": {
+                          "example": [
+                            "example.com"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "artifact_attestations": {
+                    "properties": {
+                      "services": {
+                        "items": {
+                          "example": [
+                            "example.com"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "trust_domain": {
+                        "example": [
+                          "example"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "codespaces": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "copilot": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "packages": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "storage": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "website": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "git": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "github_enterprise_importer": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "hooks": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "importer": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "packages": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "pages": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "shared_ingress": {
+                "description": "Public destination IP ranges in CIDR notation for shared GitHub-managed ingress infrastructure.\nThese ranges may serve multiple GitHub services and are not outbound source ranges.\nUse them alongside the relevant product-specific network requirements.\nOmitted when no ranges are available.",
+                "example": [
+                  "192.0.2.1/32"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "ssh_key_fingerprints": {
+                "properties": {
+                  "SHA256_DSA": {
+                    "type": "string"
+                  },
+                  "SHA256_ECDSA": {
+                    "type": "string"
+                  },
+                  "SHA256_ED25519": {
+                    "type": "string"
+                  },
+                  "SHA256_RSA": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "ssh_keys": {
+                "example": [
+                  "ssh-ed25519 ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "verifiable_password_authentication": {
+                "example": true,
+                "type": "boolean"
+              },
+              "web": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "verifiable_password_authentication"
+            ],
+            "title": "Api Overview",
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "operationRef": "meta/get",
+      "outputSchema": {
+        "$defs": {
+          "ref_9df4b9c763ae194346ad": {
+            "description": "Api Overview",
+            "properties": {
+              "actions": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "actions_macos": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "api": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "codespaces": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "commit_signing_keys": {
+                "example": [
+                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "copilot": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "dependabot": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "domains": {
+                "properties": {
+                  "actions": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "actions_inbound": {
+                    "properties": {
+                      "full_domains": {
+                        "items": {
+                          "example": [
+                            "example.com"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "wildcard_domains": {
+                        "items": {
+                          "example": [
+                            "example.com"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "artifact_attestations": {
+                    "properties": {
+                      "services": {
+                        "items": {
+                          "example": [
+                            "example.com"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "trust_domain": {
+                        "example": [
+                          "example"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "codespaces": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "copilot": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "packages": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "storage": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "website": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "git": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "github_enterprise_importer": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "hooks": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "importer": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "packages": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "pages": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "shared_ingress": {
+                "description": "Public destination IP ranges in CIDR notation for shared GitHub-managed ingress infrastructure.\nThese ranges may serve multiple GitHub services and are not outbound source ranges.\nUse them alongside the relevant product-specific network requirements.\nOmitted when no ranges are available.",
+                "example": [
+                  "192.0.2.1/32"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "ssh_key_fingerprints": {
+                "properties": {
+                  "SHA256_DSA": {
+                    "type": "string"
+                  },
+                  "SHA256_ECDSA": {
+                    "type": "string"
+                  },
+                  "SHA256_ED25519": {
+                    "type": "string"
+                  },
+                  "SHA256_RSA": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "ssh_keys": {
+                "example": [
+                  "ssh-ed25519 ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "verifiable_password_authentication": {
+                "example": true,
+                "type": "boolean"
+              },
+              "web": {
+                "example": [
+                  "192.0.2.1"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "verifiable_password_authentication"
+            ],
+            "title": "Api Overview",
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "result": {
+            "$ref": "#/$defs/ref_9df4b9c763ae194346ad"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object"
+      },
+      "serviceRef": "github"
+    }
+  ],
+  "outputSchema": {
+    "$defs": {
+      "ref_9df4b9c763ae194346ad": {
+        "description": "Api Overview",
+        "properties": {
+          "actions": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "actions_macos": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "api": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "codespaces": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "commit_signing_keys": {
+            "example": [
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "copilot": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dependabot": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "domains": {
+            "properties": {
+              "actions": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "actions_inbound": {
+                "properties": {
+                  "full_domains": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "wildcard_domains": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "artifact_attestations": {
+                "properties": {
+                  "services": {
+                    "items": {
+                      "example": [
+                        "example.com"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "trust_domain": {
+                    "example": [
+                      "example"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "codespaces": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "copilot": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "packages": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "storage": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "website": {
+                "items": {
+                  "example": [
+                    "example.com"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "git": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "github_enterprise_importer": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "hooks": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "importer": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "packages": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pages": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shared_ingress": {
+            "description": "Public destination IP ranges in CIDR notation for shared GitHub-managed ingress infrastructure.\nThese ranges may serve multiple GitHub services and are not outbound source ranges.\nUse them alongside the relevant product-specific network requirements.\nOmitted when no ranges are available.",
+            "example": [
+              "192.0.2.1/32"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ssh_key_fingerprints": {
+            "properties": {
+              "SHA256_DSA": {
+                "type": "string"
+              },
+              "SHA256_ECDSA": {
+                "type": "string"
+              },
+              "SHA256_ED25519": {
+                "type": "string"
+              },
+              "SHA256_RSA": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "ssh_keys": {
+            "example": [
+              "ssh-ed25519 ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "verifiable_password_authentication": {
+            "example": true,
+            "type": "boolean"
+          },
+          "web": {
+            "example": [
+              "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "verifiable_password_authentication"
+        ],
+        "title": "Api Overview",
+        "type": "object"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "result": {
+        "$ref": "#/$defs/ref_9df4b9c763ae194346ad"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "type": "object"
+  },
+  "owner": "unassigned",
+  "policy": {
+    "approval": "not_required_for_this_read",
+    "objectAuthorization": "backend_and_runtime",
+    "requiredScopes": [
+      "a2api:unreviewed"
+    ],
+    "resourceRelationshipCheck": "review_required"
+  },
+  "presentation": {
+    "pointer": "/result",
+    "view": "json"
+  },
+  "provenance": {
+    "kind": "source",
+    "reviewState": "unreviewed",
+    "source": {
+      "apiVersion": "1.1.4",
+      "document": "api.github.com.json.gz",
+      "method": "GET",
+      "openapiVersion": "3.0.3",
+      "operationId": "meta/get",
+      "path": "/meta",
+      "pointer": "/paths/~1meta/get",
+      "responseLinks": {},
+      "responseMediaType": "application/json",
+      "schemaReferences": {
+        "ref_9df4b9c763ae194346ad": "#/components/schemas/api-overview"
+      },
+      "security": [],
+      "servers": [
+        {
+          "url": "https://api.github.com"
+        }
+      ],
+      "sha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
+      "tags": [
+        "meta"
+      ]
+    }
+  },
+  "schemaProfile": "openapi-draft",
+  "semanticTypes": {},
+  "title": "Get GitHub meta information",
+  "version": "0.1.0"
+}

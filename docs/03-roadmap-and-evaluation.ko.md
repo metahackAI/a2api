@@ -26,6 +26,8 @@ MCP SDK나 validator의 구체 버전은 구현 시 지원 범위를 확인해 �
 
 첫 importer는 OpenAPI 3.0/3.1에서 지원하는 기능을 명시하고, 3.2 및 그 밖의 기능은 실제 fixture와 parser 지원을 확인해 확장한다. 지원하지 않는 버전·키워드는 진단하며 조용히 downgrade하지 않는다.
 
+현재 Python 구현에 첫 importer를 추가했다. 공식 GitHub REST의 1,254 operations 전체를 목록화하고 GET 617개를 비활성 IR로 변환한다. [구현·검증 기록](06-openapi-importer.ko.md)을 참고한다. 검토 overlay 분리·증분 재생성과 LLM 업무 성공률 평가는 남아 있으므로 아래 6단계 전체가 완료된 상태는 아니다.
+
 ## 3. 단계별 산출물과 완료 조건
 
 | 단계 | 산출물 | 완료 조건 |

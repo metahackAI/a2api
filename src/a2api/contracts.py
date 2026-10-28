@@ -13,6 +13,7 @@ from .errors import A2APIError, contract_error
 from .ir import Capability, Check, Operation, Step, ValueRef, freeze
 from .pointers import schema_at, tokens
 from .schema import check_schema, compatible, validate_value
+from .openapi_schema import check_draft_schema
 
 META = json.loads(files("a2api").joinpath("schemas/capability.schema.json").read_text())
 CONTEXT_SCHEMA = {"type": "object", "properties": {"actor": {"type": "string"}, "tenant": {"type": "string"}}, "required": ["actor", "tenant"]}
@@ -61,8 +62,20 @@ def compile_contract(manifest: dict) -> Capability:
     schemas = [manifest["inputSchema"], manifest["outputSchema"]]
     for operation in manifest["operations"]:
         schemas.extend([operation["inputSchema"], operation["outputSchema"]])
+    imported = manifest.get("schemaProfile", "mvp") == "openapi-draft"
+    if imported and (manifest["enabled"] or manifest["lifecycle"] != "draft"
+                     or manifest["provenance"]["kind"] != "source"
+                     or manifest["provenance"]["reviewState"] != "unreviewed"):
+        raise contract_error("The openapi-draft schema profile is for disabled, unreviewed source imports only")
+    checked = set()
     for schema in schemas:
-        check_schema(schema, manifest["semanticTypes"])
+        if imported:
+            key = json.dumps(schema, sort_keys=True, separators=(",", ":"))
+            if key not in checked:
+                check_draft_schema(schema)
+                checked.add(key)
+        else:
+            check_schema(schema, manifest["semanticTypes"])
         if schema["type"] != "object":
             raise contract_error("Capability and operation roots must be objects")
     for example in manifest["examples"]:
@@ -97,7 +110,7 @@ def compile_contract(manifest: dict) -> Capability:
     steps = []
     output_schemas = {}
 
-    def ref_schema(ref: ValueRef, item_schema: dict | None = None) -> dict:
+    def ref_schema(ref: ValueRef, item_schema: dict | None = None, *, required: bool = True) -> dict:
         tokens(ref.pointer)
         if ref.source == "literal":
             raise contract_error("Literal mappings are outside the executable MVP profile")
@@ -106,7 +119,7 @@ def compile_contract(manifest: dict) -> Capability:
             source = output_schemas.get(ref.step)
         if source is None:
             raise contract_error("Mapping source is unavailable")
-        return schema_at(source, ref.pointer)
+        return schema_at(source, ref.pointer, require_required=required)
 
     for name in ordered:
         raw = raw_steps[name]
@@ -128,7 +141,7 @@ def compile_contract(manifest: dict) -> Capability:
         if not required.issubset(inputs) or not set(inputs).issubset(properties):
             raise contract_error("Step inputs do not cover exactly declared operation fields")
         for key, ref in inputs.items():
-            compatible(ref_schema(ref, item_schema), properties[key])
+            compatible(ref_schema(ref, item_schema, required=key in required), properties[key])
         checks = []
         for check in raw.get("checks", []):
             ref = ValueRef.from_dict(check["equals"])

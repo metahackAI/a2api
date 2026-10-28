@@ -27,11 +27,11 @@ def resolve(value: Any, pointer: str) -> Any:
     return value
 
 
-def schema_at(schema: Mapping, pointer: str) -> Mapping:
+def schema_at(schema: Mapping, pointer: str, *, require_required: bool = True) -> Mapping:
     for key in tokens(pointer):
         if schema.get("type") != "object" or key not in schema.get("properties", {}):
             raise contract_error("Mapping points outside a supported object schema")
-        if key not in schema.get("required", []):
+        if require_required and key not in schema.get("required", []):
             raise contract_error("A mapped source field must be required")
         schema = schema["properties"][key]
     return schema

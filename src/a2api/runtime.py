@@ -67,7 +67,13 @@ class Runtime:
         def call(step, item=None, index=0):
             budget.remaining()
             operation = capability.operations[step.operation_id]
-            arguments = {key: value(ref, item) for key, ref in step.inputs.items()}
+            arguments = {}
+            for key, ref in step.inputs.items():
+                try:
+                    arguments[key] = value(ref, item)
+                except A2APIError as error:
+                    if error.code != "MAPPING_ERROR" or key in operation.input_schema.get("required", []):
+                        raise
             validate_value(operation.input_schema, arguments, code="INVALID_INPUT", status=422)
             data = self.adapter.call(operation, arguments, context, budget, capability.execution["backendTimeoutMs"])
             validate_value(operation.output_schema, data, code="SCHEMA_MISMATCH", status=502)

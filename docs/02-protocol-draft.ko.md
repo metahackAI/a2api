@@ -18,6 +18,8 @@
 
 OpenAPI 등에서 가져온 계약은 원래 dialect를 기록한다. nullable·union·discriminator·숫자 범위·직렬화 방식이 변환 중 달라지면 명시적으로 진단한다. 특히 int64, decimal 금액, byte 배열, 날짜, native pointer를 단순 JSON number/string으로 바꾸며 의미를 잃지 않도록 mapping 규칙을 둔다.
 
+구현은 schema profile을 구분한다. 기본 `mvp`는 실행을 위한 제한된 닫힌 스키마이며, `openapi-draft`는 참조·union·열린 객체 등 원본 구조를 보존하는 비활성 추출 초안이다. 후자는 `draft/unreviewed/enabled=false`에서만 컴파일되며 검토 플래그 변경만으로 활성화할 수 없다. 지원하는 변환과 진단은 [importer 구현 범위](06-openapi-importer.ko.md)에 명시한다.
+
 ## 2. Capability IR의 최소 구성
 
 | 필드 | 역할 | 조건 |

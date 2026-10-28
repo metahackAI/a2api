@@ -80,8 +80,12 @@ def validate_value(schema: Mapping, value: object, *, code: str, status: int) ->
 
 
 def compatible(source: Mapping, target: Mapping) -> None:
+    if thaw(source) == thaw(target):
+        return
     def types(s: Mapping) -> set:
         t = s.get("type")
+        if t is None:
+            raise contract_error("Complex schema mappings must have identical declarations")
         return {t} if isinstance(t, str) else set(t)
     if not types(source).issubset(types(target)):
         raise contract_error("Mapping has incompatible JSON types")

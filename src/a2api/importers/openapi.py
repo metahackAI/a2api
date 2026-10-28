@@ -1,0 +1,429 @@
+"""Streaming OpenAPI importer producing validated, disabled Capability IR."""
+
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass
+import gzip
+import hashlib
+import json
+from pathlib import Path
+import re
+from typing import Iterator, Mapping
+
+from ..contracts import compile_contract, parse_json
+from ..errors import A2APIError, contract_error
+from ..http_adapter import HTTPQueryParameter, HTTPRoute
+from ..ir import Capability, freeze, thaw
+from .schema_conversion import ImportIssue, SchemaConverter, escape, local_reference
+
+HTTP_METHODS = frozenset({'get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'})
+MAX_DOCUMENT_BYTES = 64 * 1024 * 1024
+
+
+def load_openapi(path: str | Path) -> tuple[dict, str]:
+    """Load bounded JSON/YAML, optionally gzipped. Never fetch external references."""
+    path = Path(path)
+    try:
+        opener = gzip.open if path.suffix == '.gz' else open
+        with opener(path, 'rb') as stream:
+            raw = stream.read(MAX_DOCUMENT_BYTES + 1)
+        if len(raw) > MAX_DOCUMENT_BYTES:
+            raise ValueError('document exceeds 64 MiB')
+        text = raw.decode('utf-8')
+        suffix = Path(path.stem).suffix if path.suffix == '.gz' else path.suffix
+        if suffix.lower() in ('.yaml', '.yml'):
+            document = _load_yaml(text)
+        else:
+            document = parse_json(text)
+        # Reject non-JSON values (including YAML object aliases/cycles and NaN).
+        json.dumps(document, allow_nan=False)
+    except A2APIError:
+        raise
+    except (OSError, EOFError, UnicodeError, ValueError, TypeError, RecursionError) as error:
+        raise A2APIError('INVALID_OPENAPI', 'OpenAPI input must be bounded, unambiguous UTF-8 JSON or YAML.') from error
+    return document, hashlib.sha256(raw).hexdigest()
+
+
+def _load_yaml(text: str):
+    try:
+        import yaml
+    except ModuleNotFoundError:
+        raise A2APIError('DEPENDENCY_MISSING', 'YAML input requires: python -m pip install "a2api[openapi]"') from None
+    try:
+        if any(isinstance(event, yaml.AliasEvent) for event in yaml.parse(text)):
+            raise ValueError('YAML aliases are outside this import profile')
+
+        class Loader(yaml.SafeLoader):
+            pass
+
+        # OAS YAML must roundtrip JSON values; keep unquoted dates and "on" as strings.
+        Loader.yaml_implicit_resolvers = {
+            key: [(tag, expression) for tag, expression in value
+                  if tag not in ('tag:yaml.org,2002:timestamp', 'tag:yaml.org,2002:bool')]
+            for key, value in Loader.yaml_implicit_resolvers.items()
+        }
+        Loader.add_implicit_resolver('tag:yaml.org,2002:bool', re.compile(r'^(?:true|false|True|False|TRUE|FALSE)$'), list('tTfF'))
+
+        def mapping(loader, node):
+            result = {}
+            for key, value in loader.construct_pairs(node):
+                if not isinstance(key, str) or key in result:
+                    raise ValueError('YAML mapping keys must be unique strings')
+                result[key] = value
+            return result
+
+        Loader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, mapping)
+        return yaml.load(text, Loader=Loader)
+    except yaml.YAMLError as error:
+        raise ValueError('Invalid YAML') from error
+
+
+@dataclass(frozen=True)
+class ImportRecord:
+    path: str
+    method: str
+    operation_id: str
+    status: str
+    diagnostics: tuple[Mapping, ...]
+    capability: Capability | None = None
+    binding: Mapping | None = None
+
+    def summary(self) -> dict:
+        return {'path': self.path, 'method': self.method, 'operationId': self.operation_id,
+                'status': self.status, 'capabilityId': self.capability.id if self.capability else None,
+                'diagnostics': thaw(self.diagnostics)}
+
+    def http_route(self, base_url: str, *, path_prefix: str = '', headers: dict | None = None) -> HTTPRoute:
+        """Make a GET binding only after the host explicitly chooses the origin.
+
+        This does not review or activate the disabled capability.
+        """
+        if self.binding is None or self.method != 'get':
+            raise contract_error('No imported GET binding exists')
+        if path_prefix and not path_prefix.startswith('/'):
+            raise contract_error('Deployment path prefix must be origin-relative')
+        query = {name: HTTPQueryParameter(item['pointer'], item['required'], item['explode'])
+                 for name, item in self.binding['queryParameters'].items()}
+        return HTTPRoute(base_url, path_prefix.rstrip('/') + self.path,
+                         self.binding['pathParameters'], headers or {}, query, 'result')
+
+
+def _object(properties: dict, required: list | None = None) -> dict:
+    return {'type': 'object', 'properties': properties, 'required': required or [], 'additionalProperties': False}
+
+
+def _identifier(namespace: str, operation_id: str) -> str:
+    parts = []
+    for part in re.split(r'[/.]', operation_id.casefold()):
+        part = re.sub(r'[^a-z0-9_]', '_', part).strip('_') or 'operation'
+        parts.append(part if part[0].isalpha() else 'op_' + part)
+    return namespace + '.' + '.'.join(parts)
+
+
+class OpenAPIImporter:
+    def __init__(self, document: dict, *, namespace: str = 'imported', source_name: str = '<memory>', source_hash: str | None = None):
+        if not isinstance(document, dict) or not isinstance(document.get('openapi'), str) or not re.fullmatch(r'3\.[01]\.\d+', document['openapi']):
+            raise A2APIError('INVALID_OPENAPI', 'Only OpenAPI 3.0.x and 3.1.x documents are supported.')
+        if not isinstance(document.get('info'), dict) or not isinstance(document['info'].get('title'), str) or not isinstance(document['info'].get('version'), str):
+            raise A2APIError('INVALID_OPENAPI', 'OpenAPI info.title and info.version must be strings.')
+        if not isinstance(document.get('paths'), dict):
+            raise A2APIError('INVALID_OPENAPI', 'OpenAPI paths must be an object.')
+        if not re.fullmatch(r'[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*', namespace):
+            raise A2APIError('INVALID_OPENAPI', 'Namespace must contain lowercase identifier segments.')
+        dialect = document.get('jsonSchemaDialect')
+        if dialect not in (None, 'https://json-schema.org/draft/2020-12/schema', 'https://spec.openapis.org/oas/3.1/dialect/base'):
+            raise A2APIError('INVALID_OPENAPI', 'Custom JSON Schema dialects require a separate importer.')
+        try:
+            canonical = json.dumps(document, ensure_ascii=False, sort_keys=True, allow_nan=False)
+        except (ValueError, TypeError, RecursionError):
+            raise A2APIError('INVALID_OPENAPI', 'OpenAPI source must contain finite JSON values.') from None
+        # Detach from caller mutations; component conversion caches are per document.
+        self.document = json.loads(canonical)
+        self.namespace = namespace
+        self.source_name = source_name
+        self.source_hash = source_hash or hashlib.sha256(canonical.encode()).hexdigest()
+        self.converter = SchemaConverter(self.document)
+        self._operations = list(self._inventory())
+        self._ids = Counter(opid for _, _, _, _, opid, _ in self._operations)
+        self._capability_ids = Counter(_identifier(namespace, opid) for _, _, _, _, opid, _ in self._operations)
+
+    @classmethod
+    def from_file(cls, path: str | Path, *, namespace: str = 'imported') -> OpenAPIImporter:
+        document, digest = load_openapi(path)
+        return cls(document, namespace=namespace, source_name=Path(path).name, source_hash=digest)
+
+    def _object(self, value, location: str) -> dict:
+        visited = set()
+        while isinstance(value, dict) and '$ref' in value:
+            reference = value['$ref']
+            if not isinstance(reference, str):
+                raise ImportIssue('INVALID_REFERENCE', 'Reference must be a string.', location)
+            if reference in visited:
+                raise ImportIssue('CYCLIC_OBJECT_REFERENCE', 'Reference Objects cannot form a cycle.', location)
+            visited.add(reference)
+            if set(value) - {'$ref', 'summary', 'description'}:
+                raise ImportIssue('REFERENCE_OBJECT_SIBLINGS', 'Reference Object siblings are unsupported in this position.', location)
+            value = local_reference(self.document, reference, location)
+        if not isinstance(value, dict):
+            raise ImportIssue('INVALID_OBJECT', 'Expected an OpenAPI object.', location)
+        return value
+
+    def _inventory(self):
+        for path, raw in sorted(self.document['paths'].items()):
+            if path.startswith('x-'):
+                continue
+            if not path.startswith('/'):
+                raise A2APIError('INVALID_OPENAPI', 'Path keys must start with /.')
+            location = '/paths/' + escape(path)
+            try:
+                item = self._object(raw, location)
+            except ImportIssue as error:
+                yield path, '*', {}, {}, 'unresolved-path-item', error
+                continue
+            for method in sorted(HTTP_METHODS & item.keys()):
+                operation = item[method]
+                issue = None
+                if not isinstance(operation, dict):
+                    operation = {}
+                    issue = ImportIssue('INVALID_OPERATION', 'HTTP operation must be an object.', location + '/' + method)
+                opid = operation.get('operationId')
+                if opid is not None and (not isinstance(opid, str) or not opid):
+                    issue = ImportIssue('INVALID_OPERATION_ID', 'operationId must be a nonempty string.', location + '/' + method)
+                    opid = None
+                opid = opid or method + '_' + hashlib.sha256(path.encode()).hexdigest()[:16]
+                yield path, method, item, operation, opid, issue
+
+    def iter_operations(self, operation_ids: set[str] | None = None) -> Iterator[ImportRecord]:
+        """Stream records to bound memory on large specifications; no API calls occur."""
+        if operation_ids is not None and not operation_ids.issubset(self._ids):
+            raise A2APIError('INVALID_SELECTION', 'Selected operationId is absent from the source document.')
+        for path, method, item, operation, opid, initial_issue in self._operations:
+            if operation_ids is not None and opid not in operation_ids:
+                continue
+            location = '/paths/' + escape(path) + '/' + method
+            try:
+                if initial_issue:
+                    raise initial_issue
+                if self._ids[opid] > 1:
+                    raise ImportIssue('DUPLICATE_OPERATION_ID', 'operationId is not unique in this document.', location)
+                if method != 'get':
+                    issue = ImportIssue('METHOD_OUTSIDE_MVP', 'The current deployment adapter supports GET only; this operation is inventoried but not converted.', location)
+                    yield ImportRecord(path, method, opid, 'skipped', (freeze(issue.diagnostic('info')),))
+                    continue
+                yield self._import(path, item, operation, opid, location)
+            except ImportIssue as error:
+                yield ImportRecord(path, method, opid, 'unsupported', (freeze(error.diagnostic()),))
+
+    def _parameter_types(self, schema, location: str, depth: int = 0) -> set[str]:
+        if depth > 128:
+            raise ImportIssue('SCHEMA_DEPTH', 'Parameter schema exceeds the supported structural depth.', location)
+        visited = set()
+        while isinstance(schema, dict) and '$ref' in schema:
+            reference = schema['$ref']
+            if not isinstance(reference, str):
+                raise ImportIssue('INVALID_REFERENCE', 'Reference must be a string.', location)
+            if reference in visited:
+                raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Recursive parameter schema cannot be serialized.', location)
+            visited.add(reference)
+            schema = local_reference(self.document, reference, location)
+        if not isinstance(schema, dict):
+            raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Parameter must declare scalar or scalar-array types.', location)
+        if schema.get('nullable') is True:
+            raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Nullable parameter serialization is not defined by this profile.', location)
+        declared = schema.get('type')
+        if declared is not None and not (isinstance(declared, str) or
+                isinstance(declared, list) and all(isinstance(value, str) for value in declared)):
+            raise ImportIssue('INVALID_SCHEMA', 'Parameter type must be a string or an array of strings.', location)
+        types = {declared} if isinstance(declared, str) else set(declared or [])
+        if not types and ('anyOf' in schema or 'oneOf' in schema):
+            alternatives = schema.get('anyOf', schema.get('oneOf', []))
+            if not isinstance(alternatives, list):
+                raise ImportIssue('INVALID_SCHEMA', 'Parameter alternatives must be an array.', location)
+            for branch in alternatives:
+                types.update(self._parameter_types(branch, location, depth + 1))
+            if not types:
+                raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Parameter alternatives must declare serializable types.', location)
+            return types
+        if not types or types - {'string', 'integer', 'number', 'boolean', 'array'}:
+            raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Only scalar or scalar-array parameters are serialized.', location)
+        if 'array' in types:
+            if self._parameter_types(schema.get('items'), location + '/items', depth + 1) - {'string', 'integer', 'number', 'boolean'}:
+                raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Array items must be scalar values.', location)
+        return types
+
+    def _parameters(self, item: dict, operation: dict, location: str):
+        parameters = {}
+        for parent, source_location in ((item, location.rsplit('/', 1)[0]), (operation, location)):
+            raw_parameters = parent.get('parameters', [])
+            if not isinstance(raw_parameters, list):
+                raise ImportIssue('INVALID_PARAMETERS', 'parameters must be an array.', source_location)
+            seen = set()
+            for index, raw in enumerate(raw_parameters):
+                pointer = source_location + '/parameters/' + str(index)
+                parameter = self._object(raw, pointer)
+                name, where = parameter.get('name'), parameter.get('in')
+                if not isinstance(name, str) or not name or where not in ('path', 'query', 'header', 'cookie'):
+                    raise ImportIssue('INVALID_PARAMETER', 'Parameter must have a name and supported OpenAPI location.', pointer)
+                key = (where, name)
+                if key in seen:
+                    raise ImportIssue('DUPLICATE_PARAMETER', 'Parameter name/location appears twice at the same level.', pointer)
+                seen.add(key)
+                parameters[key] = (parameter, pointer)
+        return parameters
+
+    def _import(self, path: str, item: dict, operation: dict, opid: str, location: str) -> ImportRecord:
+        if 'requestBody' in operation:
+            raise ImportIssue('GET_REQUEST_BODY', 'GET request bodies are outside this import profile.', location + '/requestBody')
+        diagnostics = []
+        schemas = {'path': {}, 'query': {}}
+        required = {'path': [], 'query': []}
+        path_bindings, query_bindings = {}, {}
+        roots = []
+        for (where, name), (parameter, pointer) in self._parameters(item, operation, location).items():
+            if where not in schemas:
+                raise ImportIssue('UNSUPPORTED_PARAMETER_LOCATION', 'Only path/query parameters are supported; no header/cookie fields are silently dropped.', pointer)
+            if 'schema' not in parameter or 'content' in parameter:
+                raise ImportIssue('UNSUPPORTED_PARAMETER_CONTENT', 'Parameter must use a schema, not content serialization.', pointer)
+            if type(parameter.get('required', False)) is not bool:
+                raise ImportIssue('INVALID_PARAMETER', 'Parameter required must be a boolean.', pointer)
+            if where == 'path' and parameter.get('required') is not True:
+                raise ImportIssue('INVALID_PATH_PARAMETER', 'Path parameters must be required.', pointer)
+            types = self._parameter_types(parameter['schema'], pointer + '/schema')
+            if where == 'path' and ('array' in types or parameter.get('style', 'simple') != 'simple' or parameter.get('explode', False)):
+                raise ImportIssue('UNSUPPORTED_PATH_SERIALIZATION', 'Path serialization supports simple scalar values only.', pointer)
+            if where == 'query' and (parameter.get('style', 'form') != 'form' or parameter.get('allowReserved', False)):
+                raise ImportIssue('UNSUPPORTED_QUERY_SERIALIZATION', 'Query serialization supports form with reserved characters encoded.', pointer)
+            if type(parameter.get('explode', where == 'query')) is not bool:
+                raise ImportIssue('INVALID_PARAMETER', 'Parameter explode must be boolean.', pointer)
+            converted, warnings = self.converter.convert(parameter['schema'], pointer + '/schema')
+            if 'description' in parameter:
+                if not isinstance(parameter['description'], str):
+                    raise ImportIssue('INVALID_PARAMETER', 'Parameter description must be a string.', pointer)
+                converted = dict(converted)
+                converted.setdefault('description', parameter['description'])
+            if 'example' in parameter:
+                converted = dict(converted)
+                converted.setdefault('examples', [parameter['example']])
+            diagnostics.extend(warnings)
+            schemas[where][name] = converted
+            roots.append(converted)
+            if parameter.get('required', False):
+                required[where].append(name)
+            source_pointer = '/' + where + '/' + escape(name)
+            if where == 'path':
+                path_bindings[name] = source_pointer
+            else:
+                query_bindings[name] = {'pointer': source_pointer, 'required': parameter.get('required', False),
+                                        'explode': parameter.get('explode', True)}
+        placeholders = set(re.findall(r'\{([^{}]+)\}', path))
+        if placeholders != set(path_bindings):
+            raise ImportIssue('PATH_PARAMETER_MISMATCH', 'Template placeholders and path parameter declarations differ.', location)
+        responses = operation.get('responses')
+        if not isinstance(responses, dict) or '200' not in responses:
+            raise ImportIssue('NO_JSON_200', 'The HTTP adapter requires a documented 200 JSON response.', location + '/responses')
+        response_location = location + '/responses/200'
+        response = self._object(responses['200'], response_location)
+        content = response.get('content', {})
+        if not isinstance(content, dict):
+            raise ImportIssue('NO_JSON_200', 'Response content must be an object.', response_location)
+        media = [name for name in content if name == 'application/json' or (name.startswith('application/') and name.endswith('+json'))]
+        media.sort(key=lambda name: (name != 'application/json', name))
+        if not media or not isinstance(content[media[0]], dict) or 'schema' not in content[media[0]]:
+            raise ImportIssue('NO_JSON_200', 'A 200 JSON response schema is required.', response_location)
+        result_schema, warnings = self.converter.convert(content[media[0]]['schema'], response_location + '/content/' + escape(media[0]) + '/schema')
+        diagnostics.extend(warnings)
+        roots.append(result_schema)
+        definitions, warnings, source_refs = self.converter.bundle(roots)
+        diagnostics.extend(warnings)
+        input_properties = {where: _object(properties, required[where]) for where, properties in schemas.items() if properties}
+        input_required = [where for where in input_properties if required[where]]
+        input_schema = _object(input_properties, input_required)
+        output_schema = _object({'result': result_schema}, ['result'])
+        for schema in (input_schema, output_schema):
+            schema['$schema'] = 'https://json-schema.org/draft/2020-12/schema'
+            if definitions:
+                schema['$defs'] = definitions
+        capability_id = _identifier(self.namespace, opid)
+        if self._capability_ids[capability_id] > 1:
+            capability_id += '_' + hashlib.sha256(('get ' + path).encode()).hexdigest()[:12]
+        summary = operation.get('summary') or opid
+        if not isinstance(summary, str) or not isinstance(operation.get('description', ''), str):
+            raise ImportIssue('INVALID_OPERATION', 'Summary/description must be strings.', location)
+        source = {'document': self.source_name, 'sha256': self.source_hash, 'openapiVersion': self.document['openapi'],
+                  'apiVersion': self.document['info']['version'], 'pointer': location, 'operationId': opid,
+                  'method': 'GET', 'path': path, 'responseMediaType': media[0],
+                  'security': operation.get('security', self.document.get('security', [])),
+                  'servers': operation.get('servers', item.get('servers', self.document.get('servers', []))),
+                  'schemaReferences': source_refs, 'tags': operation.get('tags', []), 'responseLinks': response.get('links', {})}
+        manifest = {
+            'a2api': '0.1.0-draft.1', 'schemaProfile': 'openapi-draft', 'id': capability_id, 'version': '0.1.0',
+            'lifecycle': 'draft', 'enabled': False, 'title': summary, 'owner': 'unassigned',
+            'intent': {'summary': summary + ('\n' + operation['description'] if operation.get('description') else ''),
+                       'useWhen': [summary], 'avoidWhen': ['Before business semantics, authorization and effects have been reviewed.']},
+            'inputSchema': input_schema, 'outputSchema': output_schema, 'semanticTypes': {},
+            'contextRequirements': ['actor', 'tenant'], 'effects': {'kind': 'unknown', 'externalWrites': True},
+            'policy': {'requiredScopes': ['a2api:unreviewed'], 'objectAuthorization': 'backend_and_runtime',
+                       'resourceRelationshipCheck': 'review_required', 'approval': 'not_required_for_this_read'},
+            'operations': [{'id': opid, 'serviceRef': self.namespace, 'operationRef': opid,
+                            'effects': {'kind': 'unknown', 'externalWrites': True},
+                            'inputSchema': input_schema, 'outputSchema': output_schema}],
+            'binding': {'type': 'composition', 'steps': [{'id': 'fetch', 'operationId': opid,
+                        'input': {key: {'from': 'input', 'pointer': '/' + key} for key in input_properties}}],
+                        'output': {'result': {'from': 'step', 'step': 'fetch', 'pointer': '/result'}}},
+            'execution': {'mode': 'synchronous', 'deadlineMs': 5000, 'backendTimeoutMs': 1500, 'maxBackendCalls': 1,
+                          'maxRetries': 0, 'failureMode': 'stop', 'successCondition': 'all_required_steps_succeeded_and_output_valid'},
+            'errors': ['INVALID_INPUT', 'SCHEMA_MISMATCH', 'PERMISSION_DENIED', 'DEADLINE_EXCEEDED'],
+            'presentation': {'view': 'json', 'pointer': '/result'},
+            'examples': [{'userIntent': summary, 'expectedDecision': 'review_required'}],
+            'provenance': {'kind': 'source', 'reviewState': 'unreviewed', 'source': source},
+        }
+        try:
+            capability = compile_contract(manifest)
+        except A2APIError as error:
+            raise ImportIssue('IR_VALIDATION_FAILED', error.detail, location) from None
+        binding = {'serviceRef': self.namespace, 'operationRef': opid, 'method': 'GET', 'path': path,
+                   'pathParameters': path_bindings, 'queryParameters': query_bindings, 'responseEnvelope': 'result',
+                   'deploymentRequired': True}
+        try:
+            HTTPRoute('https://deployment.invalid', path, path_bindings,
+                      query_parameters={name: HTTPQueryParameter(**item) for name, item in query_bindings.items()},
+                      response_envelope='result')
+        except A2APIError as error:
+            raise ImportIssue('UNSUPPORTED_HTTP_BINDING', error.detail, location) from None
+        unique = {json.dumps(diagnostic, sort_keys=True): diagnostic for diagnostic in diagnostics}
+        diagnostics = tuple(freeze(unique[key]) for key in sorted(unique))
+        return ImportRecord(path, 'get', opid, 'imported', diagnostics, capability, freeze(binding))
+
+
+def write_import(importer: OpenAPIImporter, output: str | Path, *, operation_ids: set[str] | None = None) -> dict:
+    """Write to a new directory; existing generated or user files are never overwritten."""
+    output = Path(output)
+    if operation_ids is not None and not operation_ids.issubset(importer._ids):
+        raise A2APIError('INVALID_SELECTION', 'Selected operationId is absent from the source document.')
+    try:
+        output.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        raise A2APIError('OUTPUT_EXISTS', 'Choose a new output directory; existing files are not overwritten.') from None
+    contracts = output / 'contracts'
+    contracts.mkdir()
+    records = []
+    statuses, methods, diagnostic_codes = Counter(), Counter(), Counter()
+    for record in importer.iter_operations(operation_ids):
+        summary = record.summary()
+        statuses[record.status] += 1
+        methods[record.method] += 1
+        diagnostic_codes.update(d['code'] for d in record.diagnostics)
+        if record.capability:
+            filename = record.capability.id + '.json'
+            (contracts / filename).write_text(json.dumps(record.capability.describe(), ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            (contracts / (record.capability.id + '.http.json')).write_text(json.dumps(thaw(record.binding), indent=2) + '\n', encoding='utf-8')
+            summary['contract'] = 'contracts/' + filename
+        records.append(summary)
+    report = {'source': importer.source_name, 'sourceSha256': importer.source_hash, 'openapi': importer.document['openapi'],
+              'selection': sorted(operation_ids) if operation_ids is not None else None,
+              'summary': {'sourceOperations': len(importer._operations), 'operations': len(records), 'statuses': dict(sorted(statuses.items())),
+                          'methods': dict(sorted(methods.items())), 'diagnostics': dict(sorted(diagnostic_codes.items()))},
+              'operations': records}
+    (output / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    return report

@@ -1,0 +1,10 @@
+{
+  "serviceRef": "github",
+  "operationRef": "meta/get",
+  "method": "GET",
+  "path": "/meta",
+  "pathParameters": {},
+  "queryParameters": {},
+  "responseEnvelope": "result",
+  "deploymentRequired": true
+}

@@ -28,6 +28,12 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     validate = commands.add_parser("validate", help="Validate and compile a capability contract")
     validate.add_argument("path")
+    importer = commands.add_parser("import-openapi", help="Import an OpenAPI 3.0/3.1 JSON/YAML document into disabled Capability IR")
+    importer.add_argument("path")
+    importer.add_argument("--namespace", default="imported")
+    importer.add_argument("--output", required=True)
+    importer.add_argument("--operation", action="append", help="Import only this operationId; may be repeated")
+    importer.add_argument("--strict", action="store_true", help="Exit unsuccessfully if selected operations are unsupported")
     demo = commands.add_parser("demo", help="Start temporary HTTP APIs and verify the full discovery flow")
     demo.add_argument("--order-id", default="ORD-1001")
     serve = commands.add_parser("serve", help="Run local sample backend and a2api HTTP gateway")
@@ -41,6 +47,12 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--order-id", default="ORD-1001")
     args = parser.parse_args(argv)
     try:
+        if args.command == "import-openapi":
+            from .importers import OpenAPIImporter, write_import
+            importer = OpenAPIImporter.from_file(args.path, namespace=args.namespace)
+            report = write_import(importer, args.output, operation_ids=set(args.operation) if args.operation else None)
+            print(json.dumps({'output': str(args.output), **report['summary']}, ensure_ascii=False, indent=2))
+            return 1 if args.strict and report['summary']['statuses'].get('unsupported', 0) else 0
         if args.command == "validate":
             capability = load_contract(args.path)
             print(json.dumps({"valid": True, "id": capability.id, "version": capability.version,

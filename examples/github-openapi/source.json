@@ -1,0 +1,18 @@
+{
+  "repository": "https://github.com/github/rest-api-description",
+  "revision": "443ef1513a17aad7f781391c4fb4e132b9b549fd",
+  "sourceUrl": "https://raw.githubusercontent.com/github/rest-api-description/443ef1513a17aad7f781391c4fb4e132b9b549fd/descriptions/api.github.com/api.github.com.json",
+  "sha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
+  "bytes": 13897231,
+  "openapi": "3.0.3",
+  "paths": 827,
+  "operations": 1254,
+  "methods": {
+    "get": 655,
+    "post": 197,
+    "patch": 76,
+    "delete": 191,
+    "put": 135
+  },
+  "license": "MIT"
+}

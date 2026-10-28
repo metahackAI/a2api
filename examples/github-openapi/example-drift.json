@@ -1,0 +1,31 @@
+{
+  "meta/get:default": [
+    {
+      "path": "/result/ssh_key_fingerprints/SHA256_DSA",
+      "rule": "type"
+    },
+    {
+      "path": "/result/ssh_key_fingerprints/SHA256_ECDSA",
+      "rule": "type"
+    },
+    {
+      "path": "/result/ssh_key_fingerprints/SHA256_ED25519",
+      "rule": "type"
+    },
+    {
+      "path": "/result/ssh_key_fingerprints/SHA256_RSA",
+      "rule": "type"
+    }
+  ],
+  "repos/get:default-response": [
+    {
+      "path": "/result",
+      "rule": "required"
+    },
+    {
+      "path": "/result/source",
+      "rule": "required"
+    }
+  ],
+  "issues/list-for-repo:default": []
+}
