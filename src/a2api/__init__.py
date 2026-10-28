@@ -3,9 +3,9 @@
 from .catalog import Catalog
 from .contracts import compile_contract, load_contract
 from .errors import A2APIError
-from .http_adapter import HTTPAdapter, HTTPQueryParameter, HTTPRoute
+from .http_adapter import HTTPAdapter, HTTPHeaderParameter, HTTPQueryParameter, HTTPResponse, HTTPRoute
 from .ir import Capability, ExecutionContext
 from .runtime import Runtime
 
-__all__ = ["A2APIError", "Capability", "Catalog", "ExecutionContext", "HTTPAdapter", "HTTPQueryParameter", "HTTPRoute",
+__all__ = ["A2APIError", "Capability", "Catalog", "ExecutionContext", "HTTPAdapter", "HTTPHeaderParameter", "HTTPQueryParameter", "HTTPResponse", "HTTPRoute",
            "Runtime", "compile_contract", "load_contract"]

@@ -6,5 +6,13 @@
   "pathParameters": {},
   "queryParameters": {},
   "responseEnvelope": "result",
+  "headerParameters": {},
+  "requestBody": null,
+  "responseStatusField": null,
+  "responses": {
+    "200": {
+      "mediaType": "application/json"
+    }
+  },
   "deploymentRequired": true
 }

@@ -4,6 +4,8 @@
 
 현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API, HTTP gateway, **stdio MCP 브리지**, **OpenAPI importer**를 제공한다. 명세에서 IR 초안을 자동 생성하며 업무 의미·권한 검토와 변경 작업은 후속 범위다.
 
+HTTP 어댑터는 **GET/HEAD/POST/PUT/PATCH/DELETE, JSON 본문, 명시적인 2xx·빈 응답, 호스트 인증 주입**을 지원한다. 활성 MVP runtime은 GET/HEAD 조회 정책을 적용하며, 다른 메서드의 import와 transport 검증은 비활성 계약으로 진행한다. [HTTP 어댑터 안내](docs/07-http-adapter.ko.md)를 참고한다.
+
 ## 빠른 실행
 
 Python 3.11 이상에서 저장소 루트를 기준으로 실행한다.
@@ -51,7 +53,7 @@ MCP 호스트가 실행할 명령은 `python -m a2api mcp`다. `a2api.discover`,
 
 ## 대규모 OpenAPI 가져오기
 
-OpenAPI 3.0/3.1 JSON·YAML에서 Capability IR과 HTTP 바인딩 초안을 생성한다. 공식 GitHub REST 전체 명세 **827 paths / 1,254 operations**를 고정 샘플로 포함했다. GET 617개를 변환하고, 쓰기 메서드 599개와 미지원 GET 38개는 사유를 보고한다. 생성물은 비활성 초안이며 담당자의 업무·권한·출력 검토 후 실행 계약을 작성한다.
+OpenAPI 3.0/3.1 JSON·YAML에서 Capability IR과 HTTP 바인딩 초안을 생성한다. 공식 GitHub REST 전체 명세 **827 paths / 1,254 operations**를 고정 샘플로 포함했다. 기본 GET 선택은 633개를 변환하고, `--methods GET HEAD POST PUT PATCH DELETE`를 지정하면 1,228개를 변환한다. 미선택·미지원 operation은 사유를 보고한다. 생성물은 비활성 초안이며 담당자의 업무·권한·출력 검토 후 실행 계약을 작성한다.
 
 ```bash
 python -m pip install -e ".[openapi]"
@@ -83,6 +85,7 @@ OpenAPI, Arazzo, MCP 등 기존 표준을 활용한다. a2api의 차별점은 �
 6. [실행 가능한 샘플 계약](src/a2api/sample/order-shipping.json): 로컬 fixture API용 검사·projection을 포함한 계약.
 7. [MCP 브리지 안내](docs/05-mcp-bridge.ko.md): 설치, stdio 연결, 도구 계약과 오류 처리, 검증 범위.
 8. [OpenAPI importer 안내](docs/06-openapi-importer.ko.md): 대규모 GitHub 명세, 변환 규칙, 비활성 IR과 진단, HTTP 검증.
+9. [HTTP 어댑터 확장](docs/07-http-adapter.ko.md): HTTP 메서드·JSON 본문·2xx 응답·호스트 인증·결과 미확정 처리와 로컬 검증.
 
 ## 작업 폴더와 원격 저장소
 

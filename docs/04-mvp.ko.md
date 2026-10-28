@@ -4,6 +4,7 @@
 
 추가한 stdio MCP binding과 에이전트 연결은 [MCP 브리지 안내](05-mcp-bridge.ko.md)에 정리했다.
 명세에서 비활성 IR을 생성하는 기능과 대규모 GitHub 샘플은 [OpenAPI importer 안내](06-openapi-importer.ko.md)에 정리했다. 실행 가능한 MVP의 닫힌 schema profile과 가져온 초안의 `openapi-draft` profile을 구분한다.
+추가 메서드·JSON 본문·상태별 응답 codec과 인증 provider는 [HTTP 어댑터 확장](07-http-adapter.ko.md)에 정리했다. 활성 runtime은 GET/HEAD 조회 정책을 적용한다.
 
 ## 실행
 
@@ -27,7 +28,7 @@ python -m unittest discover -s tests -v
 | 계약 검사·컴파일 | `src/a2api/contracts.py` | manifest 검증, 의존성 정렬, 매핑·활성화 조건 검사 |
 | schema profile | `src/a2api/schema.py`, `schemas/capability.schema.json` | 지원 범위를 제한한 JSON Schema 검사 |
 | 카탈로그 | `src/a2api/catalog.py` | scope별 공개, 키워드 검색, cursor, snapshot hash |
-| HTTP adapter | `src/a2api/http_adapter.py` | 운영자가 등록한 GET endpoint 호출과 크기·timeout 제한 |
+| HTTP adapter | `src/a2api/http_adapter.py` | 명시적 메서드·body·응답 codec·인증 binding과 크기·timeout 제한 |
 | 실행 런타임 | `src/a2api/runtime.py` | 단계 실행, bounded foreach, 결과 검사·projection·근거 |
 | 로컬 gateway | `src/a2api/server.py` | POST `/discover`, `/describe`, `/invoke` |
 | 샘플 API | `src/a2api/sample/` | 주문·배송 fixture와 테스트용 인증 |

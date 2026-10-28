@@ -33,6 +33,8 @@ def main(argv: list[str] | None = None) -> int:
     importer.add_argument("--namespace", default="imported")
     importer.add_argument("--output", required=True)
     importer.add_argument("--operation", action="append", help="Import only this operationId; may be repeated")
+    importer.add_argument("--methods", nargs="+", type=str.upper, choices=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+                          help="HTTP methods to import (default: GET); generated capabilities remain disabled")
     importer.add_argument("--strict", action="store_true", help="Exit unsuccessfully if selected operations are unsupported")
     demo = commands.add_parser("demo", help="Start temporary HTTP APIs and verify the full discovery flow")
     demo.add_argument("--order-id", default="ORD-1001")
@@ -49,7 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "import-openapi":
             from .importers import OpenAPIImporter, write_import
-            importer = OpenAPIImporter.from_file(args.path, namespace=args.namespace)
+            importer = OpenAPIImporter.from_file(args.path, namespace=args.namespace, methods=set(args.methods) if args.methods else None)
             report = write_import(importer, args.output, operation_ids=set(args.operation) if args.operation else None)
             print(json.dumps({'output': str(args.output), **report['summary']}, ensure_ascii=False, indent=2))
             return 1 if args.strict and report['summary']['statuses'].get('unsupported', 0) else 0

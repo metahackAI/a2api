@@ -48,7 +48,7 @@
         "requiredScopes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
         "objectAuthorization": {"const": "backend_and_runtime"},
         "resourceRelationshipCheck": {"type": "string"},
-        "approval": {"const": "not_required_for_this_read"}
+        "approval": {"enum": ["not_required_for_this_read", "review_required"]}
       }
     },
     "operations": {
@@ -60,6 +60,7 @@
           "id": {"type": "string", "minLength": 1},
           "serviceRef": {"type": "string", "minLength": 1},
           "operationRef": {"type": "string", "minLength": 1},
+          "httpMethod": {"enum": ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"]},
           "effects": {"$ref": "#/properties/effects"},
           "inputSchema": {"type": "object"},
           "outputSchema": {"type": "object"}

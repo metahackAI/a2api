@@ -86,7 +86,7 @@ def compile_contract(manifest: dict) -> Capability:
         if raw["id"] in operations:
             raise contract_error("Duplicate operation ID")
         operations[raw["id"]] = Operation(raw["id"], raw["serviceRef"], raw["operationRef"],
-                                           freeze(raw["inputSchema"]), freeze(raw["outputSchema"]))
+                                           freeze(raw["inputSchema"]), freeze(raw["outputSchema"]), raw.get("httpMethod", "GET"))
     raw_steps = {}
     for raw in manifest["binding"]["steps"]:
         if raw["id"] in raw_steps or raw["operationId"] not in operations:
@@ -176,9 +176,13 @@ def compile_contract(manifest: dict) -> Capability:
             raise contract_error("Active MVP capabilities require actor and tenant context")
         if manifest["policy"]["resourceRelationshipCheck"] != "explicit_checks":
             raise contract_error("Active MVP policies must use explicit response checks")
+        if manifest["policy"]["approval"] != "not_required_for_this_read":
+            raise contract_error("Active MVP policies cannot require an unimplemented approval flow")
         for effect in [manifest["effects"]] + [r["effects"] for r in manifest["operations"]]:
             if effect["kind"] != "read" or effect["externalWrites"]:
                 raise contract_error("The MVP executes read-only operations only")
+        if any(operation.http_method not in {"GET", "HEAD"} for operation in operations.values()):
+            raise contract_error("Active MVP operations support GET/HEAD only; other HTTP methods require a write execution policy")
         for step in steps:
             protected = {c.equals.pointer for c in step.checks if c.equals.source == "context" and c.code == "PERMISSION_DENIED"}
             if not {"/actor", "/tenant"}.issubset(protected):

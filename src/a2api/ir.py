@@ -51,6 +51,7 @@ class Operation:
     operation_ref: str
     input_schema: Mapping
     output_schema: Mapping
+    http_method: str = "GET"
 
 
 @dataclass(frozen=True)

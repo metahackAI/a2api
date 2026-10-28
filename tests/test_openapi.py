@@ -192,11 +192,11 @@ class OpenAPIImportTests(unittest.TestCase):
 
     def test_unsupported_serializations_and_missing_json_do_not_disappear(self):
         for edit, code in [
-            (lambda op: op['parameters'].append({'name': 'token', 'in': 'header', 'schema': {'type': 'string'}}), 'UNSUPPORTED_PARAMETER_LOCATION'),
+            (lambda op: op['parameters'].append({'name': 'Authorization', 'in': 'header', 'schema': {'type': 'string'}}), 'UNSUPPORTED_HEADER_PARAMETER'),
             (lambda op: op['parameters'].append({'name': 'filter', 'in': 'query', 'style': 'deepObject', 'schema': {'type': 'object'}}), 'UNSUPPORTED_PARAMETER_SCHEMA'),
             (lambda op: op['parameters'].append({'name': 'fields', 'in': 'query', 'style': 'pipeDelimited', 'schema': {'type': 'array', 'items': {'type': 'string'}}}), 'UNSUPPORTED_QUERY_SERIALIZATION'),
             (lambda op: op.update(requestBody={}), 'GET_REQUEST_BODY'),
-            (lambda op: op.update(responses={'204': {'description': 'No content'}}), 'NO_JSON_200'),
+            (lambda op: op.update(responses={'200': {'content': {'text/html': {'schema': {'type': 'string'}}}}}), 'UNSUPPORTED_RESPONSE'),
         ]:
             source = specification()
             edit(source['paths']['/items/{id}']['get'])
@@ -282,7 +282,7 @@ class OpenAPIImportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             source = specification()
-            source['paths']['/items/{id}']['get']['responses'] = {'204': {'description': 'Empty'}}
+            source['paths']['/items/{id}']['get']['responses'] = {'200': {'content': {'text/html': {'schema': {'type': 'string'}}}}}
             (directory / 'source.json').write_text(json.dumps(source))
             result = subprocess.run([sys.executable, '-m', 'a2api', 'import-openapi', str(directory / 'source.json'),
                                      '--output', str(directory / 'output'), '--strict'], capture_output=True, text=True,
@@ -366,6 +366,26 @@ class GitHubScaleTests(unittest.TestCase):
         golden = json.loads((FIXTURE.parent / 'example-drift.json').read_text())
         self.assertEqual(actual, golden)
         self.assertEqual(actual['issues/list-for-repo:default'], [])
+
+    def test_all_supported_methods_cover_full_snapshot_with_deployable_draft_bindings(self):
+        from collections import Counter
+        importer = OpenAPIImporter.from_file(FIXTURE, namespace='github', methods={'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'})
+        statuses, methods = Counter(), Counter()
+        for record in importer.iter_operations():
+            statuses[record.status] += 1
+            methods[record.method] += 1
+            if record.capability:
+                operation = record.capability.operations[record.operation_id]
+                self.assertEqual(operation.http_method, record.http_route('https://deployment.invalid').method)
+                self.assertFalse(record.capability.enabled)
+                self.assertTrue(all(200 <= int(status) <= 299 for status in record.binding['responses']))
+            else:
+                self.assertEqual(record.status, 'unsupported')
+                self.assertTrue(record.diagnostics)
+        golden = json.loads((FIXTURE.parent / 'import-report-all-methods.json').read_text())
+        self.assertEqual(sum(statuses.values()), 1254)
+        self.assertEqual(dict(statuses), golden['summary']['statuses'])
+        self.assertEqual(dict(methods), golden['summary']['methods'])
 
 
 if __name__ == '__main__':

@@ -41,10 +41,11 @@ KNOWN = set(Draft202012Validator.VALIDATORS) | ANNOTATIONS
 
 
 class SchemaConverter:
-    def __init__(self, document: dict, *, max_definitions: int = 2048):
+    def __init__(self, document: dict, *, max_definitions: int = 2048, direction: str = 'response'):
         self.document = document
         self.oas30 = document["openapi"].startswith("3.0.")
         self.max_definitions = max_definitions
+        self.direction = direction
         self._names = {}
         self._references = {}
         self._cache = {}
@@ -72,8 +73,10 @@ class SchemaConverter:
             if not isinstance(name, str):
                 raise ImportIssue('INVALID_SCHEMA', 'Required property names must be strings.', location)
             child = schema.get('properties', {}).get(name, {}) if isinstance(schema.get('properties', {}), dict) else {}
-            if isinstance(child, dict) and child.get('writeOnly') is True:
+            if self.direction == 'response' and isinstance(child, dict) and child.get('writeOnly') is True:
                 raise ImportIssue('WRITE_ONLY_RESPONSE_REQUIREMENT', 'A response schema requires a writeOnly field; contextual projection needs explicit review.', location)
+            if self.direction == 'request' and isinstance(child, dict) and child.get('readOnly') is True:
+                raise ImportIssue('READ_ONLY_REQUEST_REQUIREMENT', 'A request schema requires a readOnly field; contextual projection needs explicit review.', location)
         if any(key in schema for key in ("$id", "$anchor", "$dynamicRef", "$dynamicAnchor", "$vocabulary")):
             raise ImportIssue("UNSUPPORTED_SCHEMA_SCOPE", "Custom schema scopes and dynamic references require a separate dialect implementation.", location)
         dialect = schema.get("$schema")

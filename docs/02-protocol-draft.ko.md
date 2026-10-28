@@ -20,6 +20,8 @@ OpenAPI 등에서 가져온 계약은 원래 dialect를 기록한다. nullable·
 
 구현은 schema profile을 구분한다. 기본 `mvp`는 실행을 위한 제한된 닫힌 스키마이며, `openapi-draft`는 참조·union·열린 객체 등 원본 구조를 보존하는 비활성 추출 초안이다. 후자는 `draft/unreviewed/enabled=false`에서만 컴파일되며 검토 플래그 변경만으로 활성화할 수 없다. 지원하는 변환과 진단은 [importer 구현 범위](06-openapi-importer.ko.md)에 명시한다.
 
+operation의 선택적 `httpMethod`는 배포 메서드와 대조한다. 생략하면 GET이다. HTTP transport는 GET/HEAD/POST/PUT/PATCH/DELETE를 제공하며 활성 MVP는 GET/HEAD로 제한한다. 미검토 초안은 `policy.approval: review_required`를 사용하고, 승인 흐름을 실행할 수 있는 활성 profile로 해석하지 않는다. [HTTP binding의 구현 범위](07-http-adapter.ko.md)를 참고한다.
+
 ## 2. Capability IR의 최소 구성
 
 | 필드 | 역할 | 조건 |

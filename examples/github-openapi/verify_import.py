@@ -20,9 +20,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, help='New directory for generated IR and HTTP bindings')
     parser.add_argument('--record-results', action='store_true', help='Update committed coverage and benchmark snapshots')
+    parser.add_argument('--all-methods', action='store_true', help='Also import HEAD/POST/PUT/PATCH/DELETE as disabled drafts')
     args = parser.parse_args()
     started = time.perf_counter()
-    importer = OpenAPIImporter.from_file(HERE / 'api.github.com.json.gz', namespace='github')
+    importer = OpenAPIImporter.from_file(HERE / 'api.github.com.json.gz', namespace='github',
+        methods={'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'} if args.all_methods else None)
     source = json.loads((HERE / 'source.json').read_text())
     assert importer.source_hash == source['sha256'], 'Upstream fixture hash changed'
     report = write_import(importer, args.output)
@@ -46,12 +48,15 @@ def main():
                     [{'path': '/' + '/'.join(map(str, e.absolute_path)), 'rule': e.validator} for e in errors],
                     key=lambda issue: (issue['path'], issue['rule']))
     if args.record_results:
-        for filename, value in [('import-report.json', report), ('benchmark.json', benchmark), ('example-drift.json', drift)]:
+        suffix = '-all-methods' if args.all_methods else ''
+        for filename, value in [('import-report' + suffix + '.json', report), ('benchmark' + suffix + '.json', benchmark)]:
             (HERE / filename).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        example = next(importer.iter_operations({'meta/get'}))
-        (HERE / 'github.meta.get.json').write_text(json.dumps(example.capability.describe(), ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        from a2api.ir import thaw
-        (HERE / 'github.meta.get.http.json').write_text(json.dumps(thaw(example.binding), indent=2) + '\n', encoding='utf-8')
+        if not args.all_methods:
+            (HERE / 'example-drift.json').write_text(json.dumps(drift, indent=2) + '\n', encoding='utf-8')
+            example = next(importer.iter_operations({'meta/get'}))
+            (HERE / 'github.meta.get.json').write_text(json.dumps(example.capability.describe(), ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            from a2api.ir import thaw
+            (HERE / 'github.meta.get.http.json').write_text(json.dumps(thaw(example.binding), indent=2) + '\n', encoding='utf-8')
     print(json.dumps({'summary': report['summary'], 'benchmark': benchmark,
                       'exampleDrift': {key: dict(Counter(issue['rule'] for issue in value)) for key, value in drift.items()}}, indent=2))
 

@@ -24,6 +24,8 @@ class Runtime:
         for capability in catalog.capabilities:
             if capability.enabled:
                 for operation in capability.operations.values():
+                    if operation.http_method not in {"GET", "HEAD"}:
+                        raise contract_error("The active MVP runtime supports GET/HEAD operations only")
                     if not adapter.has_binding(operation):
                         raise contract_error("An active operation has no deployed HTTP binding")
 
