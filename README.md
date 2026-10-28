@@ -1,8 +1,39 @@
 # a2api
 
-다양한 언어와 환경에서 구현한 API를 에이전트가 **찾고, 조합하고, 실행하고, 결과를 사용자에게 설명할 수 있도록** 만드는 계약 및 런타임 라이브러리 설계.
+다양한 언어와 환경에서 구현한 API를 에이전트가 **찾고, 조합하고, 실행하고, 결과를 사용자에게 설명할 수 있도록** 만드는 계약 및 런타임 라이브러리.
 
-현재 단계는 **설계 초안**이다. 아래 문서의 a2api 형식, 명령, SDK는 제안이며 아직 구현하거나 성능을 검증하지 않았다.
+현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API와 HTTP gateway를 제공한다. 전체 프로토콜 설계의 일부를 구현했으며 MCP, 변경 작업, 자동 소스 추출은 후속 범위다.
+
+## 빠른 실행
+
+Python 3.11 이상에서 저장소 루트를 기준으로 실행한다.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python -m a2api demo
+python -m unittest discover -s tests -v
+```
+
+`demo`는 임시 loopback 포트에 주문·배송 API와 a2api gateway를 띄우고, 실제 HTTP로 검색 → 계약 설명 → 조립 실행을 검증한 뒤 종료한다. 기본 주문 `ORD-1001`은 배송 두 건을 반환하며 backend 호출은 총 3회다. 외부 서비스나 LLM 키는 필요 없다.
+
+```bash
+python -m a2api validate src/a2api/sample/order-shipping.json
+python -m a2api demo --order-id ORD-1002
+python -m a2api serve --port 8000 --backend-port 8001
+```
+
+`ORD-1002`는 배송이 없는 정상 결과다. `serve`의 gateway는 `http://127.0.0.1:8000`, 샘플 backend는 `http://127.0.0.1:8001`이다. 로컬 데모 토큰 `demo-alice`, `demo-bob`, `demo-limited`를 제공한다. HTTP 서버와 샘플 인증은 개발·테스트용이다.
+
+```bash
+curl -s http://127.0.0.1:8000/discover \
+  -H 'Authorization: Bearer demo-alice' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"배송 조회"}'
+```
+
+전체 HTTP·라이브러리 사용법과 지원 범위는 [MVP 실행 안내](docs/04-mvp.ko.md)를 참고한다. `jsonschema`가 이미 설치된 환경에서는 설치 없이 `PYTHONPATH=src python3 -m a2api demo`도 가능하다.
 
 ## 설계 방향
 
@@ -21,13 +52,13 @@ OpenAPI, Arazzo, MCP 등 기존 표준을 활용한다. a2api의 차별점은 �
 1. [API 분석과 아키텍처](docs/01-architecture.ko.md): 전통적 개발 방식, 대규모 도구 호출의 문제, 그래프와 native 개발 비교, 레거시 전환 방법.
 2. [프로토콜 초안](docs/02-protocol-draft.ko.md): 계약 필드, 검색·설명·실행 인터페이스, 오류·상태·권한·결과 표시 규칙.
 3. [MVP와 평가 계획](docs/03-roadmap-and-evaluation.ko.md): 구현 순서, 비교 실험, 출시 조건과 미결정 사항.
-4. [주문 배송 조회 계약 예시](examples/order-tracking.capability.json): 여러 레거시 호출을 읽기 전용 업무 하나로 조립한 가상 예시.
+4. [MVP 실행 안내](docs/04-mvp.ko.md): 실제 구현 범위, HTTP 요청, 라이브러리 사용과 검증 결과.
+5. [초기 계약 초안](examples/order-tracking.capability.json): 비활성 상태로 보존한 최초 설계 예시.
+6. [실행 가능한 샘플 계약](src/a2api/sample/order-shipping.json): 로컬 fixture API용 검사·projection을 포함한 계약.
 
 ## 작업 폴더와 원격 저장소
 
 - 의도한 원격: <https://github.com/metahackAI/a2api.git>
 - 작업 경로: `~/workspace/a2api`
-- 2026-10-28 확인: 분석 가능한 기존 소스가 없으며, 유효한 로컬 Git 저장소가 아니다. 원격 조회는 GitHub 연결에서 404, Git 접근에서 403을 반환했다. 따라서 기존 레포 내용을 검토하거나 원격 연결·커밋·푸시를 완료한 상태가 아니다.
-- 이 문서들은 해당 폴더에 로컬로 작성했다. 원격 접근이 가능해지면 기존 레포 내용을 먼저 확인한 뒤 문서를 통합해야 한다.
 
-문서의 사실 근거는 각 문서에 연결한 1차 자료이며, 그 위에서 제안한 a2api 구조와 예상 효과는 설계 가설이다.
+설계의 예상 효과는 아직 평가 가설이다. MVP의 자동 검증은 샘플 API와 계약 적합성에 대한 것이며, 실제 레거시 시스템이나 LLM의 업무 성공률을 측정한 결과는 아니다.

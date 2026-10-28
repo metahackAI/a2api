@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "a2api read-only MVP contract profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["a2api", "id", "version", "lifecycle", "enabled", "title", "owner", "intent", "inputSchema", "outputSchema", "semanticTypes", "contextRequirements", "effects", "policy", "operations", "binding", "execution", "errors", "presentation", "examples", "provenance"],
+  "properties": {
+    "a2api": {"const": "0.1.0-draft.1"},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "lifecycle": {"enum": ["draft", "reviewed", "deprecated", "disabled"]},
+    "enabled": {"type": "boolean"},
+    "title": {"type": "string", "minLength": 1},
+    "owner": {"type": "string", "minLength": 1},
+    "intent": {
+      "type": "object", "additionalProperties": false,
+      "required": ["summary", "useWhen", "avoidWhen"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "useWhen": {"$ref": "#/$defs/strings"},
+        "avoidWhen": {"$ref": "#/$defs/strings"},
+        "keywords": {"$ref": "#/$defs/strings"}
+      }
+    },
+    "inputSchema": {"type": "object"},
+    "outputSchema": {"type": "object"},
+    "semanticTypes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false, "required": ["baseType", "namespace"],
+        "properties": {"baseType": {"enum": ["string", "integer", "number"]}, "namespace": {"type": "string", "minLength": 1}}
+      }
+    },
+    "contextRequirements": {"type": "array", "uniqueItems": true, "items": {"enum": ["actor", "tenant"]}},
+    "effects": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "externalWrites"],
+      "properties": {
+        "kind": {"enum": ["read", "write", "unknown"]},
+        "externalWrites": {"type": "boolean"},
+        "sensitiveData": {"$ref": "#/$defs/strings"}
+      }
+    },
+    "policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requiredScopes", "objectAuthorization", "resourceRelationshipCheck", "approval"],
+      "properties": {
+        "requiredScopes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "objectAuthorization": {"const": "backend_and_runtime"},
+        "resourceRelationshipCheck": {"type": "string"},
+        "approval": {"const": "not_required_for_this_read"}
+      }
+    },
+    "operations": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "serviceRef", "operationRef", "effects", "inputSchema", "outputSchema"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "serviceRef": {"type": "string", "minLength": 1},
+          "operationRef": {"type": "string", "minLength": 1},
+          "effects": {"$ref": "#/properties/effects"},
+          "inputSchema": {"type": "object"},
+          "outputSchema": {"type": "object"}
+        }
+      }
+    },
+    "binding": {
+      "type": "object", "additionalProperties": false, "required": ["type", "steps", "output"],
+      "properties": {
+        "type": {"const": "composition"},
+        "steps": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["id", "operationId", "input"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "operationId": {"type": "string", "minLength": 1},
+              "input": {"type": "object", "additionalProperties": {"$ref": "#/$defs/valueRef"}},
+              "dependsOn": {"$ref": "#/$defs/strings"},
+              "foreach": {"$ref": "#/$defs/valueRef"},
+              "maxItems": {"type": "integer", "minimum": 1, "maximum": 100},
+              "parallelism": {"type": "integer", "minimum": 1, "maximum": 16},
+              "emptyCollection": {"const": "succeed"},
+              "checks": {"type": "array", "items": {"$ref": "#/$defs/check"}},
+              "select": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}
+            },
+            "dependentRequired": {"foreach": ["maxItems", "parallelism", "emptyCollection"]}
+          }
+        },
+        "output": {"type": "object", "additionalProperties": {"$ref": "#/$defs/valueRef"}}
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "deadlineMs", "backendTimeoutMs", "maxBackendCalls", "maxRetries", "failureMode", "successCondition"],
+      "properties": {
+        "mode": {"const": "synchronous"},
+        "deadlineMs": {"type": "integer", "minimum": 1, "maximum": 60000},
+        "backendTimeoutMs": {"type": "integer", "minimum": 1, "maximum": 10000},
+        "maxBackendCalls": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "maxRetries": {"const": 0},
+        "failureMode": {"const": "stop"},
+        "successCondition": {"const": "all_required_steps_succeeded_and_output_valid"}
+      }
+    },
+    "errors": {"$ref": "#/$defs/strings"},
+    "presentation": {"type": "object"},
+    "examples": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "provenance": {
+      "type": "object", "required": ["kind", "reviewState"],
+      "properties": {
+        "kind": {"enum": ["illustrative", "sample", "source"]},
+        "reviewState": {"enum": ["unreviewed", "reviewed"]}
+      }
+    }
+  },
+  "$defs": {
+    "strings": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "valueRef": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["from", "pointer"],
+          "properties": {"from": {"enum": ["input", "context", "item"]}, "pointer": {"type": "string"}}
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["from", "step", "pointer"],
+          "properties": {"from": {"const": "step"}, "step": {"type": "string"}, "pointer": {"type": "string"}}
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["from", "value"],
+          "properties": {"from": {"const": "literal"}, "value": {}}
+        }
+      ]
+    },
+    "check": {
+      "type": "object", "additionalProperties": false, "required": ["resultPointer", "equals", "code"],
+      "properties": {
+        "resultPointer": {"type": "string"},
+        "equals": {"$ref": "#/$defs/valueRef"},
+        "code": {"enum": ["PERMISSION_DENIED", "PRECONDITION_FAILED", "CONTRACT_DRIFT"]}
+      }
+    }
+  }
+}
