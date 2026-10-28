@@ -2,7 +2,7 @@
 
 다양한 언어와 환경에서 구현한 API를 에이전트가 **찾고, 조합하고, 실행하고, 결과를 사용자에게 설명할 수 있도록** 만드는 계약 및 런타임 라이브러리.
 
-현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API와 HTTP gateway를 제공한다. 전체 프로토콜 설계의 일부를 구현했으며 MCP, 변경 작업, 자동 소스 추출은 후속 범위다.
+현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API, HTTP gateway와 **stdio MCP 브리지**를 제공한다. 전체 프로토콜 설계의 일부를 구현했으며 변경 작업과 자동 소스 추출은 후속 범위다.
 
 ## 빠른 실행
 
@@ -35,6 +35,20 @@ curl -s http://127.0.0.1:8000/discover \
 
 전체 HTTP·라이브러리 사용법과 지원 범위는 [MVP 실행 안내](docs/04-mvp.ko.md)를 참고한다. `jsonschema`가 이미 설치된 환경에서는 설치 없이 `PYTHONPATH=src python3 -m a2api demo`도 가능하다.
 
+## MCP 에이전트 연결
+
+선택 의존성을 설치하고 공식 MCP 클라이언트로 전체 흐름을 확인한다.
+
+```bash
+python -m pip install -e ".[mcp]"
+python -m a2api mcp-demo
+python -m unittest discover -s tests -v
+```
+
+MCP 호스트가 실행할 명령은 `python -m a2api mcp`다. `a2api.discover`, `a2api.describe`, `a2api.invoke` 세 도구를 제공하고, 샘플 주문·배송 API도 자동으로 시작한다. stdout은 MCP 프로토콜 전용이며 별도 HTTP MCP 포트는 열지 않는다.
+
+`mcp-demo`는 공식 SDK 클라이언트가 실제 stdio 서버를 별도 프로세스로 실행해 세 도구를 호출한다. 기본 주문의 조회 결과는 배송 두 건, backend HTTP 호출은 3회다. 에이전트 연결 설정과 라이브러리 사용은 [MCP 브리지 안내](docs/05-mcp-bridge.ko.md)를 참고한다.
+
 ## 설계 방향
 
 레거시 API와 신규 API를 같은 중간 표현인 **Capability IR**로 정규화한다. 여기서 capability는 사용자가 달성하려는 업무를 수행하는 기능 단위다. 타입과 호출 주소뿐 아니라 업무 의미, 입력의 출처, 실행 조건, 부작용, 결과의 근거와 표시 방법을 함께 정의한다.
@@ -55,6 +69,7 @@ OpenAPI, Arazzo, MCP 등 기존 표준을 활용한다. a2api의 차별점은 �
 4. [MVP 실행 안내](docs/04-mvp.ko.md): 실제 구현 범위, HTTP 요청, 라이브러리 사용과 검증 결과.
 5. [초기 계약 초안](examples/order-tracking.capability.json): 비활성 상태로 보존한 최초 설계 예시.
 6. [실행 가능한 샘플 계약](src/a2api/sample/order-shipping.json): 로컬 fixture API용 검사·projection을 포함한 계약.
+7. [MCP 브리지 안내](docs/05-mcp-bridge.ko.md): 설치, stdio 연결, 도구 계약과 오류 처리, 검증 범위.
 
 ## 작업 폴더와 원격 저장소
 

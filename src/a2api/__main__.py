@@ -8,7 +8,7 @@ import urllib.request
 
 from .contracts import load_contract
 from .errors import A2APIError
-from .sample import authenticate, create_backend, running, sample_runtime
+from .sample import TOKENS, authenticate, create_backend, running, sample_runtime
 from .server import create_server
 
 
@@ -33,6 +33,12 @@ def main(argv: list[str] | None = None) -> int:
     serve = commands.add_parser("serve", help="Run local sample backend and a2api HTTP gateway")
     serve.add_argument("--port", type=int, default=8000)
     serve.add_argument("--backend-port", type=int, default=8001)
+    for name, help_text in (("mcp", "Run the local sample as a stdio MCP server"),
+                            ("mcp-demo", "Verify discover/describe/invoke using the official MCP client")):
+        command = commands.add_parser(name, help=help_text)
+        command.add_argument("--sample-user", choices=("alice", "bob", "limited"), default="alice")
+        if name == "mcp-demo":
+            command.add_argument("--order-id", default="ORD-1001")
     args = parser.parse_args(argv)
     try:
         if args.command == "validate":
@@ -40,6 +46,21 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"valid": True, "id": capability.id, "version": capability.version,
                               "enabled": capability.enabled, "steps": [s.id for s in capability.steps]}, ensure_ascii=False))
             return 0
+        if args.command in ("mcp", "mcp-demo"):
+            try:
+                import anyio
+                from .mcp_bridge import serve_stdio
+            except ModuleNotFoundError:
+                raise A2APIError("DEPENDENCY_MISSING", 'Install the MCP extra: python -m pip install -e ".[mcp]"') from None
+            if args.command == "mcp":
+                # Only protocol messages go to stdout. The host chooses this demo identity.
+                with running(create_backend()) as backend_url:
+                    anyio.run(serve_stdio, sample_runtime(backend_url), TOKENS["demo-" + args.sample_user])
+                return 0
+            from .mcp_demo import run_demo
+            result = anyio.run(run_demo, args.order_id, args.sample_user)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["invoke"].get("status") == "succeeded" else 1
         with running(create_backend(port=args.backend_port if args.command == "serve" else 0)) as backend_url:
             runtime = sample_runtime(backend_url)
             with running(create_server(runtime, authenticate, port=args.port if args.command == "serve" else 0)) as gateway:

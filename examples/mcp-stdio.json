@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "a2api": {
+      "command": "/absolute/path/to/a2api-venv/bin/python",
+      "args": ["-m", "a2api", "mcp", "--sample-user", "alice"]
+    }
+  }
+}
