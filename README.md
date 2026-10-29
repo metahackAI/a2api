@@ -9,7 +9,22 @@
 - [설계 방향·코드/OpenAPI 전환 예제·LLM 호출 전체 흐름](docs/00-product-direction.ko.md)
 - [이 문서에 따른 개발 계획과 범위](docs/03-roadmap-and-evaluation.ko.md)
 
-**이 방향의 간편 `convert`/코드 등록 API는 아직 구현 전이다.** 현재 소스는 Python 조회 MVP이며, HTTP adapter·OpenAPI importer·전체 Capability IR·검증기·discover/describe/invoke·MCP bridge와 선택적인 검토/변경 관리 기능을 포함한다. 아래 명령은 현재 실행 가능한 예제다. 문서의 기능 목록은 모두 따라야 할 사용 순서가 아니다.
+**P0-1의 메모리 `convert → invoke`를 구현했다.** 선택한 OpenAPI GET/HEAD를 review/build 파일 없이 직접 호출한다. 코드/native 등록과 MCP 경량화는 아직 구현 전이다. 기존 전체 Capability IR·검증기·discover/describe/invoke·MCP bridge와 선택적인 검토/변경 관리 기능도 보존한다. 문서의 기능 목록은 모두 따라야 할 사용 순서가 아니다.
+
+## OpenAPI를 바로 호출하기
+
+```python
+from a2api import HTTPDeployment, convert
+from a2api.importers import OpenAPIImporter
+
+source = OpenAPIImporter.from_file("orders.openapi.json", namespace="legacy")
+app = convert(source, operations={
+    "getOrder": {"effect": "read", "select": ["orderId", "orderState", "shipmentIds"]},
+}, deployment=HTTPDeployment("https://orders.example.internal", credential_provider=credentials_for_user))
+result = app.invoke("legacy.getorder", {"path": {"orderId": "ORD-1001"}}, context=authenticated_caller)
+```
+
+credential과 context는 호스트가 제공한다. 전체 실행 예제: `python examples/direct-orders/convert_and_invoke.py`. [사용법·반환 형식·지원 범위](docs/11-in-memory-conversion.ko.md)를 참고한다. 파일 생성·review/build 명령은 필요 없다.
 
 HTTP 어댑터는 **GET/HEAD/POST/PUT/PATCH/DELETE, JSON 본문, 명시적인 2xx·빈 응답, 호스트 인증 주입**을 지원한다. 활성 MVP runtime은 GET/HEAD 조회 정책을 적용하며, 다른 메서드의 import와 transport 검증은 비활성 계약으로 진행한다. [HTTP 어댑터 안내](docs/07-http-adapter.ko.md)를 참고한다.
 
@@ -110,6 +125,8 @@ OpenAPI·JSON Schema·MCP를 재사용한다. 여러 API의 업무 조립은 선
 ## 문서
 
 현재 기준은 [제품 방향과 전환·호출 설계](docs/00-product-direction.ko.md), [개발 계획](docs/03-roadmap-and-evaluation.ko.md)이다. 아래는 설계 배경과 기존 구현의 참고 문서이며 순서대로 실행할 작업 목록이 아니다.
+
+현재 실행 가능한 간편 전환 경로는 [P0-1 메모리 convert/invoke 안내](docs/11-in-memory-conversion.ko.md)에 있다.
 
 1. [API 분석과 아키텍처](docs/01-architecture.ko.md): 전통적 개발 방식, 대규모 도구 호출의 문제, 그래프와 native 개발 비교, 레거시 전환 방법.
 2. [프로토콜 초안](docs/02-protocol-draft.ko.md): 계약 필드, 검색·설명·실행 인터페이스, 오류·상태·권한·결과 표시 규칙.

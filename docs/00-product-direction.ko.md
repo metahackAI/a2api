@@ -1,8 +1,8 @@
 # a2api 방향 재정렬: 전환해서 바로 호출하는 프로토콜 모듈
 
-작성일: 2026-10-29 · 상태: 개발 기준 설계 · 이번 변경은 문서만 작성
+작성일: 2026-10-29 · 상태: 개발 기준 설계 · P0-1 메모리 convert/invoke 구현 완료
 
-이 문서와 [개발 계획](03-roadmap-and-evaluation.ko.md)이 이후 개발의 기준이다. 최초 아키텍처·프로토콜 초안은 배경 자료로 보존한다. 기존 구현을 삭제하거나 승인 체계를 우회하는 변경은 이번에 하지 않는다.
+이 문서와 [개발 계획](03-roadmap-and-evaluation.ko.md)이 이후 개발의 기준이다. 최초 아키텍처·프로토콜 초안은 배경 자료로 보존한다. P0-1의 실제 사용법은 [메모리 전환 안내](11-in-memory-conversion.ko.md)에 있다. 기존 구현을 삭제하거나 전체 계약의 승인 규칙을 우회하지 않는다.
 
 ## 1. 제품의 목적과 순서
 
@@ -45,9 +45,9 @@ HTTP adapter, importer의 schema 처리, 실제 MCP 연결, 입력·응답 검�
 
 **현재 구현:** Python 조회 MVP, OpenAPI 3.0/3.1 importer, 여러 HTTP 메서드의 transport, 고정 세 도구 MCP bridge, review/build, 변경 영향·부분 승인. 활성 runtime은 GET/HEAD 중심이고 CLI MCP 데모는 로컬 fixture를 사용한다.
 
-**아직 없는 목표:** 아래의 `convert`, `capability`, `Application` 형태, 경량 호출 계약, 일반 OpenAPI의 간편 실행 연결, 코드/native 등록, 전체 schema를 나열하지 않는 MCP 응답 정의. 이 문서의 해당 코드는 설계 예시이며 지금 실행 가능한 API로 안내하지 않는다.
+**P0-1에서 추가한 구현:** `convert(OpenAPIImporter, operations=..., deployment=...)`가 `ConvertedAPI`를 반환하며 메모리에서 GET/HEAD를 호출한다. `ConvertedAPI.describe(id)`는 경량 호출 설명만 제공한다. 별도 review/build 파일을 생성하지 않는다.
 
-이번 작업에서는 소스·테스트·CLI 동작을 변경하지 않는다.
+**아직 없는 목표:** `capability`/native `Application` 등록, 전체 schema를 나열하지 않는 MCP 응답 정의. 해당 예시는 설계용으로 표시한다. 기존 Runtime/MCP의 describe와 도구 목록은 이번 P0-1에서 변경하지 않았다.
 
 ## 3. importer·converter·protocol·runtime의 역할
 
@@ -74,7 +74,7 @@ HTTP adapter, importer의 schema 처리, 실제 MCP 연결, 입력·응답 검�
 
 ## 4. 최소 호출 계약
 
-다음은 **목표 경량 descriptor 예시**다. 기존 전체 manifest schema를 그대로 이 형식이라고 부르지 않는다.
+다음은 **경량 descriptor 형태 예시**다. 기존 전체 manifest schema를 그대로 이 형식이라고 부르지 않는다. 실제 schema는 importer가 생성한 제약과 필요한 내부 정의를 보존한다.
 
 ```json
 {
@@ -250,10 +250,10 @@ components:
 
 ### 5.4 converter에 주는 작은 설정과 호출
 
-다음은 **구현할 공개 API의 설계 예시**다. `OpenAPIImporter.from_file`과 `HTTPDeployment`는 기존 클래스이고 `convert` 및 아래 `app` 인터페이스는 아직 없다.
+다음 형태는 **P0-1에서 구현한 공개 API**다. 실제로는 자기 OpenAPI와 호스트의 credential/context를 제공한다. 원본의 유한한 단순 객체 필드를 선택하며 복잡한 projection은 오류로 보고한다.
 
 ```python
-from a2api import convert                    # 계획된 간편 API
+from a2api import convert                    # P0-1 메모리 변환
 from a2api.importers import OpenAPIImporter   # 기존 parser 재사용
 from a2api.reviewed_adapter import HTTPDeployment
 
@@ -285,7 +285,7 @@ result = app.invoke(
 
 공개 설정의 `select`는 노출할 응답 필드만 지정한다. 예시는 원래 필드명을 유지하며 임의 변환 표현식을 도입하지 않는다. 원래부터 공개하기 적합한 JSON을 반환하는 단순 API는 그대로 노출할 수 있다. 내부 데이터가 있는 이 예제에서는 필드 목록을 명시한다. 표시 열을 숨기는 것으로 서버가 LLM 전송 전에 필드를 제거하는 처리를 대신하지 않는다.
 
-위 코드를 실행하면 메모리에 다음 연결이 만들어지는 것이 목표다.
+위 코드를 실행하면 메모리에 다음 연결이 만들어진다.
 
 ```text
 legacy.getorder    → 원본 요청·응답 schema → GET /orders/{orderId}
