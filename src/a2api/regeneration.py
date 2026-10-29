@@ -12,11 +12,33 @@ from .contracts import compile_contract
 from .errors import A2APIError
 from .importers import ImportRecord, OpenAPIImporter
 from .ir import freeze, thaw
+from .reviewed_adapter import ReviewedHTTPAdapter
 from .openapi_dependencies import (canonical_bytes, dependency_index, diff_indices, operation_key,
                                   snapshot, snapshot_importer, validate_index)
 
 INCREMENTAL_FORMAT = 'a2api-incremental-build/0.1'
+APPROVED_FORMAT = 'a2api-incremental-build/0.2'
 MAX_GENERATIONS = 64
+MAX_APPROVALS = 256
+
+
+@dataclass(frozen=True)
+class CapabilityApproval:
+    generation: int
+    build: BuildResult
+
+
+def _latest(approved, approvals):
+    latest = {(cap.id, cap.version): (cap, approved) for cap in approved.capabilities}
+    for approval in approvals:
+        cap = approval.build.capabilities[0]
+        # Reviewed operation IDs are business identifiers. Scope deployment refs
+        # so independently reviewed projections never replace another cap's plan.
+        manifest = cap.describe()
+        for operation in manifest['operations']:
+            operation['operationRef'] += '#capability=' + cap.id + '@' + cap.version
+        latest[(cap.id, cap.version)] = (compile_contract(manifest), approval.build)
+    return latest
 
 
 def _key(record: ImportRecord) -> str:
@@ -46,18 +68,28 @@ def _approved_with_snapshot(previous: BuildResult, baseline_source: str | Path |
                    source_dependencies=freeze(index))
 
 
-def _review_states(approved: BuildResult, history: tuple) -> list[dict]:
-    sources = {plan.operation.id: _key(plan.source) for plan in approved.plans}
-    affected = {}
+def _review_states(approved: BuildResult, history: tuple, approvals: tuple = ()) -> list[dict]:
+    latest = _latest(approved, approvals)
+    anchors = {(item.build.capabilities[0].id, item.build.capabilities[0].version): item.generation for item in approvals}
+    transitions = []
     for before, after in zip(history, history[1:]):
+        affected = {}
         for operation in diff_indices(before, after)['operations']:
             if operation['status'] != 'unchanged':
                 reasons = operation['reasons'] or [{'kind': operation['status'], 'pointer': '/paths/' + operation['path'].replace('~', '~0').replace('/', '~1')}]
                 affected.setdefault(operation['key'], {})
                 for reason in reasons:
                     affected[operation['key']][_digest(reason)] = reason
+        transitions.append(affected)
     states = []
     for capability in approved.capabilities:
+        identity = (capability.id, capability.version)
+        source_build = latest[identity][1]
+        sources = {plan.operation.id: _key(plan.source) for plan in source_build.plans}
+        affected = {}
+        for changes in transitions[anchors.get(identity, 0):]:
+            for key, reasons in changes.items():
+                affected.setdefault(key, {}).update(reasons)
         operations = sorted(identifier for identifier in capability.operations if sources[identifier] in affected)
         states.append({'id': capability.id, 'version': capability.version,
                        'state': 'requires_review' if operations else 'reviewed', 'affectedOperationIds': operations,
@@ -67,10 +99,10 @@ def _review_states(approved: BuildResult, history: tuple) -> list[dict]:
     return states
 
 
-def _capabilities(approved: BuildResult, states: list[dict]):
+def _capabilities(approved: BuildResult, states: list[dict], approvals: tuple = ()):
     status = {(entry['id'], entry['version']): entry for entry in states}
     capabilities = []
-    for capability in approved.capabilities:
+    for capability, _ in _latest(approved, approvals).values():
         decision = status[(capability.id, capability.version)]
         if decision['state'] == 'reviewed':
             capabilities.append(capability)
@@ -90,9 +122,27 @@ class IncrementalBuild(BuildResult):
     candidates: tuple[ImportRecord, ...] = ()
     change_report: Mapping = field(default_factory=dict)
     review_status: tuple = ()
+    approvals: tuple[CapabilityApproval, ...] = ()
+
+    def adapter(self, deployments, **limits):
+        active = {(operation.service_ref, operation.operation_ref): operation
+                  for cap in self.capabilities if cap.enabled for operation in cap.operations.values()}
+        plans = tuple(plan for plan in self.plans
+                      if active.get((plan.operation.service_ref, plan.operation.operation_ref)) == plan.operation)
+        # The underlying wire adapter keys routes by source service/operation.
+        # Distinct projections are fine; conflicting live source contracts are not.
+        wire = {}
+        for plan in plans:
+            operation = plan.source.capability.operations[plan.source.operation_id]
+            key = (operation.service_ref, operation.operation_ref)
+            signature = (operation, plan.source.binding)
+            if key in wire and wire[key] != signature:
+                raise A2APIError('APPROVAL_OPERATION_CONFLICT', 'Active capabilities disagree on a shared HTTP source.')
+            wire[key] = signature
+        return ReviewedHTTPAdapter(plans, deployments, **limits)
 
     def summary(self) -> dict:
-        return {'format': INCREMENTAL_FORMAT, 'sourceSha256': self.source_snapshot['sourceSha256'],
+        return {'format': APPROVED_FORMAT if self.approvals else INCREMENTAL_FORMAT, 'sourceSha256': self.source_snapshot['sourceSha256'],
                 'approvedSourceSha256': self.review['source']['sha256'], 'reviewSha256': self.review_sha256,
                 'scope': self.review['review']['scope'], 'generation': len(self.history) - 1,
                 'capabilities': len(self.capabilities), 'operations': len(self.plans),
@@ -101,7 +151,7 @@ class IncrementalBuild(BuildResult):
                 **dict(self.change_report['regeneration'])}
 
 
-def _assemble(approved: BuildResult, history: tuple, current: dict, candidates: tuple) -> IncrementalBuild:
+def _assemble(approved: BuildResult, history: tuple, current: dict, candidates: tuple, approvals: tuple = ()) -> IncrementalBuild:
     if len(history) < 2 or len(history) > MAX_GENERATIONS + 1:
         raise A2APIError('DEPENDENCY_HISTORY_INVALID', 'The update history has an unsupported length.')
     for index in history:
@@ -111,10 +161,30 @@ def _assemble(approved: BuildResult, history: tuple, current: dict, candidates: 
     latest_index = dependency_index(snapshot_importer(thaw(current)))
     if thaw(history[-1]) != latest_index:
         raise A2APIError('DEPENDENCY_HISTORY_INVALID', 'The latest source and dependency history disagree.')
+    identities = {(cap.id, cap.version): cap for cap in approved.capabilities}
+    original_sources = {plan.operation.id: (_key(plan.source), plan.source.operation_id) for plan in approved.plans}
+    if len(approvals) > MAX_APPROVALS:
+        raise A2APIError('APPROVAL_HISTORY_INVALID', 'Start a new baseline before the approval history limit.')
+    last_generation = 1
+    for approval in approvals:
+        if (type(approval.generation) is not int or not last_generation <= approval.generation < len(history)
+                or len(approval.build.capabilities) != 1 or isinstance(approval.build, IncrementalBuild)
+                or approval.build.source_dependencies is None):
+            raise A2APIError('APPROVAL_HISTORY_INVALID', 'Selective approval history is invalid.')
+        cap = approval.build.capabilities[0]
+        if ((cap.id, cap.version) not in identities or thaw(approval.build.source_dependencies) != thaw(history[approval.generation])
+                or approval.build.review['review']['scope'] != approved.review['review']['scope']):
+            raise A2APIError('APPROVAL_HISTORY_INVALID', 'An approval does not match its capability or source generation.')
+        if (set(cap.operations) != set(identities[(cap.id, cap.version)].operations)
+                or any(original_sources.get(plan.operation.id) != (_key(plan.source), plan.source.operation_id)
+                       for plan in approval.build.plans)):
+            raise A2APIError('APPROVAL_HISTORY_INVALID', 'Selective approvals must preserve operation membership and source identities.')
+        last_generation = approval.generation
     changed = diff_indices(history[-2], history[-1])
-    states = _review_states(approved, history)
-    capabilities = _capabilities(approved, states)
-    previous_caps = _capabilities(approved, _review_states(approved, history[:-1]))
+    states = _review_states(approved, history, approvals)
+    capabilities = _capabilities(approved, states, approvals)
+    previous_approvals = tuple(item for item in approvals if item.generation < len(history) - 1)
+    previous_caps = _capabilities(approved, _review_states(approved, history[:-1], previous_approvals), previous_approvals)
     previous = {(capability.id, capability.version): capability for capability in previous_caps}
     converted = {operation['key'] for operation in changed['operations'] if operation['status'] in {'added', 'changed'}
                  and operation['method'].upper() in latest_index['requestedMethods']}
@@ -131,21 +201,29 @@ def _assemble(approved: BuildResult, history: tuple, current: dict, candidates: 
                                'reusedCapabilityArtifacts': len(reused_caps)}
     changed['reusedCapabilities'] = reused_caps
     changed['capabilities'] = states
-    return IncrementalBuild(capabilities=capabilities, plans=approved.plans, review=approved.review,
+    plans = {}
+    for cap, source_build in _latest(approved, approvals).values():
+        for plan in source_build.plans:
+            if plan.operation.id in cap.operations:
+                operation = cap.operations[plan.operation.id]
+                plans[(operation.service_ref, operation.operation_ref)] = replace(plan, operation=operation)
+    return IncrementalBuild(capabilities=capabilities, plans=tuple(plans[key] for key in sorted(plans)), review=approved.review,
                             import_report=approved.import_report, source_snapshot=freeze(current),
                             source_dependencies=freeze(latest_index), approved=approved, history=tuple(freeze(index) for index in history),
                             candidates=tuple(sorted(candidates, key=_key)), change_report=freeze(changed),
-                            review_status=tuple(freeze(state) for state in states))
+                            review_status=tuple(freeze(state) for state in states), approvals=approvals)
 
 
 def regenerate(previous: BuildResult | str | Path, source: str | Path, *, baseline_source: str | Path | None = None) -> IncrementalBuild:
     previous = load_build(previous) if isinstance(previous, (str, Path)) else previous
     if isinstance(previous, IncrementalBuild):
         approved, history, cache = previous.approved, previous.history, {_key(record): record for record in previous.candidates}
+        approvals = previous.approvals
     else:
         approved = _approved_with_snapshot(previous, baseline_source)
         history = (approved.source_dependencies,)
         cache = {_key(plan.source): plan.source for plan in approved.plans}
+        approvals = ()
     if len(history) > MAX_GENERATIONS:
         raise A2APIError('DEPENDENCY_HISTORY_INVALID', 'Start a new reviewed baseline before the update history limit.')
     importer = OpenAPIImporter.from_file(source, namespace=approved.review['source']['namespace'],
@@ -163,7 +241,7 @@ def regenerate(previous: BuildResult | str | Path, source: str | Path, *, baseli
         for record in importer.iter_operations(identifiers):
             if _key(record) in changed_keys and record.method.upper() in importer.methods:
                 cache[_key(record)] = record
-    return _assemble(approved, (*history, index), current, tuple(cache.values()))
+    return _assemble(approved, (*history, index), current, tuple(cache.values()), approvals)
 
 
 def _draft_files(records: tuple, approved: BuildResult) -> dict[str, bytes]:
@@ -198,6 +276,15 @@ def _incremental_files(result: IncrementalBuild) -> dict[str, bytes]:
     for capability in result.capabilities:
         artifacts['contracts/' + capability.id + '.' + capability.version + '.json'] = _bytes(capability.describe())
     artifacts.update(_draft_files(result.candidates, result.approved))
+    if result.approvals:
+        rows = []
+        for index, approval in enumerate(result.approvals):
+            prefix = f'approvals/{index:04d}'
+            files = _artifact_files(approval.build)
+            artifacts.update({prefix + '/' + name: raw for name, raw in files.items()})
+            artifacts[prefix + '/build.json'] = _bytes(_build_report(approval.build, files))
+            rows.append({'generation': approval.generation, 'build': prefix})
+        artifacts['approvals/index.json'] = _bytes(rows)
     return artifacts
 
 
@@ -271,7 +358,16 @@ def load_regeneration(directory: Path) -> IncrementalBuild:
         raise A2APIError('DEPENDENCY_HISTORY_INVALID', 'Updates require a flat reviewed baseline with source dependencies.')
     history = tuple(_read(_inside(directory, f'history/{index:04d}.json')) for index in range(generation + 1))
     current = _read(_inside(directory, 'source.snapshot.json'), limit=128 * 1024 * 1024)
-    result = _assemble(approved, history, current, _load_drafts(directory, approved))
+    approvals = []
+    if report.get('format') == APPROVED_FORMAT:
+        rows = _read(_inside(directory, 'approvals/index.json'))
+        if not isinstance(rows, list) or not 1 <= len(rows) <= MAX_APPROVALS:
+            raise A2APIError('APPROVAL_HISTORY_INVALID', 'Approval history must be a bounded nonempty list.')
+        for index, row in enumerate(rows):
+            if not isinstance(row, dict) or set(row) != {'generation', 'build'} or row['build'] != f'approvals/{index:04d}':
+                raise A2APIError('APPROVAL_HISTORY_INVALID', 'Approval build paths must use canonical filenames.')
+            approvals.append(CapabilityApproval(row['generation'], load_build(_inside(directory, row['build']))))
+    result = _assemble(approved, history, current, _load_drafts(directory, approved), tuple(approvals))
     artifacts = _incremental_files(result)
     if report != _incremental_report(result, artifacts):
         raise A2APIError('BUILD_DRIFT', 'Incremental metadata differs from its reconstructed impact analysis.')

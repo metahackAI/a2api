@@ -53,6 +53,17 @@ def main(argv: list[str] | None = None) -> int:
     update.add_argument('--baseline-source', help='Original reviewed OpenAPI for a legacy build without dependency snapshots')
     update.add_argument('--fail-on-review', action='store_true', help='Write output then exit 1 if capability review is required')
     commands.add_parser('incremental-demo', help='Verify selective order/shipment regeneration and an unaffected MCP capability')
+    review = commands.add_parser('prepare-review', help='Write a pinned, editable review proposal for pending capabilities')
+    review.add_argument('--build', required=True)
+    review.add_argument('--capability', required=True, action='append', help='Pending ID@version; repeat to select several')
+    review.add_argument('--output', required=True, help='New review JSON filename')
+    approve = commands.add_parser('approve-review', help='Validate and approve only the capabilities in a prepared review')
+    approve.add_argument('--build', required=True)
+    approve.add_argument('--review', required=True)
+    approve.add_argument('--reviewed-by', required=True)
+    approve.add_argument('--reviewed-at', help='ISO 8601 timestamp; defaults to current UTC time')
+    approve.add_argument('--output', required=True, help='New build directory')
+    commands.add_parser('reapproval-demo', help='Verify source diff, selective approval and the restored shipping MCP flow')
     reviewed = commands.add_parser("review-demo", help="Verify OpenAPI import, review build and the full MCP stdio flow")
     reviewed.add_argument("--order-id", default="ORD-1001")
     reviewed.add_argument("--sample-user", choices=("alice", "bob", "limited"), default="alice")
@@ -70,6 +81,23 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--order-id", default="ORD-1001")
     args = parser.parse_args(argv)
     try:
+        if args.command == 'prepare-review':
+            from .reapproval import prepare_review, write_review
+            proposal = prepare_review(args.build, args.capability)
+            write_review(proposal, args.output)
+            print(json.dumps({'output': args.output, 'target': proposal['target'],
+                              'selected': [row['context']['id'] + '@' + row['context']['version'] for row in proposal['reviews']],
+                              'state': 'unreviewed'}, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == 'approve-review':
+            from .reapproval import approve_review
+            from .builder import write_build
+            from .ir import thaw
+            result = approve_review(args.build, args.review, reviewed_by=args.reviewed_by, reviewed_at=args.reviewed_at)
+            write_build(result, args.output)
+            print(json.dumps({'output': args.output, **result.summary(), 'approvals': len(result.approvals),
+                              'capabilitiesStatus': thaw(result.review_status)}, ensure_ascii=False, indent=2))
+            return 0
         if args.command == 'diff-openapi':
             from .openapi_dependencies import diff_openapi
             result = diff_openapi(args.before, args.after, namespace=args.namespace, review=args.review,
@@ -102,12 +130,17 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"valid": True, "id": capability.id, "version": capability.version,
                               "enabled": capability.enabled, "steps": [s.id for s in capability.steps]}, ensure_ascii=False))
             return 0
-        if args.command in ("mcp", "mcp-demo", "review-demo", "incremental-demo"):
+        if args.command in ("mcp", "mcp-demo", "review-demo", "incremental-demo", "reapproval-demo"):
             try:
                 import anyio
                 from .mcp_bridge import serve_stdio
             except ModuleNotFoundError:
                 raise A2APIError("DEPENDENCY_MISSING", 'Install the MCP extra: python -m pip install -e ".[mcp]"') from None
+            if args.command == 'reapproval-demo':
+                from .reapproval_demo import run_reapproval_demo
+                result = anyio.run(run_reapproval_demo)
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                return 0 if result['mcp']['invoke'].get('status') == 'succeeded' and result['unaffectedContractPreserved'] else 1
             if args.command == 'incremental-demo':
                 from .incremental_demo import run_incremental_demo
                 from .ir import thaw

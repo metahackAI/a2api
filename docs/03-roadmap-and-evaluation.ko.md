@@ -26,7 +26,7 @@ MCP SDK나 validator의 구체 버전은 구현 시 지원 범위를 확인해 �
 
 첫 importer는 OpenAPI 3.0/3.1에서 지원하는 기능을 명시하고, 3.2 및 그 밖의 기능은 실제 fixture와 parser 지원을 확인해 확장한다. 지원하지 않는 버전·키워드는 진단하며 조용히 downgrade하지 않는다.
 
-현재 Python 구현에 첫 importer와 HTTP transport 확장을 추가했다. 공식 GitHub REST의 1,254 operations 전체를 목록화하고 기본 GET 선택은 633개, 전체 지원 메서드 선택은 1,228개를 비활성 IR로 변환한다. 별도 검토 설정과 빌더로 [주문·배송의 OpenAPI → MCP 경로](08-review-builder.ko.md)를 연결했고, [operation 의존성 diff와 증분 재생성](09-source-diff-and-regeneration.ko.md)도 추가했다. 필드 수준 영향 축소·세분화한 재승인 절차와 LLM 업무 성공률 평가는 추가 검증·확장 대상이다.
+현재 Python 구현에 첫 importer와 HTTP transport 확장을 추가했다. 공식 GitHub REST의 1,254 operations 전체를 목록화하고 기본 GET 선택은 633개, 전체 지원 메서드 선택은 1,228개를 비활성 IR로 변환한다. 별도 검토 설정과 빌더로 [주문·배송의 OpenAPI → MCP 경로](08-review-builder.ko.md)를 연결했고, [operation 의존성 diff와 증분 재생성](09-source-diff-and-regeneration.ko.md), [capability 선택 검토·재승인 CLI](10-selective-reapproval.ko.md)도 추가했다. 필드 수준 영향 축소·승인 스냅샷 중복 제거와 LLM 업무 성공률 평가는 추가 검증·확장 대상이다.
 
 ## 3. 단계별 산출물과 완료 조건
 

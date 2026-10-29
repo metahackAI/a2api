@@ -268,7 +268,7 @@ def load_build(path: str | Path) -> BuildResult:
     directory = Path(path)
     _inside(directory, 'imports')
     report = _read(_inside(directory, 'build.json'))
-    if isinstance(report, dict) and report.get('format') == 'a2api-incremental-build/0.1':
+    if isinstance(report, dict) and report.get('format') in {'a2api-incremental-build/0.1', 'a2api-incremental-build/0.2'}:
         from .regeneration import load_regeneration
         return load_regeneration(directory)
     result = build_contracts(_inside(directory, 'imports'), _inside(directory, 'review.json'))
