@@ -130,4 +130,4 @@ python examples/github-openapi/verify_live.py
 
 실제 명세를 사용한 덕분에 upstream 예제 자체의 오류도 확인했다. `/meta` 예제의 fingerprint 네 필드가 string 스키마에 대해 number이고, 저장소 예제는 두 위치에서 required 필드가 빠져 있다. [예제 불일치 기록](../examples/github-openapi/example-drift.json)에 rule과 경로를 남겼고, 이슈 목록 예제는 적합하다. 이 차이를 숨기기 위해 원본이나 스키마를 고치지 않았다. 실제 공개 GET 응답 세 건은 모두 적합했다.
 
-검토 설정 별도 저장과 명시적 업무 capability projection은 [조회 계약 빌더](08-review-builder.ko.md)로 구현했다. 다음 확장 대상은 원본 변경 영향 diff·증분 재생성, pagination 결과의 완전성 표시와 변경 업무 실행 정책이다.
+검토 설정 별도 저장과 업무 capability projection은 [조회 계약 빌더](08-review-builder.ko.md)로 구현했다. 새 import는 source snapshot과 의존성 index도 기록하며 [변경 영향 diff·증분 재생성](09-source-diff-and-regeneration.ko.md)에 사용한다. pagination 결과의 완전성 표시와 변경 업무 실행 정책은 후속 범위다.

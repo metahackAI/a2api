@@ -472,6 +472,8 @@ def write_import(importer: OpenAPIImporter, output: str | Path, *, operation_ids
     output = Path(output)
     if operation_ids is not None and not operation_ids.issubset(importer._ids):
         raise A2APIError('INVALID_SELECTION', 'Selected operationId is absent from the source document.')
+    from ..openapi_dependencies import canonical_bytes, dependency_index, snapshot
+    dependencies = dependency_index(importer)
     try:
         output.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
@@ -492,10 +494,13 @@ def write_import(importer: OpenAPIImporter, output: str | Path, *, operation_ids
             summary['contract'] = 'contracts/' + filename
         records.append(summary)
     report = {'source': importer.source_name, 'sourceSha256': importer.source_hash, 'openapi': importer.document['openapi'],
+              'sourceSnapshot': 'source.snapshot.json', 'dependencyIndex': 'dependencies.json',
               'requestedMethods': sorted(importer.methods),
               'selection': sorted(operation_ids) if operation_ids is not None else None,
               'summary': {'sourceOperations': len(importer._operations), 'operations': len(records), 'statuses': dict(sorted(statuses.items())),
                           'methods': dict(sorted(methods.items())), 'diagnostics': dict(sorted(diagnostic_codes.items()))},
               'operations': records}
+    (output / 'source.snapshot.json').write_bytes(canonical_bytes(snapshot(importer)))
+    (output / 'dependencies.json').write_bytes(canonical_bytes(dependencies))
     (output / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     return report

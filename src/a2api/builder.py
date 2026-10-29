@@ -67,7 +67,7 @@ def load_review(path: str | Path) -> dict:
     return review
 
 
-def _import_records(directory: Path, review: dict) -> tuple[tuple[ImportRecord, ...], dict]:
+def _import_records(directory: Path, review: dict):
     report = _read(_inside(directory, 'report.json'))
     if not isinstance(report, dict) or not isinstance(report.get('operations'), list):
         raise A2APIError('IMPORT_BUNDLE_INVALID', 'Import report is missing its operation inventory.')
@@ -113,12 +113,31 @@ def _import_records(directory: Path, review: dict) -> tuple[tuple[ImportRecord, 
         record = records[item['source']['capabilityId']]
         if record.operation_id != item['source']['operationId'] or source_digest(record) != item['source']['digest']:
             raise A2APIError('SOURCE_DRIFT', 'An imported contract or binding differs from its reviewed digest.')
+    source_snapshot, source_dependencies = None, None
+    if 'sourceSnapshot' in report or 'dependencyIndex' in report:
+        from .openapi_dependencies import dependency_index, operation_key, snapshot_importer
+        if report.get('sourceSnapshot') != 'source.snapshot.json' or report.get('dependencyIndex') != 'dependencies.json':
+            raise A2APIError('IMPORT_BUNDLE_INVALID', 'Source snapshot paths must use canonical bundle filenames.')
+        source_snapshot = _read(_inside(directory, 'source.snapshot.json'), limit=128 * 1024 * 1024)
+        importer = snapshot_importer(source_snapshot)
+        source_dependencies = dependency_index(importer)
+        if (importer.source_hash != review['source']['sha256'] or importer.namespace != review['source']['namespace']
+                or _read(_inside(directory, 'dependencies.json')) != source_dependencies):
+            raise A2APIError('DEPENDENCY_SNAPSHOT_INVALID', 'Source snapshot, dependency index and review disagree.')
+        reconstructed = {record.capability.id: record for record in importer.iter_operations({r.operation_id for r in records.values()})
+                         if record.capability is not None}
+        for key, record in records.items():
+            entry = source_dependencies['operations'].get(operation_key(record.method, record.path))
+            if entry is None or entry['errors']:
+                raise A2APIError('DEPENDENCY_SNAPSHOT_INVALID', 'Reviewed operations require resolved source dependencies.')
+            if key not in reconstructed or source_digest(record) != source_digest(reconstructed[key]):
+                raise A2APIError('SOURCE_DRIFT', 'Imported contracts differ from the captured OpenAPI source.')
     # Self-contained subset for rebuild/load; preserve the original document hash.
     selected = [row for row in report['operations'] if isinstance(row, dict) and row.get('capabilityId') in records]
-    snapshot = {key: report[key] for key in ('source', 'sourceSha256', 'openapi') if key in report}
+    snapshot = {key: report[key] for key in ('source', 'sourceSha256', 'openapi', 'sourceSnapshot', 'dependencyIndex') if key in report}
     snapshot['selection'] = sorted(record.operation_id for record in records.values())
     snapshot['operations'] = sorted(selected, key=lambda row: row['capabilityId'])
-    return tuple(records[key] for key in sorted(records)), snapshot
+    return tuple(records[key] for key in sorted(records)), snapshot, source_snapshot, source_dependencies
 
 
 @dataclass(frozen=True)
@@ -127,19 +146,23 @@ class BuildResult:
     plans: tuple[ReviewedOperation, ...]
     review: Mapping
     import_report: Mapping
+    source_snapshot: Mapping | None = None
+    source_dependencies: Mapping | None = None
 
     @property
     def review_sha256(self) -> str:
         return _digest(self.review)
 
     def adapter(self, deployments: Mapping[str, HTTPDeployment], **limits) -> ReviewedHTTPAdapter:
-        return ReviewedHTTPAdapter(self.plans, deployments, **limits)
+        active = {operation for capability in self.capabilities if capability.enabled for operation in capability.operations}
+        return ReviewedHTTPAdapter(tuple(plan for plan in self.plans if plan.operation.id in active), deployments, **limits)
 
     def runtime(self, deployments: Mapping[str, HTTPDeployment], *, allow_samples: bool = False, **limits) -> Runtime:
         return Runtime(Catalog(list(self.capabilities), allow_samples=allow_samples), self.adapter(deployments, **limits))
 
     def summary(self) -> dict:
-        return {'format': BUILD_FORMAT, 'sourceSha256': self.review['source']['sha256'], 'reviewSha256': self.review_sha256,
+        return {'format': 'a2api-build/0.2' if self.source_snapshot is not None else BUILD_FORMAT,
+                'sourceSha256': self.review['source']['sha256'], 'reviewSha256': self.review_sha256,
                 'scope': self.review['review']['scope'], 'capabilities': len(self.capabilities), 'operations': len(self.plans),
                 'enabled': sum(capability.enabled for capability in self.capabilities)}
 
@@ -153,7 +176,7 @@ def build_contracts(imports: str | Path, review: dict | str | Path) -> BuildResu
         raise A2APIError('REVIEW_REQUIRED', 'Review settings must be explicitly reviewed before building.')
     if not decision['reviewedBy'].strip() or any(not item['owner'].strip() or item['owner'] == 'unassigned' for item in review['capabilities']):
         raise A2APIError('REVIEW_REQUIRED', 'A reviewer and assigned capability owners are required.')
-    records, report = _import_records(Path(imports), review)
+    records, report, source_snapshot, source_dependencies = _import_records(Path(imports), review)
     by_source = {record.capability.id: record for record in records}
     prepared, sources = {}, {}
     for item in review['operations']:
@@ -196,11 +219,16 @@ def build_contracts(imports: str | Path, review: dict | str | Path) -> BuildResu
     compiled = {key: operation for capability in capabilities for key, operation in capability.operations.items()}
     plans = tuple(ReviewedOperation(compiled[key], sources[key][0], freeze(sources[key][1]['inputs']),
                                     freeze(sources[key][1]['outputs'])) for key in sorted(prepared))
-    return BuildResult(tuple(sorted(capabilities, key=lambda c: (c.id, c.version))), plans, freeze(review), freeze(report))
+    return BuildResult(tuple(sorted(capabilities, key=lambda c: (c.id, c.version))), plans, freeze(review), freeze(report),
+                       freeze(source_snapshot), freeze(source_dependencies))
 
 
 def _artifact_files(result: BuildResult) -> dict[str, bytes]:
     artifacts = {'review.json': _bytes(result.review), 'imports/report.json': _bytes(result.import_report)}
+    if result.source_snapshot is not None:
+        from .openapi_dependencies import canonical_bytes
+        artifacts['imports/source.snapshot.json'] = canonical_bytes(result.source_snapshot)
+        artifacts['imports/dependencies.json'] = canonical_bytes(result.source_dependencies)
     for capability in result.capabilities:
         artifacts['contracts/' + capability.id + '.' + capability.version + '.json'] = _bytes(capability.describe())
     for plan in result.plans:
@@ -217,6 +245,9 @@ def _build_report(result: BuildResult, artifacts: dict[str, bytes]) -> dict:
 
 
 def write_build(result: BuildResult, output: str | Path) -> dict:
+    from .regeneration import IncrementalBuild, write_regeneration
+    if isinstance(result, IncrementalBuild):
+        return write_regeneration(result, output)
     artifacts = _artifact_files(result)
     report = _build_report(result, artifacts)
     directory = Path(output)
@@ -235,9 +266,13 @@ def write_build(result: BuildResult, output: str | Path) -> dict:
 def load_build(path: str | Path) -> BuildResult:
     """Rebuild from bundled sources/review and verify every generated artifact."""
     directory = Path(path)
+    _inside(directory, 'imports')
+    report = _read(_inside(directory, 'build.json'))
+    if isinstance(report, dict) and report.get('format') == 'a2api-incremental-build/0.1':
+        from .regeneration import load_regeneration
+        return load_regeneration(directory)
     result = build_contracts(_inside(directory, 'imports'), _inside(directory, 'review.json'))
     artifacts = _artifact_files(result)
-    report = _read(_inside(directory, 'build.json'))
     if report != _build_report(result, artifacts):
         raise A2APIError('BUILD_DRIFT', 'Build metadata differs from the reviewed source reconstruction.')
     for relative, expected in artifacts.items():

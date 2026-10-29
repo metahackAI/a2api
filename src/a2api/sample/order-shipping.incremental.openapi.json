@@ -1,0 +1,191 @@
+{
+  "components": {
+    "schemas": {
+      "Order": {
+        "additionalProperties": true,
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "orderState": {
+            "enum": [
+              "created",
+              "processing",
+              "shipped",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "ownerId": {
+            "$ref": "#/components/schemas/ActorId"
+          },
+          "shipmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "tenantId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId",
+          "orderState",
+          "shipmentIds",
+          "ownerId",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "Shipment": {
+        "additionalProperties": true,
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "estimatedArrival": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "ownerId": {
+            "$ref": "#/components/schemas/ActorId"
+          },
+          "shipmentId": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_transit",
+              "delivered",
+              "exception"
+            ],
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "shipmentId",
+          "status",
+          "estimatedArrival",
+          "asOf",
+          "ownerId",
+          "tenantId",
+          "orderId"
+        ],
+        "type": "object"
+      },
+      "PrincipalId": {
+        "type": "string",
+        "minLength": 1
+      },
+      "ActorId": {
+        "$ref": "#/components/schemas/PrincipalId"
+      }
+    },
+    "securitySchemes": {
+      "serviceBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Legacy order and shipment fixture API",
+    "version": "2026-10-29"
+  },
+  "openapi": "3.1.2",
+  "paths": {
+    "/orders/{orderId}": {
+      "get": {
+        "operationId": "getOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            },
+            "description": "Fixture resource with object authorization fields"
+          },
+          "403": {
+            "description": "Object access denied"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "demo.getOrder"
+      }
+    },
+    "/shipments/{shipmentId}": {
+      "get": {
+        "operationId": "getShipment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shipment"
+                }
+              }
+            },
+            "description": "Fixture resource with object authorization fields"
+          },
+          "403": {
+            "description": "Object access denied"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "demo.getShipment"
+      }
+    }
+  },
+  "security": [
+    {
+      "serviceBearer": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://fixture.invalid"
+    }
+  ]
+}

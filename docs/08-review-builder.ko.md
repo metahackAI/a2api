@@ -123,7 +123,7 @@ orders-built/
   imports/contracts/legacy_orders.getshipment.http.json
 ```
 
-검토한 import 스냅샷과 설정을 포함하며, 원본 OpenAPI 전체는 복사하지 않고 해시로 추적한다. 실행 계약 provenance에는 검토자·시각·원본 해시·검토 파일 해시·source operation digest가 들어간다. 실제 deployment origin과 credential은 호스트가 주입한다. 명세의 servers/security는 출처 정보로 남는다.
+검토한 import 스냅샷과 설정을 포함한다. 새 빌드 형식 0.2는 `imports/source.snapshot.json`과 `imports/dependencies.json`에 원본 JSON과 의존성 index도 보관해 [증분 재생성](09-source-diff-and-regeneration.ko.md)에 사용한다. 기존 0.1 빌드도 계속 로드한다. 실행 계약 provenance에는 검토자·시각·원본 해시·검토 파일 해시·source operation digest가 들어간다. 실제 deployment origin과 credential은 호스트가 주입한다. 명세의 servers/security는 출처 정보로 남는다.
 
 `load_build`는 source/review로 계약을 다시 생성하고 metadata와 산출물 바이트를 대조한다. 수정·누락·외부로 나가는 파일 참조는 로드 실패다. 동일한 입력은 JSON object의 키 순서와 무관하게 같은 계약과 catalogVersion을 만든다.
 
@@ -156,7 +156,7 @@ deployment mapping은 source serviceRef별 `HTTPDeployment(base_url, path_prefix
 | `BUILD_DRIFT` | 산출물/metadata와 재구성 결과 불일치 |
 | `OUTPUT_EXISTS` | 기존 출력 폴더 덮어쓰기 시도 |
 
-모든 설정·매핑 검사를 통과한 뒤 출력 폴더를 만든다. 첫 버전은 문서 전체 해시를 고정하므로 관련 없는 OpenAPI 변경도 재검토를 요구한다. 변경 영향 diff·증분 재생성, 새로운 schema 실행 profile, 변경 업무 승인·멱등성·결과 대조는 후속 범위다.
+모든 설정·매핑 검사를 통과한 뒤 출력 폴더를 만든다. 새 기준을 승인하는 `build`는 문서 전체 해시를 고정한다. 기존 검토를 보존하며 다음 원본으로 이동할 때에는 [diff·증분 재생성](09-source-diff-and-regeneration.ko.md)을 사용해 영향받는 capability만 재검토 대상으로 표시한다. 새로운 schema 실행 profile, 변경 업무 승인·멱등성·결과 대조는 후속 범위다.
 
 ## 검증
 

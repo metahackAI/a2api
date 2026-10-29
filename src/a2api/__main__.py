@@ -40,6 +40,19 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument("--imports", required=True, help="Directory produced by import-openapi")
     build.add_argument("--review", required=True, help="a2api review JSON file")
     build.add_argument("--output", required=True, help="New directory for a self-contained build")
+    diff = commands.add_parser('diff-openapi', help='Compare operation and local-reference dependency fingerprints')
+    diff.add_argument('--before', required=True)
+    diff.add_argument('--after', required=True)
+    diff.add_argument('--review', help='Optional review JSON for capability impact mapping')
+    diff.add_argument('--namespace')
+    diff.add_argument('--methods', nargs='+', type=str.upper, choices=['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'])
+    update = commands.add_parser('regenerate', help='Regenerate changed drafts and quarantine only affected capabilities')
+    update.add_argument('--previous', required=True, help='Previously reviewed or incremental build directory')
+    update.add_argument('--source', required=True, help='Updated OpenAPI JSON/YAML/gzip')
+    update.add_argument('--output', required=True, help='New incremental build directory')
+    update.add_argument('--baseline-source', help='Original reviewed OpenAPI for a legacy build without dependency snapshots')
+    update.add_argument('--fail-on-review', action='store_true', help='Write output then exit 1 if capability review is required')
+    commands.add_parser('incremental-demo', help='Verify selective order/shipment regeneration and an unaffected MCP capability')
     reviewed = commands.add_parser("review-demo", help="Verify OpenAPI import, review build and the full MCP stdio flow")
     reviewed.add_argument("--order-id", default="ORD-1001")
     reviewed.add_argument("--sample-user", choices=("alice", "bob", "limited"), default="alice")
@@ -57,6 +70,21 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--order-id", default="ORD-1001")
     args = parser.parse_args(argv)
     try:
+        if args.command == 'diff-openapi':
+            from .openapi_dependencies import diff_openapi
+            result = diff_openapi(args.before, args.after, namespace=args.namespace, review=args.review,
+                                  methods=set(args.methods) if args.methods else None)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == 'regenerate':
+            from .regeneration import regenerate
+            from .builder import write_build
+            from .ir import thaw
+            result = regenerate(args.previous, args.source, baseline_source=args.baseline_source)
+            write_build(result, args.output)
+            print(json.dumps({'output': args.output, **result.summary(), 'capabilitiesStatus': thaw(result.change_report['capabilities'])},
+                             ensure_ascii=False, indent=2))
+            return 1 if args.fail_on_review and result.summary()['requiresReview'] else 0
         if args.command == "build":
             from .builder import build_contracts, write_build
             result = build_contracts(args.imports, args.review)
@@ -74,12 +102,18 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"valid": True, "id": capability.id, "version": capability.version,
                               "enabled": capability.enabled, "steps": [s.id for s in capability.steps]}, ensure_ascii=False))
             return 0
-        if args.command in ("mcp", "mcp-demo", "review-demo"):
+        if args.command in ("mcp", "mcp-demo", "review-demo", "incremental-demo"):
             try:
                 import anyio
                 from .mcp_bridge import serve_stdio
             except ModuleNotFoundError:
                 raise A2APIError("DEPENDENCY_MISSING", 'Install the MCP extra: python -m pip install -e ".[mcp]"') from None
+            if args.command == 'incremental-demo':
+                from .incremental_demo import run_incremental_demo
+                from .ir import thaw
+                result = anyio.run(run_incremental_demo)
+                print(json.dumps(thaw(result), ensure_ascii=False, indent=2))
+                return 0 if result['mcp']['invoke'].get('status') == 'succeeded' and result['mcp']['pendingCapabilityHidden'] else 1
             if args.command == "review-demo":
                 from .review_demo import run_review_demo
                 result = anyio.run(run_review_demo, args.order_id, args.sample_user)

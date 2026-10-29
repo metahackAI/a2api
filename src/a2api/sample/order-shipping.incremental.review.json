@@ -1,0 +1,626 @@
+{
+  "a2apiReview": "0.1",
+  "review": {
+    "state": "reviewed",
+    "reviewedBy": "local-fixture-suite",
+    "reviewedAt": "2026-10-29T00:00:00+09:00",
+    "scope": "sample"
+  },
+  "source": {
+    "sha256": "3517af2b7db286eaeb0b9aa643d690e4b93b71f77d2d06467e8c4cf55d0b00af",
+    "namespace": "legacy_orders"
+  },
+  "semanticTypes": {
+    "sales.OrderId": {
+      "baseType": "string",
+      "namespace": "demo-sales"
+    },
+    "shipping.ShipmentId": {
+      "baseType": "string",
+      "namespace": "demo-shipping"
+    }
+  },
+  "operations": [
+    {
+      "id": "demo.getOrder",
+      "source": {
+        "capabilityId": "legacy_orders.getorder",
+        "operationId": "getOrder",
+        "digest": "c8b6659f8d4924111975b533418f24239d7c82365fa0ef8bd93ba0844f3dab1f"
+      },
+      "effects": {
+        "kind": "read",
+        "externalWrites": false
+      },
+      "inputs": {
+        "orderId": {
+          "pointer": "/path/orderId"
+        }
+      },
+      "outputs": {
+        "orderId": {
+          "pointer": "/result/orderId"
+        },
+        "orderState": {
+          "pointer": "/result/orderState"
+        },
+        "shipmentIds": {
+          "pointer": "/result/shipmentIds"
+        },
+        "ownerId": {
+          "pointer": "/result/ownerId"
+        },
+        "tenantId": {
+          "pointer": "/result/tenantId"
+        }
+      },
+      "semanticAnnotations": [
+        {
+          "schema": "input",
+          "pointer": "/properties/orderId",
+          "semanticType": "sales.OrderId"
+        },
+        {
+          "schema": "output",
+          "pointer": "/properties/orderId",
+          "semanticType": "sales.OrderId"
+        },
+        {
+          "schema": "output",
+          "pointer": "/properties/shipmentIds/items",
+          "semanticType": "shipping.ShipmentId"
+        }
+      ]
+    },
+    {
+      "id": "demo.getShipment",
+      "source": {
+        "capabilityId": "legacy_orders.getshipment",
+        "operationId": "getShipment",
+        "digest": "1b7a5620a22aaa22b2da79fdbe427969a48eb8689dcfca29f0d05542bafa9080"
+      },
+      "effects": {
+        "kind": "read",
+        "externalWrites": false
+      },
+      "inputs": {
+        "shipmentId": {
+          "pointer": "/path/shipmentId"
+        }
+      },
+      "outputs": {
+        "shipmentId": {
+          "pointer": "/result/shipmentId"
+        },
+        "status": {
+          "pointer": "/result/status"
+        },
+        "estimatedArrival": {
+          "pointer": "/result/estimatedArrival"
+        },
+        "asOf": {
+          "pointer": "/result/asOf"
+        },
+        "ownerId": {
+          "pointer": "/result/ownerId"
+        },
+        "tenantId": {
+          "pointer": "/result/tenantId"
+        },
+        "orderId": {
+          "pointer": "/result/orderId"
+        }
+      },
+      "semanticAnnotations": [
+        {
+          "schema": "input",
+          "pointer": "/properties/shipmentId",
+          "semanticType": "shipping.ShipmentId"
+        },
+        {
+          "schema": "output",
+          "pointer": "/properties/shipmentId",
+          "semanticType": "shipping.ShipmentId"
+        },
+        {
+          "schema": "output",
+          "pointer": "/properties/orderId",
+          "semanticType": "sales.OrderId"
+        }
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "order.shipping_status",
+      "version": "0.1.0",
+      "title": "주문 배송 현황 조회",
+      "owner": "demo-order-team",
+      "intent": {
+        "summary": "주문과 연결된 최대 10개 배송의 현재 상태와 배송 예정 시각을 조회한다. 한도를 넘으면 전체 결과처럼 잘라내지 않고 지원 범위 초과를 보고한다.",
+        "useWhen": [
+          "주문 번호를 알고 연결된 배송이 10개 이하인 주문의 배송 상황을 확인하려는 경우"
+        ],
+        "avoidWhen": [
+          "주문 취소",
+          "배송지 변경",
+          "주문 번호 없이 고객 이름만으로 주문을 확정하려는 경우"
+        ],
+        "keywords": [
+          "shipping",
+          "tracking",
+          "delivery",
+          "order",
+          "배송",
+          "주문",
+          "조회"
+        ]
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "조회 권한이 있는 주문의 번호",
+            "x-a2api-semanticType": "sales.OrderId"
+          }
+        },
+        "required": [
+          "orderId"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "x-a2api-semanticType": "sales.OrderId"
+          },
+          "orderState": {
+            "type": "string",
+            "enum": [
+              "created",
+              "processing",
+              "shipped",
+              "cancelled"
+            ]
+          },
+          "shipments": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "shipmentId": {
+                  "type": "string",
+                  "x-a2api-semanticType": "shipping.ShipmentId"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pending",
+                    "in_transit",
+                    "delivered",
+                    "exception"
+                  ]
+                },
+                "estimatedArrival": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "asOf": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "shipmentId",
+                "status",
+                "estimatedArrival",
+                "asOf"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "orderId",
+          "orderState",
+          "shipments"
+        ],
+        "additionalProperties": false
+      },
+      "contextRequirements": [
+        "actor",
+        "tenant"
+      ],
+      "effects": {
+        "kind": "read",
+        "externalWrites": false,
+        "sensitiveData": [
+          "order_status",
+          "shipment_status"
+        ]
+      },
+      "policy": {
+        "requiredScopes": [
+          "orders:read",
+          "shipments:read"
+        ],
+        "objectAuthorization": "backend_and_runtime",
+        "resourceRelationshipCheck": "explicit_checks",
+        "approval": "not_required_for_this_read"
+      },
+      "binding": {
+        "type": "composition",
+        "steps": [
+          {
+            "id": "order",
+            "operationId": "demo.getOrder",
+            "input": {
+              "orderId": {
+                "from": "input",
+                "pointer": "/orderId"
+              }
+            },
+            "checks": [
+              {
+                "resultPointer": "/ownerId",
+                "equals": {
+                  "from": "context",
+                  "pointer": "/actor"
+                },
+                "code": "PERMISSION_DENIED"
+              },
+              {
+                "resultPointer": "/tenantId",
+                "equals": {
+                  "from": "context",
+                  "pointer": "/tenant"
+                },
+                "code": "PERMISSION_DENIED"
+              },
+              {
+                "resultPointer": "/orderId",
+                "equals": {
+                  "from": "input",
+                  "pointer": "/orderId"
+                },
+                "code": "CONTRACT_DRIFT"
+              }
+            ],
+            "select": [
+              "orderId",
+              "orderState",
+              "shipmentIds"
+            ]
+          },
+          {
+            "id": "shipments",
+            "operationId": "demo.getShipment",
+            "dependsOn": [
+              "order"
+            ],
+            "foreach": {
+              "from": "step",
+              "step": "order",
+              "pointer": "/shipmentIds"
+            },
+            "maxItems": 10,
+            "parallelism": 5,
+            "emptyCollection": "succeed",
+            "input": {
+              "shipmentId": {
+                "from": "item",
+                "pointer": ""
+              }
+            },
+            "checks": [
+              {
+                "resultPointer": "/ownerId",
+                "equals": {
+                  "from": "context",
+                  "pointer": "/actor"
+                },
+                "code": "PERMISSION_DENIED"
+              },
+              {
+                "resultPointer": "/tenantId",
+                "equals": {
+                  "from": "context",
+                  "pointer": "/tenant"
+                },
+                "code": "PERMISSION_DENIED"
+              },
+              {
+                "resultPointer": "/shipmentId",
+                "equals": {
+                  "from": "item",
+                  "pointer": ""
+                },
+                "code": "CONTRACT_DRIFT"
+              },
+              {
+                "resultPointer": "/orderId",
+                "equals": {
+                  "from": "step",
+                  "step": "order",
+                  "pointer": "/orderId"
+                },
+                "code": "PRECONDITION_FAILED"
+              }
+            ],
+            "select": [
+              "shipmentId",
+              "status",
+              "estimatedArrival",
+              "asOf"
+            ]
+          }
+        ],
+        "output": {
+          "orderId": {
+            "from": "step",
+            "step": "order",
+            "pointer": "/orderId"
+          },
+          "orderState": {
+            "from": "step",
+            "step": "order",
+            "pointer": "/orderState"
+          },
+          "shipments": {
+            "from": "step",
+            "step": "shipments",
+            "pointer": ""
+          }
+        }
+      },
+      "execution": {
+        "mode": "synchronous",
+        "deadlineMs": 5000,
+        "backendTimeoutMs": 1500,
+        "maxBackendCalls": 11,
+        "maxRetries": 0,
+        "failureMode": "stop",
+        "successCondition": "all_required_steps_succeeded_and_output_valid"
+      },
+      "errors": [
+        "INPUT_REQUIRED",
+        "PERMISSION_DENIED",
+        "PRECONDITION_FAILED",
+        "SCHEMA_MISMATCH",
+        "CONTRACT_DRIFT",
+        "RATE_LIMITED",
+        "DEADLINE_EXCEEDED"
+      ],
+      "presentation": {
+        "view": "table",
+        "rows": "/shipments",
+        "contextFields": [
+          "/orderId",
+          "/orderState"
+        ],
+        "columns": [
+          {
+            "pointer": "/shipmentId",
+            "label": "배송 번호"
+          },
+          {
+            "pointer": "/status",
+            "label": "배송 상태"
+          },
+          {
+            "pointer": "/estimatedArrival",
+            "label": "예상 도착",
+            "format": "datetime"
+          },
+          {
+            "pointer": "/asOf",
+            "label": "조회 기준 시각",
+            "format": "datetime"
+          }
+        ],
+        "timeZone": "Asia/Seoul",
+        "emptyMessage": "이 주문에 연결된 배송이 없습니다. 주문 상태를 함께 확인하세요.",
+        "missingEstimateMessage": "예상 도착 시각이 아직 제공되지 않았습니다."
+      },
+      "examples": [
+        {
+          "userIntent": "ORD-1001 주문 배송 상황을 알려줘",
+          "input": {
+            "orderId": "ORD-1001"
+          }
+        },
+        {
+          "userIntent": "배송지를 바꿔줘",
+          "expectedDecision": "do_not_select"
+        }
+      ],
+      "operationIds": [
+        "demo.getOrder",
+        "demo.getShipment"
+      ]
+    },
+    {
+      "id": "order.summary",
+      "version": "0.1.0",
+      "title": "주문 기본 현황 조회",
+      "owner": "demo-order-team",
+      "intent": {
+        "summary": "조회 권한이 있는 주문의 기본 상태를 확인한다.",
+        "useWhen": [
+          "주문 번호로 기본 상태를 확인할 때"
+        ],
+        "avoidWhen": [
+          "배송별 상세 상태가 필요한 경우"
+        ],
+        "keywords": [
+          "order",
+          "주문",
+          "기본",
+          "상태"
+        ]
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "조회 권한이 있는 주문의 번호",
+            "x-a2api-semanticType": "sales.OrderId"
+          }
+        },
+        "required": [
+          "orderId"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "x-a2api-semanticType": "sales.OrderId"
+          },
+          "orderState": {
+            "type": "string",
+            "enum": [
+              "created",
+              "processing",
+              "shipped",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "orderId",
+          "orderState"
+        ],
+        "additionalProperties": false
+      },
+      "contextRequirements": [
+        "actor",
+        "tenant"
+      ],
+      "effects": {
+        "kind": "read",
+        "externalWrites": false,
+        "sensitiveData": [
+          "order_status"
+        ]
+      },
+      "policy": {
+        "requiredScopes": [
+          "orders:read"
+        ],
+        "objectAuthorization": "backend_and_runtime",
+        "resourceRelationshipCheck": "explicit_checks",
+        "approval": "not_required_for_this_read"
+      },
+      "binding": {
+        "type": "composition",
+        "steps": [
+          {
+            "id": "order",
+            "operationId": "demo.getOrder",
+            "input": {
+              "orderId": {
+                "from": "input",
+                "pointer": "/orderId"
+              }
+            },
+            "checks": [
+              {
+                "resultPointer": "/ownerId",
+                "equals": {
+                  "from": "context",
+                  "pointer": "/actor"
+                },
+                "code": "PERMISSION_DENIED"
+              },
+              {
+                "resultPointer": "/tenantId",
+                "equals": {
+                  "from": "context",
+                  "pointer": "/tenant"
+                },
+                "code": "PERMISSION_DENIED"
+              },
+              {
+                "resultPointer": "/orderId",
+                "equals": {
+                  "from": "input",
+                  "pointer": "/orderId"
+                },
+                "code": "CONTRACT_DRIFT"
+              }
+            ],
+            "select": [
+              "orderId",
+              "orderState"
+            ]
+          }
+        ],
+        "output": {
+          "orderId": {
+            "from": "step",
+            "step": "order",
+            "pointer": "/orderId"
+          },
+          "orderState": {
+            "from": "step",
+            "step": "order",
+            "pointer": "/orderState"
+          }
+        }
+      },
+      "execution": {
+        "mode": "synchronous",
+        "deadlineMs": 5000,
+        "backendTimeoutMs": 1500,
+        "maxBackendCalls": 1,
+        "maxRetries": 0,
+        "failureMode": "stop",
+        "successCondition": "all_required_steps_succeeded_and_output_valid"
+      },
+      "errors": [
+        "INPUT_REQUIRED",
+        "PERMISSION_DENIED",
+        "PRECONDITION_FAILED",
+        "SCHEMA_MISMATCH",
+        "CONTRACT_DRIFT",
+        "RATE_LIMITED",
+        "DEADLINE_EXCEEDED"
+      ],
+      "presentation": {
+        "view": "json"
+      },
+      "examples": [
+        {
+          "userIntent": "ORD-1001 주문 배송 상황을 알려줘",
+          "input": {
+            "orderId": "ORD-1001"
+          }
+        },
+        {
+          "userIntent": "배송지를 바꿔줘",
+          "expectedDecision": "do_not_select"
+        }
+      ],
+      "operationIds": [
+        "demo.getOrder"
+      ]
+    }
+  ]
+}
