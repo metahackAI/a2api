@@ -80,6 +80,14 @@ python examples/native-orders/mcp_client.py
 
 호스트의 Python 파일에서는 `anyio.run(serve_stdio, app, caller)`로 연결한다. 두 객체는 `[http_api, functions]`로 묶을 수 있다. [호스트 설정·요청 형식·경량화와 비용 측정](docs/13-lightweight-mcp.ko.md)을 참고한다.
 
+공개 GitHub 저장소 조회와 이슈/PR 목록을 실제 API로 호출하는 예제도 제공한다. 기존 고정 OpenAPI의 두 operation을 `convert`하고 Python wrapper로 필요한 필드만 반환한다. 토큰 없이 직접 호출과 MCP stdio를 함께 검증한다.
+
+```bash
+python examples/github-openapi/verify_agent.py --owner octocat --repo Hello-World --per-page 2
+```
+
+[GitHub 예제 사용법·입출력·페이지 범위](docs/14-github-readonly-example.ko.md)를 참고한다.
+
 선택 의존성을 설치하고 공식 MCP 클라이언트로 전체 흐름을 확인한다.
 
 ```bash

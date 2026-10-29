@@ -1,0 +1,152 @@
+{
+  "checkedAt": "2026-10-29T06:37:04+00:00",
+  "origin": "https://api.github.com",
+  "apiVersion": "2026-03-10",
+  "authentication": "none",
+  "sourceRevision": "443ef1513a17aad7f781391c4fb4e132b9b549fd",
+  "sourceSha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
+  "operations": [
+    "repos/get",
+    "issues/list-for-repo"
+  ],
+  "exampleOnlySourceAdjustments": [
+    {
+      "schemaPath": "/components/schemas/issue/required",
+      "change": "Make assignee optional; retain its type constraint."
+    },
+    {
+      "schemaPath": "/components/schemas/issue/properties/state_reason/enum",
+      "change": "Allow null, preserving nullable and existing strings."
+    }
+  ],
+  "unadjustedNonemptyResponse": "Rejected with SCHEMA_MISMATCH for missing assignee and null state_reason.",
+  "tools": [
+    "a2api.discover",
+    "a2api.describe",
+    "a2api.invoke"
+  ],
+  "mcpTransport": "actual stdio subprocess",
+  "runs": [
+    {
+      "repository": "metahackAI/a2api",
+      "state": "open",
+      "page": 1,
+      "perPage": 2,
+      "successfulHttpReads": 4,
+      "direct": {
+        "status": "validated",
+        "repositoryFields": [
+          "archived",
+          "defaultBranch",
+          "description",
+          "fullName",
+          "language",
+          "stars",
+          "url"
+        ],
+        "pageFields": [
+          "items",
+          "page",
+          "perPage",
+          "repository",
+          "state"
+        ],
+        "itemCount": 0,
+        "itemFields": [],
+        "kinds": []
+      },
+      "stdio": {
+        "status": "validated",
+        "repositoryFields": [
+          "archived",
+          "defaultBranch",
+          "description",
+          "fullName",
+          "language",
+          "stars",
+          "url"
+        ],
+        "pageFields": [
+          "items",
+          "page",
+          "perPage",
+          "repository",
+          "state"
+        ],
+        "itemCount": 0,
+        "itemFields": [],
+        "kinds": []
+      }
+    },
+    {
+      "repository": "octocat/Hello-World",
+      "state": "open",
+      "page": 1,
+      "perPage": 2,
+      "successfulHttpReads": 4,
+      "direct": {
+        "status": "validated",
+        "repositoryFields": [
+          "archived",
+          "defaultBranch",
+          "description",
+          "fullName",
+          "language",
+          "stars",
+          "url"
+        ],
+        "pageFields": [
+          "items",
+          "page",
+          "perPage",
+          "repository",
+          "state"
+        ],
+        "itemCount": 2,
+        "itemFields": [
+          "kind",
+          "number",
+          "state",
+          "title",
+          "updatedAt",
+          "url"
+        ],
+        "kinds": [
+          "pull_request"
+        ]
+      },
+      "stdio": {
+        "status": "validated",
+        "repositoryFields": [
+          "archived",
+          "defaultBranch",
+          "description",
+          "fullName",
+          "language",
+          "stars",
+          "url"
+        ],
+        "pageFields": [
+          "items",
+          "page",
+          "perPage",
+          "repository",
+          "state"
+        ],
+        "itemCount": 2,
+        "itemFields": [
+          "kind",
+          "number",
+          "state",
+          "title",
+          "updatedAt",
+          "url"
+        ],
+        "kinds": [
+          "pull_request"
+        ]
+      }
+    }
+  ],
+  "scope": "Selected response schemas validated. Single API page per invoke. No LLM evaluation."
+}

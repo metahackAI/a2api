@@ -25,7 +25,7 @@ OpenAPI/등록한 코드 → convert → invoke
 | **P0-2 완료** | **명시적으로 등록한 Python 함수·신규 API도 같은 방식으로 호출** | 지원하는 signature/TypedDict 등에서 schema를 생성하고 callable을 연결한다. 같은 프로토콜로 기존 함수 wrapper와 신규 함수가 모두 실행된다. 지원 불가 타입은 명시적 schema를 요구한다. |
 | **P0-3 완료** | **전환한 객체를 MCP에서 작은 설명으로 호출하고 사용자 가이드 완성** | 실제 stdio에서 discover/describe/invoke를 실행한다. MCP tools/list가 전체 business schema를 나열하지 않는다. 기본 describe는 agent descriptor만 반환한다. 일반 앱 연결 예제와 현재 실행 가능한 시작 문서를 제공한다. |
 
-이번 구현은 **P0-3 하나**로 제한했다. 후속 범위는 사용자의 다음 지시를 따르며 운영 기능이나 새 단계를 자동으로 착수하지 않는다.
+P0-3 이후 이번 요청은 **기존 GitHub OpenAPI로 공개 저장소 조회·이슈 목록 조회를 연결하는 실사용 예제**로 제한한다. 기존 `convert`/`capability`로 필요한 필드만 반환하고 실제 API·MCP stdio를 검증한다. [사용 문서](14-github-readonly-example.ko.md)에 실행법과 한 페이지 범위를 기록한다. 핵심 모듈 확장이나 새 관리 단계는 추가하지 않는다. 후속 범위는 사용자의 다음 지시를 따른다.
 
 ### 기존 코드의 처리
 
