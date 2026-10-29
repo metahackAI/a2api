@@ -5,6 +5,7 @@
 추가한 stdio MCP binding과 에이전트 연결은 [MCP 브리지 안내](05-mcp-bridge.ko.md)에 정리했다.
 명세에서 비활성 IR을 생성하는 기능과 대규모 GitHub 샘플은 [OpenAPI importer 안내](06-openapi-importer.ko.md)에 정리했다. 실행 가능한 MVP의 닫힌 schema profile과 가져온 초안의 `openapi-draft` profile을 구분한다.
 추가 메서드·JSON 본문·상태별 응답 codec과 인증 provider는 [HTTP 어댑터 확장](07-http-adapter.ko.md)에 정리했다. 활성 runtime은 GET/HEAD 조회 정책을 적용한다.
+기존 수동 계약과 동일한 주문·배송 업무를 OpenAPI import와 검토 설정에서 생성하는 경로는 [검토 빌더 안내](08-review-builder.ko.md)에 정리했다.
 
 ## 실행
 

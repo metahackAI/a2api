@@ -91,6 +91,8 @@ JSON request body를 `inputSchema.body`에 보존하고, 일반 header parameter
 
 생성 capability는 계속 `openapi-draft`, `enabled=false`, `effects=unknown`, `approval=review_required`다. transport에 POST를 추가해도 discover/describe/invoke 또는 MCP에서 변경 도구가 활성화되지 않는다. compiler와 Runtime은 활성 MVP operation을 GET/HEAD로 제한한다. 효과를 read로 표시하고 POST route를 연결해도 활성화·바인딩 검사를 통과하지 못한다.
 
+조회 계약은 별도 [검토 설정과 빌더](08-review-builder.ko.md)로 projection·권한·관계 검사를 명시해 생성할 수 있다. `ReviewedHTTPAdapter`가 source HTTP 검증을 유지하면서 검토한 입력과 반환 필드로 연결한다. 원래 import 초안은 변경하지 않는다.
+
 이번 구현의 변경 메서드는 호스트가 명시적으로 호출하는 어댑터와 격리된 transport 검증에서 사용할 수 있다. 에이전트를 통한 운영 변경 업무에는 검토한 변경 정책·승인·멱등성·결과 대조를 먼저 구현해야 한다.
 
 ## 재현

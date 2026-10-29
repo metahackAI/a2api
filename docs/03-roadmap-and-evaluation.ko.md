@@ -26,7 +26,7 @@ MCP SDK나 validator의 구체 버전은 구현 시 지원 범위를 확인해 �
 
 첫 importer는 OpenAPI 3.0/3.1에서 지원하는 기능을 명시하고, 3.2 및 그 밖의 기능은 실제 fixture와 parser 지원을 확인해 확장한다. 지원하지 않는 버전·키워드는 진단하며 조용히 downgrade하지 않는다.
 
-현재 Python 구현에 첫 importer와 HTTP transport 확장을 추가했다. 공식 GitHub REST의 1,254 operations 전체를 목록화하고 기본 GET 선택은 633개, 전체 지원 메서드 선택은 1,228개를 비활성 IR로 변환한다. [구현·검증 기록](06-openapi-importer.ko.md)을 참고한다. 검토 overlay 분리·증분 재생성과 LLM 업무 성공률 평가는 남아 있으므로 아래 6단계 전체가 완료된 상태는 아니다.
+현재 Python 구현에 첫 importer와 HTTP transport 확장을 추가했다. 공식 GitHub REST의 1,254 operations 전체를 목록화하고 기본 GET 선택은 633개, 전체 지원 메서드 선택은 1,228개를 비활성 IR로 변환한다. [구현·검증 기록](06-openapi-importer.ko.md)을 참고한다. 별도 검토 설정과 조회 계약 빌더를 추가해 [주문·배송의 OpenAPI → MCP 경로](08-review-builder.ko.md)도 연결했다. 증분 재생성과 LLM 업무 성공률 평가는 남아 있으므로 아래 6단계 전체가 완료된 상태는 아니다.
 
 ## 3. 단계별 산출물과 완료 조건
 
@@ -38,7 +38,7 @@ MCP SDK나 validator의 구체 버전은 구현 시 지원 범위를 확인해 �
 | 3. 점진 탐색 | discover/describe, 태그·검색·권한 filter | 관련 기능 발견률과 노출 토큰 수 측정 |
 | 4. 조립·그래프 | 검토한 의미 타입·관계, bounded DAG, 예산 | 잘못된 ID 매핑·순환·과도한 fan-out 검출 |
 | 5. 표준 bridge | 고정 버전 MCP bridge, 선택적 직접 도구 노출 | 대상 호스트의 실제 discovery·call·결과 schema 검증 |
-| 6. 레거시 자동화 | OpenAPI importer, overlay 분리, 증분 재생성 | 원본 변경 영향 추적 및 사람의 검토 내용 보존 |
+| 6. 레거시 자동화 | OpenAPI importer, 검토 설정·계약 빌더, 증분 재생성 | 원본 변경 영향 추적 및 사람의 검토 내용 보존 |
 | 7. 변경 업무 | prepare/commit, 결과 대조, 제한한 보상 | 중복 요청·응답 유실·경쟁 상태를 격리 환경에서 검증 |
 | 8. 확대 | 추가 importer·SDK·이벤트 binding | 언어·규모를 늘렸을 때 적합성과 운영 비용 재평가 |
 

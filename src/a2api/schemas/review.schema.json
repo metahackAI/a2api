@@ -1,0 +1,617 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "a2api review settings 0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "a2apiReview",
+    "review",
+    "source",
+    "semanticTypes",
+    "operations",
+    "capabilities"
+  ],
+  "properties": {
+    "a2apiReview": {
+      "const": "0.1"
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "reviewedBy",
+        "reviewedAt",
+        "scope"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "unreviewed",
+            "reviewed"
+          ]
+        },
+        "reviewedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scope": {
+          "enum": [
+            "sample",
+            "source"
+          ]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256",
+        "namespace"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "namespace": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"
+        }
+      }
+    },
+    "semanticTypes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "baseType",
+          "namespace"
+        ],
+        "properties": {
+          "baseType": {
+            "enum": [
+              "string",
+              "integer",
+              "number"
+            ]
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/reviewedOperation"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/reviewedCapability"
+      }
+    }
+  },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "valueRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "pointer"
+          ],
+          "properties": {
+            "from": {
+              "enum": [
+                "input",
+                "context",
+                "item"
+              ]
+            },
+            "pointer": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "step",
+            "pointer"
+          ],
+          "properties": {
+            "from": {
+              "const": "step"
+            },
+            "step": {
+              "type": "string"
+            },
+            "pointer": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "value"
+          ],
+          "properties": {
+            "from": {
+              "const": "literal"
+            },
+            "value": {}
+          }
+        }
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resultPointer",
+        "equals",
+        "code"
+      ],
+      "properties": {
+        "resultPointer": {
+          "type": "string"
+        },
+        "equals": {
+          "$ref": "#/$defs/valueRef"
+        },
+        "code": {
+          "enum": [
+            "PERMISSION_DENIED",
+            "PRECONDITION_FAILED",
+            "CONTRACT_DRIFT"
+          ]
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pointer"
+      ],
+      "properties": {
+        "pointer": {
+          "type": "string",
+          "pattern": "^(?:/|$)"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "semanticAnnotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "pointer",
+        "semanticType"
+      ],
+      "properties": {
+        "schema": {
+          "enum": [
+            "input",
+            "output"
+          ]
+        },
+        "pointer": {
+          "type": "string"
+        },
+        "semanticType": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "reviewedOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "effects",
+        "inputs",
+        "outputs",
+        "semanticAnnotations"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "capabilityId",
+            "operationId",
+            "digest"
+          ],
+          "properties": {
+            "capabilityId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            "operationId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "externalWrites"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "read",
+                "write",
+                "unknown"
+              ]
+            },
+            "externalWrites": {
+              "type": "boolean"
+            },
+            "sensitiveData": {
+              "$ref": "#/$defs/strings"
+            }
+          }
+        },
+        "inputs": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        },
+        "semanticAnnotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/semanticAnnotation"
+          }
+        }
+      }
+    },
+    "reviewedCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "title",
+        "owner",
+        "intent",
+        "inputSchema",
+        "outputSchema",
+        "contextRequirements",
+        "effects",
+        "policy",
+        "binding",
+        "execution",
+        "errors",
+        "presentation",
+        "examples",
+        "operationIds"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "summary",
+            "useWhen",
+            "avoidWhen"
+          ],
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "useWhen": {
+              "$ref": "#/$defs/strings"
+            },
+            "avoidWhen": {
+              "$ref": "#/$defs/strings"
+            },
+            "keywords": {
+              "$ref": "#/$defs/strings"
+            }
+          }
+        },
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "object"
+        },
+        "contextRequirements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "actor",
+              "tenant"
+            ]
+          }
+        },
+        "effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "externalWrites"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "read",
+                "write",
+                "unknown"
+              ]
+            },
+            "externalWrites": {
+              "type": "boolean"
+            },
+            "sensitiveData": {
+              "$ref": "#/$defs/strings"
+            }
+          }
+        },
+        "policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requiredScopes",
+            "objectAuthorization",
+            "resourceRelationshipCheck",
+            "approval"
+          ],
+          "properties": {
+            "requiredScopes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "objectAuthorization": {
+              "const": "backend_and_runtime"
+            },
+            "resourceRelationshipCheck": {
+              "type": "string"
+            },
+            "approval": {
+              "enum": [
+                "not_required_for_this_read",
+                "review_required"
+              ]
+            }
+          }
+        },
+        "binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "steps",
+            "output"
+          ],
+          "properties": {
+            "type": {
+              "const": "composition"
+            },
+            "steps": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "operationId",
+                  "input"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "operationId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "input": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/$defs/valueRef"
+                    }
+                  },
+                  "dependsOn": {
+                    "$ref": "#/$defs/strings"
+                  },
+                  "foreach": {
+                    "$ref": "#/$defs/valueRef"
+                  },
+                  "maxItems": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "parallelism": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16
+                  },
+                  "emptyCollection": {
+                    "const": "succeed"
+                  },
+                  "checks": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/check"
+                    }
+                  },
+                  "select": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "dependentRequired": {
+                  "foreach": [
+                    "maxItems",
+                    "parallelism",
+                    "emptyCollection"
+                  ]
+                }
+              }
+            },
+            "output": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/valueRef"
+              }
+            }
+          }
+        },
+        "execution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "deadlineMs",
+            "backendTimeoutMs",
+            "maxBackendCalls",
+            "maxRetries",
+            "failureMode",
+            "successCondition"
+          ],
+          "properties": {
+            "mode": {
+              "const": "synchronous"
+            },
+            "deadlineMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60000
+            },
+            "backendTimeoutMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "maxBackendCalls": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "maxRetries": {
+              "const": 0
+            },
+            "failureMode": {
+              "const": "stop"
+            },
+            "successCondition": {
+              "const": "all_required_steps_succeeded_and_output_valid"
+            }
+          }
+        },
+        "errors": {
+          "$ref": "#/$defs/strings"
+        },
+        "presentation": {
+          "type": "object"
+        },
+        "examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object"
+          }
+        },
+        "operationIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

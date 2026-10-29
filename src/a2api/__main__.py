@@ -36,6 +36,13 @@ def main(argv: list[str] | None = None) -> int:
     importer.add_argument("--methods", nargs="+", type=str.upper, choices=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
                           help="HTTP methods to import (default: GET); generated capabilities remain disabled")
     importer.add_argument("--strict", action="store_true", help="Exit unsuccessfully if selected operations are unsupported")
+    build = commands.add_parser("build", help="Build executable read contracts from pinned imports and explicit review settings")
+    build.add_argument("--imports", required=True, help="Directory produced by import-openapi")
+    build.add_argument("--review", required=True, help="a2api review JSON file")
+    build.add_argument("--output", required=True, help="New directory for a self-contained build")
+    reviewed = commands.add_parser("review-demo", help="Verify OpenAPI import, review build and the full MCP stdio flow")
+    reviewed.add_argument("--order-id", default="ORD-1001")
+    reviewed.add_argument("--sample-user", choices=("alice", "bob", "limited"), default="alice")
     demo = commands.add_parser("demo", help="Start temporary HTTP APIs and verify the full discovery flow")
     demo.add_argument("--order-id", default="ORD-1001")
     serve = commands.add_parser("serve", help="Run local sample backend and a2api HTTP gateway")
@@ -45,10 +52,17 @@ def main(argv: list[str] | None = None) -> int:
                             ("mcp-demo", "Verify discover/describe/invoke using the official MCP client")):
         command = commands.add_parser(name, help=help_text)
         command.add_argument("--sample-user", choices=("alice", "bob", "limited"), default="alice")
+        command.add_argument("--build", help="Reviewed local order/shipment sample build; backend is the loopback fixture")
         if name == "mcp-demo":
             command.add_argument("--order-id", default="ORD-1001")
     args = parser.parse_args(argv)
     try:
+        if args.command == "build":
+            from .builder import build_contracts, write_build
+            result = build_contracts(args.imports, args.review)
+            report = write_build(result, args.output)
+            print(json.dumps({'output': args.output, **result.summary(), 'contracts': report['contracts']}, ensure_ascii=False, indent=2))
+            return 0
         if args.command == "import-openapi":
             from .importers import OpenAPIImporter, write_import
             importer = OpenAPIImporter.from_file(args.path, namespace=args.namespace, methods=set(args.methods) if args.methods else None)
@@ -60,19 +74,30 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"valid": True, "id": capability.id, "version": capability.version,
                               "enabled": capability.enabled, "steps": [s.id for s in capability.steps]}, ensure_ascii=False))
             return 0
-        if args.command in ("mcp", "mcp-demo"):
+        if args.command in ("mcp", "mcp-demo", "review-demo"):
             try:
                 import anyio
                 from .mcp_bridge import serve_stdio
             except ModuleNotFoundError:
                 raise A2APIError("DEPENDENCY_MISSING", 'Install the MCP extra: python -m pip install -e ".[mcp]"') from None
+            if args.command == "review-demo":
+                from .review_demo import run_review_demo
+                result = anyio.run(run_review_demo, args.order_id, args.sample_user)
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                return 0 if result['mcp']['invoke'].get('status') == 'succeeded' else 1
             if args.command == "mcp":
+                from .builder import load_build
+                from .review_demo import sample_built_runtime
+                built = load_build(args.build) if args.build else None
+                if built is not None and (built.review['review']['scope'] != 'sample' or built.review['source']['namespace'] != 'legacy_orders'):
+                    raise A2APIError('BUILD_SCOPE_MISMATCH', 'The sample CLI accepts local order/shipment fixture builds only.')
                 # Only protocol messages go to stdout. The host chooses this demo identity.
                 with running(create_backend()) as backend_url:
-                    anyio.run(serve_stdio, sample_runtime(backend_url), TOKENS["demo-" + args.sample_user])
+                    runtime = sample_built_runtime(built, backend_url) if built is not None else sample_runtime(backend_url)
+                    anyio.run(serve_stdio, runtime, TOKENS["demo-" + args.sample_user])
                 return 0
             from .mcp_demo import run_demo
-            result = anyio.run(run_demo, args.order_id, args.sample_user)
+            result = anyio.run(run_demo, args.order_id, args.sample_user, args.build)
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return 0 if result["invoke"].get("status") == "succeeded" else 1
         with running(create_backend(port=args.backend_port if args.command == "serve" else 0)) as backend_url:

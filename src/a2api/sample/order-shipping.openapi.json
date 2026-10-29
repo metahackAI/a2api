@@ -1,0 +1,184 @@
+{
+  "openapi": "3.1.2",
+  "info": {
+    "title": "Legacy order and shipment fixture API",
+    "version": "2026-10-29"
+  },
+  "servers": [
+    {
+      "url": "https://fixture.invalid"
+    }
+  ],
+  "security": [
+    {
+      "serviceBearer": []
+    }
+  ],
+  "paths": {
+    "/orders/{orderId}": {
+      "get": {
+        "operationId": "getOrder",
+        "summary": "demo.getOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fixture resource with object authorization fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Object access denied"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/shipments/{shipmentId}": {
+      "get": {
+        "operationId": "getShipment",
+        "summary": "demo.getShipment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fixture resource with object authorization fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shipment"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Object access denied"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "orderState": {
+            "type": "string",
+            "enum": [
+              "created",
+              "processing",
+              "shipped",
+              "cancelled"
+            ]
+          },
+          "shipmentIds": {
+            "type": "array",
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId",
+          "orderState",
+          "shipmentIds",
+          "ownerId",
+          "tenantId"
+        ],
+        "additionalProperties": true
+      },
+      "Shipment": {
+        "type": "object",
+        "properties": {
+          "shipmentId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_transit",
+              "delivered",
+              "exception"
+            ]
+          },
+          "estimatedArrival": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "shipmentId",
+          "status",
+          "estimatedArrival",
+          "asOf",
+          "ownerId",
+          "tenantId",
+          "orderId"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "securitySchemes": {
+      "serviceBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -93,7 +93,7 @@ OpenAPI 3.0의 `nullable`과 exclusive bound는 2020-12 표현으로 변환한�
 }
 ```
 
-`externalWrites: true`는 실제 쓰기 발생의 관측값이 아니라, 효과 미검토를 나타내는 보수적 선언이다. 생성물은 카탈로그 discover/describe/invoke와 MCP에 공개되지 않는다. `openapi-draft` profile은 검토 플래그만 바꿔 활성화할 수 없다. 실행하려면 담당자가 업무 입력·출력을 정하고, 기존 실행 가능한 `mvp` profile로 닫힌 projection과 권한·관계 검사·효과·deployment binding을 작성해 검증해야 한다. 일반 OpenAPI 스키마를 그대로 실행하는 새 profile이나 검토 overlay 병합 기능은 이번 범위에 포함하지 않았다.
+`externalWrites: true`는 실제 쓰기 발생의 관측값이 아니라, 효과 미검토를 나타내는 보수적 선언이다. 생성물은 카탈로그 discover/describe/invoke와 MCP에 공개되지 않는다. `openapi-draft` profile은 검토 플래그만 바꿔 활성화할 수 없다. 실행하려면 담당자가 업무 입력·출력을 정하고, 기존 실행 가능한 `mvp` profile로 닫힌 projection과 권한·관계 검사·효과·deployment binding을 작성해 검증해야 한다. 이후 추가한 [검토 설정과 계약 빌더](08-review-builder.ko.md)가 이 과정을 지원한다. source 필드에서 새 실행 계약을 생성하며, 일반 OpenAPI schema를 그대로 활성화하는 기능은 아니다.
 
 원본 응답에 owner·token 같은 필드가 존재하면 추출 단계에서 원본 스키마를 보존한다. 사용자에게 내보낼 필드 선택은 이후 검토한 projection의 역할이다. importer의 성공은 에이전트 도구 배포나 업무 성공률 검증을 의미하지 않는다.
 
@@ -130,4 +130,4 @@ python examples/github-openapi/verify_live.py
 
 실제 명세를 사용한 덕분에 upstream 예제 자체의 오류도 확인했다. `/meta` 예제의 fingerprint 네 필드가 string 스키마에 대해 number이고, 저장소 예제는 두 위치에서 required 필드가 빠져 있다. [예제 불일치 기록](../examples/github-openapi/example-drift.json)에 rule과 경로를 남겼고, 이슈 목록 예제는 적합하다. 이 차이를 숨기기 위해 원본이나 스키마를 고치지 않았다. 실제 공개 GET 응답 세 건은 모두 적합했다.
 
-다음 확장 대상은 검토 overlay의 별도 저장·병합, 원본 변경에 따른 영향 diff, 명시적 업무 capability projection, pagination 결과의 완전성 표시와 변경 업무 실행 정책이다.
+검토 설정 별도 저장과 명시적 업무 capability projection은 [조회 계약 빌더](08-review-builder.ko.md)로 구현했다. 다음 확장 대상은 원본 변경 영향 diff·증분 재생성, pagination 결과의 완전성 표시와 변경 업무 실행 정책이다.

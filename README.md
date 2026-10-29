@@ -2,7 +2,7 @@
 
 다양한 언어와 환경에서 구현한 API를 에이전트가 **찾고, 조합하고, 실행하고, 결과를 사용자에게 설명할 수 있도록** 만드는 계약 및 런타임 라이브러리.
 
-현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API, HTTP gateway, **stdio MCP 브리지**, **OpenAPI importer**를 제공한다. 명세에서 IR 초안을 자동 생성하며 업무 의미·권한 검토와 변경 작업은 후속 범위다.
+현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API, HTTP gateway, **stdio MCP 브리지**, **OpenAPI importer**, **검토 설정과 계약 빌더**를 제공한다. 명세에서 IR 초안을 생성하고, 검토한 매핑·권한·업무 정의로 조회 실행 계약을 빌드한다. 변경 업무 실행 정책은 후속 범위다.
 
 HTTP 어댑터는 **GET/HEAD/POST/PUT/PATCH/DELETE, JSON 본문, 명시적인 2xx·빈 응답, 호스트 인증 주입**을 지원한다. 활성 MVP runtime은 GET/HEAD 조회 정책을 적용하며, 다른 메서드의 import와 transport 검증은 비활성 계약으로 진행한다. [HTTP 어댑터 안내](docs/07-http-adapter.ko.md)를 참고한다.
 
@@ -63,6 +63,17 @@ python -m a2api import-openapi examples/github-openapi/api.github.com.json.gz \
 
 출력 폴더의 `report.json`과 `contracts/`에서 결과를 확인한다. 기존 출력 폴더는 덮어쓰지 않는다. 지원 기능, 검증 결과와 실제 공개 API 검증 스크립트는 [OpenAPI importer 안내](docs/06-openapi-importer.ko.md)에 정리했다.
 
+## 검토 설정으로 계약 빌드
+
+주문·배송 OpenAPI → import → 검토 설정 → 실행 계약 → MCP 전체 경로를 검증한다.
+
+```bash
+python -m pip install -e ".[mcp]"
+python -m a2api review-demo
+```
+
+일반 명령은 `python -m a2api build --imports <import-directory> --review <review.json> --output <new-directory>`다. 원본·바인딩 해시, 미검토 설정, 미지원 projection과 권한 검사 누락을 검사한다. import 산출물과 검토 파일은 보존하며, 생성 묶음은 로드 시 다시 빌드해 검증한다. [검토 빌더 안내](docs/08-review-builder.ko.md)에 샘플 설정과 단계별 실행을 정리했다.
+
 ## 설계 방향
 
 레거시 API와 신규 API를 같은 중간 표현인 **Capability IR**로 정규화한다. 여기서 capability는 사용자가 달성하려는 업무를 수행하는 기능 단위다. 타입과 호출 주소뿐 아니라 업무 의미, 입력의 출처, 실행 조건, 부작용, 결과의 근거와 표시 방법을 함께 정의한다.
@@ -86,6 +97,7 @@ OpenAPI, Arazzo, MCP 등 기존 표준을 활용한다. a2api의 차별점은 �
 7. [MCP 브리지 안내](docs/05-mcp-bridge.ko.md): 설치, stdio 연결, 도구 계약과 오류 처리, 검증 범위.
 8. [OpenAPI importer 안내](docs/06-openapi-importer.ko.md): 대규모 GitHub 명세, 변환 규칙, 비활성 IR과 진단, HTTP 검증.
 9. [HTTP 어댑터 확장](docs/07-http-adapter.ko.md): HTTP 메서드·JSON 본문·2xx 응답·호스트 인증·결과 미확정 처리와 로컬 검증.
+10. [검토 설정과 계약 빌더](docs/08-review-builder.ko.md): source pin·필드 projection·업무 계약 생성·빌드 재검증과 OpenAPI부터 MCP까지의 주문·배송 예제.
 
 ## 작업 폴더와 원격 저장소
 

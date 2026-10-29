@@ -7,18 +7,25 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from uuid import uuid4
+from typing import Protocol
 
 from .catalog import Catalog
 from .errors import A2APIError, contract_error
 from .execution import Budget
-from .http_adapter import HTTPAdapter
-from .ir import ExecutionContext, ValueRef, thaw
+from .ir import ExecutionContext, Operation, ValueRef, thaw
 from .pointers import resolve
 from .schema import validate_value
 
 
+class OperationAdapter(Protocol):
+    def has_binding(self, operation: Operation) -> bool: ...
+
+    def call(self, operation: Operation, arguments: dict, context: ExecutionContext,
+             budget: Budget, timeout_ms: int) -> object: ...
+
+
 class Runtime:
-    def __init__(self, catalog: Catalog, adapter: HTTPAdapter):
+    def __init__(self, catalog: Catalog, adapter: OperationAdapter):
         self.catalog = catalog
         self.adapter = adapter
         for capability in catalog.capabilities:

@@ -108,6 +108,10 @@ anyio.run(serve_stdio, runtime, context)
 
 이 factory는 호스트가 이미 인증한 고정 identity의 stdio 용도다. 다중 사용자 HTTP 공개 서버용 인증을 구현한 것은 아니다. Streamable HTTP, HTTP OAuth, 실행 중 GET의 강제 취소와 추가 MCP 기능은 별도 범위다. 클라이언트 종료·취소 시에도 이미 시작한 읽기는 runtime의 timeout 범위에서 끝날 수 있다.
 
+## 검토한 빌드 연결
+
+`python -m a2api mcp --build /absolute/path/to/orders-built`로 조회 계약 빌더의 로컬 주문·배송 산출물을 연결한다. `mcp-demo --build ...`는 공식 SDK의 stdio 클라이언트로 이를 검증한다. `review-demo`는 OpenAPI import와 build부터 실행한다. 샘플 범위 검사와 source/review/산출물 재검증을 서버 시작 전에 수행한다. 전체 사용법은 [검토 빌더 안내](08-review-builder.ko.md)에 정리했다.
+
 ## 검증
 
 Python 3.12, MCP SDK 2.3.0, jsonschema 4.26.0에서 총 **60개 테스트**가 통과했다. 기존 계약·HTTP 테스트 40개와 MCP 테스트 20개를 포함한다.
