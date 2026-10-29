@@ -12,6 +12,14 @@ python examples/github-openapi/verify_agent.py --owner octocat --repo Hello-Worl
 
 각 실행은 직접 호출 2회와 실제 MCP stdio 호출 2회를 검증한다. [사용 문서·입출력·호스트 설정·제약](../../docs/14-github-readonly-example.ko.md), [연결 코드](agent_app.py), [MCP 서버](mcp_server.py), [검증 client](verify_agent.py)를 참고한다. 아래 전체 import/benchmark는 별도의 기존 예제이며 이 실행의 선행 단계가 아니다.
 
+실제 LLM의 선택·호출을 확인하려면 로그인된 Codex CLI로 다음 명령을 실행한다.
+
+```bash
+python examples/github-openapi/agent_demo.py
+```
+
+다섯 한국어 질문, 실제 호출 기록, 답변 대조 방법과 대화 재생 제약은 [LLM 사용 안내](../../docs/16-agent-usage.ko.md)에 있다. 실행 예제 개발 범위는 [확정 계획](../../docs/15-agent-usage-plan.ko.md)에 한정했다. 기본 테스트는 외부 LLM을 호출하지 않는다.
+
 ## 전체 명세와 importer 검증 자료
 
 공식 [github/rest-api-description](https://github.com/github/rest-api-description)의 bundled OpenAPI 3.0.3 명세를 사용한다. 827 paths, 1,254 operations, 압축 전 13,897,231 bytes다. revision과 SHA-256은 [source.json](source.json), upstream MIT 라이선스는 [LICENSE.upstream.md](LICENSE.upstream.md)에 있다. gzip 안의 JSON은 원본 그대로다.

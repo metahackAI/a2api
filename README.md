@@ -88,6 +88,8 @@ python examples/github-openapi/verify_agent.py --owner octocat --repo Hello-Worl
 
 [GitHub 예제 사용법·입출력·페이지 범위](docs/14-github-readonly-example.ko.md)를 참고한다.
 
+로그인된 Codex CLI가 있으면 `python examples/github-openapi/agent_demo.py`로 다섯 한국어 질문을 실제 LLM에서 실행하고 선택한 MCP 호출·결과·답변을 기록한다. [개발 범위와 순서](docs/15-agent-usage-plan.ko.md), [실행법·답변 확인·대화 재생 제약](docs/16-agent-usage.ko.md)에 정리했다. 이 명령은 모델 계정 사용량과 외부 GitHub 조회를 사용하며, 일반 테스트에서는 실행하지 않는다.
+
 선택 의존성을 설치하고 공식 MCP 클라이언트로 전체 흐름을 확인한다.
 
 ```bash

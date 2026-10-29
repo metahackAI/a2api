@@ -1,0 +1,45 @@
+[
+  {
+    "id": "repository",
+    "question": "metahackAI/a2api가 어떤 저장소인지와 열린 이슈·PR 한 페이지를 설명해줘.",
+    "expected": {
+      "invocations": [
+        {"id": "github.repository.get", "input": {"owner": "metahackAI", "repo": "a2api"}},
+        {"id": "github.issues.list", "input": {"owner": "metahackAI", "repo": "a2api", "state": "open", "page": 1}}
+      ]
+    }
+  },
+  {
+    "id": "issues",
+    "question": "octocat/Hello-World의 최근 열린 이슈·PR 3개를 보여줘.",
+    "expected": {
+      "invocations": [
+        {"id": "github.issues.list", "input": {"owner": "octocat", "repo": "Hello-World", "state": "open", "page": 1, "perPage": 3}}
+      ]
+    }
+  },
+  {
+    "id": "next_page",
+    "question": "이어서 다음 페이지도 보여줘.",
+    "previous": "issues",
+    "expected": {
+      "invocations": [
+        {"id": "github.issues.list", "input": {"owner": "octocat", "repo": "Hello-World", "state": "open", "page": 2, "perPage": 3}}
+      ]
+    }
+  },
+  {
+    "id": "missing_repository",
+    "question": "metahackAI/a2api-example-missing-repository-7f8d2b941c6e의 저장소 정보를 알려줘.",
+    "expected": {
+      "invocations": [
+        {"id": "github.repository.get", "input": {"owner": "metahackAI", "repo": "a2api-example-missing-repository-7f8d2b941c6e"}, "error": "RESOURCE_NOT_FOUND"}
+      ]
+    }
+  },
+  {
+    "id": "missing_input",
+    "question": "최근 열린 이슈들을 보여줘.",
+    "expected": {"invocations": [], "clarification": true}
+  }
+]

@@ -1,0 +1,324 @@
+{
+  "runStartedAt": "2026-10-29T08:19:07+00:00",
+  "reviewedAt": "2026-10-29T08:23:44+00:00",
+  "baselineCommit": "4dd668f",
+  "host": "Codex CLI 0.164.0-alpha.11.1 on Linux",
+  "model": null,
+  "modelNote": "CLI default; JSONL does not report model identity.",
+  "origin": "https://api.github.com",
+  "transport": "actual MCP stdio subprocess",
+  "continuation": "replay_actual_previous_question_calls_answer",
+  "initialRun": [
+    {
+      "id": "repository",
+      "automaticPassed": true,
+      "failures": [],
+      "invalidWireRequests": 0,
+      "hostErrors": []
+    },
+    {
+      "id": "issues",
+      "automaticPassed": false,
+      "failures": [
+        "host_or_answer_incomplete",
+        "wire_schema_mismatch"
+      ],
+      "invalidWireRequests": 1,
+      "hostErrors": [
+        "MCP_TRANSPORT_ERROR"
+      ]
+    },
+    {
+      "id": "next_page",
+      "automaticPassed": false,
+      "failures": [
+        "previous_scenario_failed"
+      ],
+      "invalidWireRequests": 0,
+      "hostErrors": []
+    },
+    {
+      "id": "missing_repository",
+      "automaticPassed": false,
+      "failures": [
+        "host_or_answer_incomplete"
+      ],
+      "invalidWireRequests": 0,
+      "hostErrors": [
+        "MCP_TRANSPORT_ERROR"
+      ]
+    },
+    {
+      "id": "missing_input",
+      "automaticPassed": true,
+      "failures": [],
+      "invalidWireRequests": 0,
+      "hostErrors": []
+    }
+  ],
+  "afterFirstDescriptionEdit": [
+    {
+      "id": "repository",
+      "automaticPassed": false,
+      "failures": [
+        "wire_schema_mismatch"
+      ],
+      "invalidWireRequests": 4,
+      "hostErrors": []
+    },
+    {
+      "id": "issues",
+      "automaticPassed": false,
+      "failures": [
+        "wire_schema_mismatch"
+      ],
+      "invalidWireRequests": 1,
+      "hostErrors": []
+    },
+    {
+      "id": "next_page",
+      "automaticPassed": false,
+      "failures": [
+        "previous_scenario_failed"
+      ],
+      "invalidWireRequests": 0,
+      "hostErrors": []
+    },
+    {
+      "id": "missing_repository",
+      "automaticPassed": true,
+      "failures": [],
+      "invalidWireRequests": 0,
+      "hostErrors": []
+    },
+    {
+      "id": "missing_input",
+      "automaticPassed": true,
+      "failures": [],
+      "invalidWireRequests": 0,
+      "hostErrors": []
+    }
+  ],
+  "changes": [
+    "Clarify generic describe required JSON shape in tool description and server instructions; wire/schema unchanged.",
+    "Fix the example host parser: structured API errors are distinct from transport errors."
+  ],
+  "finalRun": [
+    {
+      "id": "repository",
+      "automaticPassed": true,
+      "toolCounts": {
+        "a2api.discover": 1,
+        "a2api.describe": 2,
+        "a2api.invoke": 2
+      },
+      "invocations": [
+        {
+          "id": "github.issues.list",
+          "input": {
+            "owner": "metahackAI",
+            "repo": "a2api",
+            "state": "open",
+            "page": 1,
+            "perPage": 5
+          },
+          "status": "succeeded",
+          "dataFields": [
+            "items",
+            "page",
+            "perPage",
+            "repository",
+            "state"
+          ],
+          "page": 1,
+          "itemCount": 0,
+          "kinds": {}
+        },
+        {
+          "id": "github.repository.get",
+          "input": {
+            "owner": "metahackAI",
+            "repo": "a2api"
+          },
+          "status": "succeeded",
+          "dataFields": [
+            "archived",
+            "defaultBranch",
+            "description",
+            "fullName",
+            "language",
+            "stars",
+            "url"
+          ]
+        }
+      ],
+      "hostReportedUsage": {
+        "input_tokens": 75463,
+        "cached_input_tokens": 67200,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 477,
+        "reasoning_output_tokens": 0
+      },
+      "answerReview": {
+        "result": "passed",
+        "method": "Direct comparison against actual public MCP results.",
+        "observation": "Returned metadata and null description match. Empty page is reported without invented purpose or total."
+      }
+    },
+    {
+      "id": "issues",
+      "automaticPassed": true,
+      "toolCounts": {
+        "a2api.discover": 1,
+        "a2api.describe": 1,
+        "a2api.invoke": 1
+      },
+      "invocations": [
+        {
+          "id": "github.issues.list",
+          "input": {
+            "owner": "octocat",
+            "repo": "Hello-World",
+            "state": "open",
+            "page": 1,
+            "perPage": 3
+          },
+          "status": "succeeded",
+          "dataFields": [
+            "items",
+            "page",
+            "perPage",
+            "repository",
+            "state"
+          ],
+          "page": 1,
+          "itemCount": 3,
+          "kinds": {
+            "pull_request": 3
+          }
+        }
+      ],
+      "hostReportedUsage": {
+        "input_tokens": 87751,
+        "cached_input_tokens": 75648,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 511,
+        "reasoning_output_tokens": 0
+      },
+      "answerReview": {
+        "result": "passed",
+        "method": "Direct comparison against actual public MCP results.",
+        "observation": "Three titles (ignoring trailing whitespace), URLs, PR kinds and timestamps converted to KST match; updated ordering is stated."
+      }
+    },
+    {
+      "id": "next_page",
+      "automaticPassed": true,
+      "toolCounts": {
+        "a2api.discover": 1,
+        "a2api.describe": 1,
+        "a2api.invoke": 1
+      },
+      "invocations": [
+        {
+          "id": "github.issues.list",
+          "input": {
+            "owner": "octocat",
+            "repo": "Hello-World",
+            "state": "open",
+            "page": 2,
+            "perPage": 3
+          },
+          "status": "succeeded",
+          "dataFields": [
+            "items",
+            "page",
+            "perPage",
+            "repository",
+            "state"
+          ],
+          "page": 2,
+          "itemCount": 3,
+          "kinds": {
+            "pull_request": 1,
+            "issue": 2
+          }
+        }
+      ],
+      "hostReportedUsage": {
+        "input_tokens": 81879,
+        "cached_input_tokens": 65664,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 441,
+        "reasoning_output_tokens": 0
+      },
+      "answerReview": {
+        "result": "passed",
+        "method": "Direct comparison against actual public MCP results.",
+        "observation": "Repository/open state/three-per-page retained; page 2 returns one PR and two issues. Titles, URLs, KST timestamps and kinds match."
+      }
+    },
+    {
+      "id": "missing_repository",
+      "automaticPassed": true,
+      "toolCounts": {
+        "a2api.discover": 1,
+        "a2api.describe": 1,
+        "a2api.invoke": 1
+      },
+      "invocations": [
+        {
+          "id": "github.repository.get",
+          "input": {
+            "owner": "metahackAI",
+            "repo": "a2api-example-missing-repository-7f8d2b941c6e"
+          },
+          "status": "failed",
+          "errorCode": "RESOURCE_NOT_FOUND"
+        }
+      ],
+      "hostReportedUsage": {
+        "input_tokens": 113803,
+        "cached_input_tokens": 86528,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 363,
+        "reasoning_output_tokens": 0
+      },
+      "answerReview": {
+        "result": "passed",
+        "method": "Direct comparison against actual public MCP results.",
+        "observation": "404 is explained as a failed lookup, with no metadata or unsupported certainty about absence versus privacy."
+      }
+    },
+    {
+      "id": "missing_input",
+      "automaticPassed": true,
+      "toolCounts": {},
+      "invocations": [],
+      "hostReportedUsage": {
+        "input_tokens": 13135,
+        "cached_input_tokens": 8960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 41,
+        "reasoning_output_tokens": 11
+      },
+      "answerReview": {
+        "result": "passed",
+        "method": "Direct comparison against actual public MCP results.",
+        "observation": "No invocation; explicitly asks for repository name or URL."
+      }
+    }
+  ],
+  "tests": {
+    "command": ".venv-mcp/bin/python -m unittest discover -s tests -v",
+    "passed": 242,
+    "externalCallsInUnitTests": false
+  },
+  "limits": [
+    "Five fixed questions on one host-default model configuration; not a general success rate.",
+    "Follow-up replays actual prior interaction, rather than resuming a persistent CLI session.",
+    "CLI usage includes host context and cumulative model steps; no token saving claim.",
+    "Natural-language review is separate from automatic checks.",
+    "No reasoning, credentials, raw GitHub bodies or public issue titles are committed in this evidence."
+  ]
+}

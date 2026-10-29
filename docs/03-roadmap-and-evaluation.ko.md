@@ -27,6 +27,8 @@ OpenAPI/등록한 코드 → convert → invoke
 
 P0-3 이후 이번 요청은 **기존 GitHub OpenAPI로 공개 저장소 조회·이슈 목록 조회를 연결하는 실사용 예제**로 제한한다. 기존 `convert`/`capability`로 필요한 필드만 반환하고 실제 API·MCP stdio를 검증한다. [사용 문서](14-github-readonly-example.ko.md)에 실행법과 한 페이지 범위를 기록한다. 핵심 모듈 확장이나 새 관리 단계는 추가하지 않는다. 후속 범위는 사용자의 다음 지시를 따른다.
 
+해당 예제 완료 후 사용자가 지시한 다음 개발은 **실제 LLM의 GitHub MCP 사용 검증**이다. [상세 개발 계획](15-agent-usage-plan.ko.md)에 파일·질문·수정 허용 범위·완료 기준을 고정했다. 문서의 1 → 2 → 3 → 4 순서대로 끝내며 계획 밖의 확장 후보를 구현하지 않는다.
+
 ### 기존 코드의 처리
 
 - 재사용: OpenAPI 읽기/진단, JSON Schema 처리, HTTP 직렬화·응답 처리, credential provider, context, 기존 호출·오류 인터페이스, MCP SDK 연결.
