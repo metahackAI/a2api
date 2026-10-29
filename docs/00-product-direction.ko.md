@@ -1,8 +1,10 @@
 # a2api 방향 재정렬: 전환해서 바로 호출하는 프로토콜 모듈
 
-작성일: 2026-10-29 · 상태: 개발 기준 설계 · P0-1 메모리 convert/invoke 구현 완료
+작성일: 2026-10-29 · 상태: 개발 기준 설계 · P0-1/P0-2 구현 완료, P0-3 미착수
 
 이 문서와 [개발 계획](03-roadmap-and-evaluation.ko.md)이 이후 개발의 기준이다. 최초 아키텍처·프로토콜 초안은 배경 자료로 보존한다. P0-1의 실제 사용법은 [메모리 전환 안내](11-in-memory-conversion.ko.md)에 있다. 기존 구현을 삭제하거나 전체 계약의 승인 규칙을 우회하지 않는다.
+
+P0-2의 현재 사용법은 [Python 함수·신규 API 등록](12-python-functions.ko.md)에 있다.
 
 ## 1. 제품의 목적과 순서
 
@@ -47,7 +49,9 @@ HTTP adapter, importer의 schema 처리, 실제 MCP 연결, 입력·응답 검�
 
 **P0-1에서 추가한 구현:** `convert(OpenAPIImporter, operations=..., deployment=...)`가 `ConvertedAPI`를 반환하며 메모리에서 GET/HEAD를 호출한다. `ConvertedAPI.describe(id)`는 경량 호출 설명만 제공한다. 별도 review/build 파일을 생성하지 않는다.
 
-**아직 없는 목표:** `capability`/native `Application` 등록, 전체 schema를 나열하지 않는 MCP 응답 정의. 해당 예시는 설계용으로 표시한다. 기존 Runtime/MCP의 describe와 도구 목록은 이번 P0-1에서 변경하지 않았다.
+**P0-2에서 추가한 구현:** `@capability`와 `Application`이 명시적으로 등록한 동기 Python 함수의 타입 힌트·TypedDict에서 schema를 만들고 같은 형식으로 호출한다.
+
+**아직 없는 목표:** 전체 schema를 나열하지 않는 MCP 응답 정의. 기존 Runtime/MCP의 describe와 도구 목록은 이번 P0-2에서 변경하지 않았다.
 
 ## 3. importer·converter·protocol·runtime의 역할
 
@@ -336,11 +340,11 @@ def find_order_in_legacy(order_id, caller):
     return legacy_repository.load_visible_to(order_id, caller)
 ```
 
-다음은 **계획된 등록 인터페이스**다. 수동 wrapper 하나로 입력 이름과 공개 결과를 분명히 한다.
+다음은 **P0-2에서 구현한 등록 인터페이스**다. 수동 wrapper 하나로 입력 이름과 공개 결과를 분명히 한다.
 
 ```python
 from typing import TypedDict
-from a2api import capability, Application  # 아직 구현하지 않은 목표 API
+from a2api import capability, Application  # P0-2 명시적 함수 등록
 from a2api import ExecutionContext        # 기존 호스트 context 재사용
 
 class OrderView(TypedDict):

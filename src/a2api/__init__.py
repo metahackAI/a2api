@@ -12,8 +12,10 @@ from .openapi_dependencies import dependency_index, diff_openapi
 from .regeneration import IncrementalBuild, regenerate
 from .reapproval import prepare_review, approve_review, write_review
 from .conversion import ConvertedAPI, convert
+from .native import Application, capability
 
 __all__ = ["A2APIError", "Capability", "Catalog", "ExecutionContext", "HTTPAdapter", "HTTPHeaderParameter", "HTTPQueryParameter", "HTTPResponse", "HTTPRoute",
            "Runtime", "compile_contract", "load_contract", "BuildResult", "build_contracts", "load_build", "load_review",
            "source_digest", "write_build", "HTTPDeployment", "ReviewedHTTPAdapter", "dependency_index", "diff_openapi",
-           "IncrementalBuild", "regenerate", "prepare_review", "approve_review", "write_review", "ConvertedAPI", "convert"]
+           "IncrementalBuild", "regenerate", "prepare_review", "approve_review", "write_review", "ConvertedAPI", "convert",
+           "Application", "capability"]
