@@ -2,6 +2,8 @@
 
 구현일: 2026-10-29. operation별 의존성 fingerprint를 비교하고, 영향을 받는 업무 capability만 `requires_review`로 표시한다. 기존 검토 JSON을 수정하거나 새 원본을 자동 승인하지 않는다.
 
+선택적인 변경 관리 기능의 구현 안내다. [현재 제품 방향](00-product-direction.ko.md)에서는 간편한 전환·첫 호출의 선행 절차로 요구하지 않는다.
+
 ## 빠른 검증
 
 ```bash

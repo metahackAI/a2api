@@ -1,8 +1,15 @@
 # a2api
 
-다양한 언어와 환경에서 구현한 API를 에이전트가 **찾고, 조합하고, 실행하고, 결과를 사용자에게 설명할 수 있도록** 만드는 계약 및 런타임 라이브러리.
+기존 API·함수를 에이전트가 **찾고 호출할 수 있는 공통 인터페이스로 전환하는 프로토콜과 라이브러리**.
 
-현재는 **Python 조회 전용 MVP**다. Capability IR, 계약 검증기, HTTP adapter, `discover / describe / invoke`, 주문·배송 샘플 API, HTTP gateway, **stdio MCP 브리지**, **OpenAPI importer**, **검토 설정과 계약 빌더**를 제공한다. 명세에서 IR 초안을 생성하고, 검토한 매핑·권한·업무 정의로 조회 실행 계약을 빌드한다. 변경 업무 실행 정책은 후속 범위다.
+## 현재 개발 기준
+
+목표 사용 흐름은 **OpenAPI/등록한 코드 → 변환 → 바로 호출**이다. 전체 실행 계약과 LLM용 호출 설명을 구분하고, 검토·빌드·변경·재승인을 첫 호출의 필수 절차로 만들지 않는다.
+
+- [설계 방향·코드/OpenAPI 전환 예제·LLM 호출 전체 흐름](docs/00-product-direction.ko.md)
+- [이 문서에 따른 개발 계획과 범위](docs/03-roadmap-and-evaluation.ko.md)
+
+**이 방향의 간편 `convert`/코드 등록 API는 아직 구현 전이다.** 현재 소스는 Python 조회 MVP이며, HTTP adapter·OpenAPI importer·전체 Capability IR·검증기·discover/describe/invoke·MCP bridge와 선택적인 검토/변경 관리 기능을 포함한다. 아래 명령은 현재 실행 가능한 예제다. 문서의 기능 목록은 모두 따라야 할 사용 순서가 아니다.
 
 HTTP 어댑터는 **GET/HEAD/POST/PUT/PATCH/DELETE, JSON 본문, 명시적인 2xx·빈 응답, 호스트 인증 주입**을 지원한다. 활성 MVP runtime은 GET/HEAD 조회 정책을 적용하며, 다른 메서드의 import와 transport 검증은 비활성 계약으로 진행한다. [HTTP 어댑터 안내](docs/07-http-adapter.ko.md)를 참고한다.
 
@@ -51,7 +58,7 @@ MCP 호스트가 실행할 명령은 `python -m a2api mcp`다. `a2api.discover`,
 
 `mcp-demo`는 공식 SDK 클라이언트가 실제 stdio 서버를 별도 프로세스로 실행해 세 도구를 호출한다. 기본 주문의 조회 결과는 배송 두 건, backend HTTP 호출은 3회다. 에이전트 연결 설정과 라이브러리 사용은 [MCP 브리지 안내](docs/05-mcp-bridge.ko.md)를 참고한다.
 
-## 대규모 OpenAPI 가져오기
+## 현재 importer: 대규모 OpenAPI 가져오기
 
 OpenAPI 3.0/3.1 JSON·YAML에서 Capability IR과 HTTP 바인딩 초안을 생성한다. 공식 GitHub REST 전체 명세 **827 paths / 1,254 operations**를 고정 샘플로 포함했다. 기본 GET 선택은 633개를 변환하고, `--methods GET HEAD POST PUT PATCH DELETE`를 지정하면 1,228개를 변환한다. 미선택·미지원 operation은 사유를 보고한다. 생성물은 비활성 초안이며 담당자의 업무·권한·출력 검토 후 실행 계약을 작성한다.
 
@@ -63,7 +70,7 @@ python -m a2api import-openapi examples/github-openapi/api.github.com.json.gz \
 
 출력 폴더의 `report.json`과 `contracts/`에서 결과를 확인한다. 기존 출력 폴더는 덮어쓰지 않는다. 지원 기능, 검증 결과와 실제 공개 API 검증 스크립트는 [OpenAPI importer 안내](docs/06-openapi-importer.ko.md)에 정리했다.
 
-## 검토 설정으로 계약 빌드
+## 선택 관리 기능: 검토 설정으로 계약 빌드
 
 주문·배송 OpenAPI → import → 검토 설정 → 실행 계약 → MCP 전체 경로를 검증한다.
 
@@ -74,7 +81,7 @@ python -m a2api review-demo
 
 일반 명령은 `python -m a2api build --imports <import-directory> --review <review.json> --output <new-directory>`다. 원본·바인딩 해시, 미검토 설정, 미지원 projection과 권한 검사 누락을 검사한다. import 산출물과 검토 파일은 보존하며, 생성 묶음은 로드 시 다시 빌드해 검증한다. [검토 빌더 안내](docs/08-review-builder.ko.md)에 샘플 설정과 단계별 실행을 정리했다.
 
-## OpenAPI 변경 영향과 증분 재생성
+## 선택 관리 기능: 변경 영향·증분·재승인
 
 operation과 전이적 참조 schema의 변경을 추적해 영향받는 capability만 재검토 대상으로 표시한다. 기존 검토 설정을 보존하고 무관한 계약은 바이트 그대로 재사용한다.
 
@@ -98,9 +105,11 @@ python -m a2api regenerate --previous approved-build --source new.openapi.json -
 신규:   capability 계약 작성 → 구현·계약 검증 ────────────────┘
 ```
 
-OpenAPI, Arazzo, MCP 등 기존 표준을 활용한다. a2api의 차별점은 업무 계약을 실행 규칙과 검증까지 연결하는 데 둔다.
+OpenAPI·JSON Schema·MCP를 재사용한다. 여러 API의 업무 조립은 선택이며, 단순 API도 1:1 전환해 호출할 수 있게 한다. 최초의 넓은 아키텍처와 전체 프로토콜 초안보다 위의 현재 개발 기준을 우선한다.
 
 ## 문서
+
+현재 기준은 [제품 방향과 전환·호출 설계](docs/00-product-direction.ko.md), [개발 계획](docs/03-roadmap-and-evaluation.ko.md)이다. 아래는 설계 배경과 기존 구현의 참고 문서이며 순서대로 실행할 작업 목록이 아니다.
 
 1. [API 분석과 아키텍처](docs/01-architecture.ko.md): 전통적 개발 방식, 대규모 도구 호출의 문제, 그래프와 native 개발 비교, 레거시 전환 방법.
 2. [프로토콜 초안](docs/02-protocol-draft.ko.md): 계약 필드, 검색·설명·실행 인터페이스, 오류·상태·권한·결과 표시 규칙.

@@ -2,6 +2,8 @@
 
 구현일: 2026-10-29. 비활성 import IR과 별도의 검토 JSON에서 실행 가능한 조회 capability와 재검증 가능한 빌드 묶음을 생성한다.
 
+현재 방향에서 이 문서는 선택적인 전체 계약 관리 경로의 구현 안내다. 간편 전환·호출 모듈의 개발 기준은 [제품 방향](00-product-direction.ko.md)을 따른다. 모든 API의 첫 호출에 이 절차를 요구하지 않는 방향으로 정리한다.
+
 ```text
 OpenAPI → import-openapi → 비활성 source IR ─┐
                                            ├→ build → mvp 실행 계약 → MCP discover/describe/invoke

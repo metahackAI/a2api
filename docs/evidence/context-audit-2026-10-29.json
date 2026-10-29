@@ -1,0 +1,23 @@
+{
+  "encoding": "UTF-8 compact JSON, ensure_ascii=False, sorted keys, no JSON-RPC framing",
+  "sourceOpenapiBytes": 2028,
+  "currentFullCapabilityBytes": 6990,
+  "currentDescribeResponseBytes": 7096,
+  "proposedDescriptorBytes": 1356,
+  "currentMcpToolsListBytes": {
+    "1": 6995,
+    "10": 23420,
+    "100": 187760
+  },
+  "date": "2026-10-29",
+  "sourceCommit": "fc4b40b288a3a4a8ea2334cf5ffc883e5fdbed54",
+  "python": "3.12.14",
+  "mcp": "2.3.0",
+  "jsonschema": "4.26.0",
+  "notes": [
+    "Byte counts are not model token counts or LLM success measurements.",
+    "1/10/100 capabilities repeat the same shipping schema under synthetic IDs.",
+    "The proposed descriptor is a field projection for design comparison; runtime behavior is unchanged.",
+    "Text content and structured content rendering depends on the MCP host; no automatic 2x token claim."
+  ]
+}
