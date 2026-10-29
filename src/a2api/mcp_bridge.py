@@ -20,20 +20,24 @@ from .api import METHODS, dispatch, input_schema
 from .errors import A2APIError
 from .ir import ExecutionContext
 from .mcp_schemas import output_schemas
+from .mcp_application import DirectApplications, agent_descriptor
 from .runtime import Runtime
+from .schema import validate_value
 
 _DESCRIPTIONS = {
     "discover": "Find capabilities available to this caller using task keywords. Returns IDs, versions, catalogVersion and an optional pagination cursor. Start here.",
-    "describe": "Inspect a capability's exact input/output schemas, intended use and execution rules. Use the ID and version returned by a2api.discover.",
-    "invoke": "Execute a read-only capability with its exact ID, version and catalogVersion. Supply business arguments under input, following a2api.describe. Reports data, completeness and evidence; errors require correction before retrying.",
+    "describe": "Get only the selected capability's purpose, exact input/output schemas and read effect. Use its ID and version from a2api.discover.",
+    "invoke": "Execute a read-only capability with its ID, version and catalogVersion. Follow a2api.describe for business arguments under input. The server validates the selected business schema; this tool advertises only the common result envelope.",
 }
 
 
-def create_mcp_server(runtime: Runtime, context: ExecutionContext) -> Server:
-    """Create a stdio-compatible server. Context comes from the host, never tools."""
+def create_mcp_server(runtime, context: ExecutionContext) -> Server:
+    """Bind a Runtime, direct app or list of direct apps. Context is host-owned."""
     if not isinstance(context, ExecutionContext):
         raise TypeError("A trusted ExecutionContext is required")
-    schemas = output_schemas(runtime, context)
+    if not isinstance(runtime, Runtime):
+        runtime = DirectApplications(runtime)
+    schemas = output_schemas()
     for schema in schemas.values():
         Draft202012Validator.check_schema(schema)
     tools = [types.Tool(
@@ -60,6 +64,13 @@ def create_mcp_server(runtime: Runtime, context: ExecutionContext) -> Server:
             payload = await anyio.to_thread.run_sync(partial(
                 dispatch, runtime, method, params.arguments if params.arguments is not None else {}, context,
             ))
+            if method == "describe":
+                payload = {**payload, "capability": agent_descriptor(payload["capability"])}
+            if method == "invoke" and payload.get("status") == "succeeded":
+                arguments = params.arguments
+                description = runtime.describe(arguments["id"], arguments["version"], context)
+                validate_value(description["capability"]["outputSchema"], payload.get("data"),
+                               code="SCHEMA_MISMATCH", status=502)
             failed = payload.get("status") == "failed"
             if not Draft202012Validator(schemas[method]).is_valid(payload):
                 raise A2APIError("SCHEMA_MISMATCH", "MCP result does not match its advertised output schema.", status=502)
@@ -81,7 +92,7 @@ def create_mcp_server(runtime: Runtime, context: ExecutionContext) -> Server:
     )
 
 
-async def serve_stdio(runtime: Runtime, context: ExecutionContext) -> None:
+async def serve_stdio(runtime, context: ExecutionContext) -> None:
     server = create_mcp_server(runtime, context)
     async with stdio_server() as (read, write):
         await server.run(read, write, server.create_initialization_options())

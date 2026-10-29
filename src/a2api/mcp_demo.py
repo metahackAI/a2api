@@ -35,6 +35,6 @@ async def run_demo(order_id: str = "ORD-1001", sample_user: str = "alice", build
         return {
             "transport": "stdio", "tools": [tool.name for tool in tools.tools], "discover": found,
             "describe": {"id": item["id"], "inputSchema": described.structured_content["capability"]["inputSchema"],
-                         "provenance": described.structured_content["capability"]["provenance"]},
+                         "outputSchema": described.structured_content["capability"]["outputSchema"]},
             "isError": invoked.is_error, "invoke": invoked.structured_content,
         }

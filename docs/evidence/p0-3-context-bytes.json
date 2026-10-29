@@ -1,0 +1,37 @@
+{
+  "encoding": "Compact UTF-8 JSON; structured payloads; no JSON-RPC framing, initialization or duplicate text content",
+  "scenario": "One cold order lookup; 1/100 synthetic capabilities share the same typed Order function; direct-tool baseline is constructed from identical business schemas and result data",
+  "modelEvaluation": false,
+  "rows": [
+    {
+      "capabilities": 1,
+      "directToolDefinitionsBytes": 645,
+      "a2apiToolDefinitionsBytes": 6504,
+      "directRequestReplyBytes": 103,
+      "a2apiDiscoverDescribeInvokeBytes": 1388,
+      "directTotalBytes": 748,
+      "a2apiTotalBytes": 7892
+    },
+    {
+      "capabilities": 100,
+      "directToolDefinitionsBytes": 57858,
+      "a2apiToolDefinitionsBytes": 6504,
+      "directRequestReplyBytes": 103,
+      "a2apiDiscoverDescribeInvokeBytes": 1506,
+      "directTotalBytes": 57961,
+      "a2apiTotalBytes": 8010
+    }
+  ],
+  "date": "2026-10-29",
+  "python": "3.12.14",
+  "mcp": "2.3.0",
+  "jsonschema": "4.26.0",
+  "function": "lookup(orderId: str) -> TypedDict(orderId: str, state: str)",
+  "input": {
+    "orderId": "ORD-1001"
+  },
+  "result": {
+    "orderId": "ORD-1001",
+    "state": "shipped"
+  }
+}

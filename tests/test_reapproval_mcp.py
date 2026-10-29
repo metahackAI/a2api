@@ -69,7 +69,8 @@ class ReapprovalStdioTests(unittest.IsolatedAsyncioTestCase):
                 current = discovery.structured_content
                 self.assertEqual({row['id'] for row in current['capabilities']}, {'order.summary', 'order.shipping_status'})
                 described = await client.call_tool('a2api.describe', {'id': 'order.shipping_status', 'version': '0.1.0'})
-                self.assertEqual(described.structured_content['capability']['provenance']['reviewedBy'], 'MCP fixture suite')
+                self.assertNotIn('provenance', described.structured_content['capability'])
+                self.assertIn('returned', described.structured_content['capability']['outputSchema']['properties']['shipments']['items']['properties']['status']['enum'])
                 arguments = {'id': 'order.shipping_status', 'version': '0.1.0', 'catalogVersion': catalog['catalogVersion'],
                              'input': {'orderId': 'ORD-1001'}}
                 stale = await client.call_tool('a2api.invoke', arguments)

@@ -1,12 +1,6 @@
-"""MCP result schemas, including each visible capability's business output."""
+"""Catalog-independent MCP envelopes. Business schemas stay in describe/runtime."""
 
 from __future__ import annotations
-
-from copy import deepcopy
-
-from .errors import A2APIError
-from .ir import ExecutionContext, thaw
-from .runtime import Runtime
 
 
 def _object(properties: dict, required: list[str] | None = None) -> dict:
@@ -14,7 +8,9 @@ def _object(properties: dict, required: list[str] | None = None) -> dict:
             "required": list(properties) if required is None else required, "additionalProperties": False}
 
 
-def output_schemas(runtime: Runtime, context: ExecutionContext) -> dict[str, dict]:
+def output_schemas(runtime=None, context=None) -> dict[str, dict]:
+    # Arguments are retained for callers of the previous helper. Neither a
+    # catalog nor its individual schemas are part of the advertised envelopes.
     string = {"type": "string"}
     problem = _object({
         "type": string, "title": string, "status": {"type": "integer"}, "detail": string,
@@ -25,28 +21,26 @@ def output_schemas(runtime: Runtime, context: ExecutionContext) -> dict[str, dic
         "step": string, "itemIndex": {"type": "integer", "minimum": 0}, "operation": string,
         "source": string, "observedAt": {"type": "string", "format": "date-time"},
     })}
-    common = {
+    metadata = {
         "capability": string, "version": string, "catalogVersion": string,
-        "executionId": string, "requestId": string,
-        "evidence": evidence, "stats": _object({"backendCalls": {"type": "integer", "minimum": 0}}),
+        "executionId": string, "requestId": string, "evidence": evidence,
+        "stats": _object({"backendCalls": {"type": "integer", "minimum": 0}}),
     }
-    invocation_variants = [preflight_error, _object({
-        **common, "status": {"const": "failed"}, "error": problem,
-        "completeness": _object({"complete": {"const": False}}),
-    })]
-    for capability in runtime.catalog.capabilities:
-        try:
-            visible = runtime.catalog.get(capability.id, capability.version, context)
-        except A2APIError as error:
-            if error.code == "NOT_FOUND":
-                continue
-            raise
-        invocation_variants.append(_object({
-            **common, "capability": {"const": visible.id}, "version": {"const": visible.version},
-            "status": {"const": "succeeded"}, "data": thaw(visible.output_schema),
-            "completeness": _object({"complete": {"const": True}}),
-            "presentation": {"type": "object"},
-        }))
+    success = _object({
+        **metadata, "status": {"const": "succeeded"}, "data": {},
+        "completeness": _object({"complete": {"const": True}, "scope": string}, ["complete"]),
+        "presentation": {"type": "object"},
+        "httpStatus": {"type": "integer", "minimum": 200, "maximum": 299},
+    }, ["status", "data", "completeness"])
+    failure = _object({
+        **metadata, "status": {"const": "failed"}, "error": problem,
+        "completeness": _object({"complete": {"const": False}}, ["complete"]),
+    }, ["status", "error", "completeness"])
+    descriptor = _object({
+        "id": string, "version": string, "summary": string,
+        "effects": _object({"kind": {"const": "read"}}),
+        "inputSchema": {"type": "object"}, "outputSchema": {"type": "object"},
+    })
     successes = {
         "discover": _object({
             "catalogVersion": string,
@@ -56,8 +50,8 @@ def output_schemas(runtime: Runtime, context: ExecutionContext) -> dict[str, dic
             })},
             "nextCursor": {"type": ["string", "null"]},
         }),
-        "describe": _object({"catalogVersion": string, "capability": {"type": "object"}}),
+        "describe": _object({"catalogVersion": string, "capability": descriptor}),
     }
     result = {name: {"type": "object", "oneOf": [schema, preflight_error]} for name, schema in successes.items()}
-    result["invoke"] = {"type": "object", "oneOf": invocation_variants}
-    return deepcopy(result)
+    result["invoke"] = {"type": "object", "oneOf": [preflight_error, failure, success]}
+    return result

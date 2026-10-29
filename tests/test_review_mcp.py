@@ -11,6 +11,7 @@ import tempfile
 import unittest
 
 from jsonschema import Draft202012Validator
+from a2api import load_build
 
 ROOT = Path(__file__).resolve().parents[1]
 HAS_MCP = importlib.util.find_spec('mcp') is not None
@@ -55,9 +56,10 @@ class ReviewedStdioTests(unittest.IsolatedAsyncioTestCase):
             item = discovery['capabilities'][0]
             described = await client.call_tool('a2api.describe', {'id': item['id'], 'version': item['version']})
             manifest = described.structured_content['capability']
-            self.assertEqual(manifest['schemaProfile'], 'mvp')
-            self.assertEqual(manifest['provenance']['reviewSha256'], self.summary['reviewSha256'])
-            self.assertEqual(manifest['provenance']['sourceSha256'], self.summary['sourceSha256'])
+            self.assertEqual(set(manifest), {'id', 'version', 'summary', 'effects', 'inputSchema', 'outputSchema'})
+            full = load_build(self.built).capabilities[0].describe()
+            self.assertEqual(full['provenance']['reviewSha256'], self.summary['reviewSha256'])
+            self.assertEqual(full['provenance']['sourceSha256'], self.summary['sourceSha256'])
             for order, calls, shipment_count in [('ORD-1001', 3, 2), ('ORD-1002', 1, 0)]:
                 invoked = await client.call_tool('a2api.invoke', {'id': item['id'], 'version': item['version'],
                     'catalogVersion': discovery['catalogVersion'], 'input': {'orderId': order}})
@@ -101,4 +103,5 @@ class ReviewedStdioTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['build']['enabled'], 1)
         self.assertEqual(result['mcp']['invoke']['stats']['backendCalls'], 3)
         self.assertEqual(result['mcp']['invoke']['status'], 'succeeded')
-        self.assertEqual(result['mcp']['describe']['provenance']['reviewSha256'], result['build']['reviewSha256'])
+        self.assertIn('outputSchema', result['mcp']['describe'])
+        self.assertNotIn('provenance', result['mcp']['describe'])

@@ -2,7 +2,7 @@
 
 갱신일: 2026-10-29 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
 
-과거의 넓은 로드맵을 이 계획으로 대체했다. 현재 **P0-1과 P0-2 구현 완료**이며 [OpenAPI 호출](11-in-memory-conversion.ko.md), [Python 함수 등록](12-python-functions.ko.md) 안내가 있다. P0-3은 계획이며 착수하지 않았다.
+과거의 넓은 로드맵을 이 계획으로 대체했다. 현재 **P0-1/2/3 구현 완료**이며 [OpenAPI 호출](11-in-memory-conversion.ko.md), [Python 함수 등록](12-python-functions.ko.md), [경량 MCP 연결](13-lightweight-mcp.ko.md) 안내가 있다.
 
 ## 1. 목표와 기본 사용 경험
 
@@ -23,9 +23,9 @@ OpenAPI/등록한 코드 → convert → invoke
 |---|---|---|
 | **P0-1 완료** | **OpenAPI의 선택한 GET/HEAD를 메모리에서 변환해 호출** | 작은 descriptor와 서버 binding을 구분한다. `convert(source, operations=..., deployment=...)`가 반환한 객체로 주문·배송 원자 API를 호출한다. 별도 review/build/snapshot이 필수가 아니다. 기존 인증·입력·응답 검증은 유지한다. |
 | **P0-2 완료** | **명시적으로 등록한 Python 함수·신규 API도 같은 방식으로 호출** | 지원하는 signature/TypedDict 등에서 schema를 생성하고 callable을 연결한다. 같은 프로토콜로 기존 함수 wrapper와 신규 함수가 모두 실행된다. 지원 불가 타입은 명시적 schema를 요구한다. |
-| **P0-3** | **전환한 객체를 MCP에서 작은 설명으로 호출하고 사용자 가이드 완성** | 실제 stdio에서 discover/describe/invoke를 실행한다. MCP tools/list가 전체 business schema를 나열하지 않는다. 기본 describe는 agent descriptor만 반환한다. 일반 앱 연결 예제와 현재 실행 가능한 시작 문서를 제공한다. |
+| **P0-3 완료** | **전환한 객체를 MCP에서 작은 설명으로 호출하고 사용자 가이드 완성** | 실제 stdio에서 discover/describe/invoke를 실행한다. MCP tools/list가 전체 business schema를 나열하지 않는다. 기본 describe는 agent descriptor만 반환한다. 일반 앱 연결 예제와 현재 실행 가능한 시작 문서를 제공한다. |
 
-이번 구현은 **P0-2 하나**로 제한했다. 후속 범위는 사용자의 다음 지시를 따르며 P0-3이나 운영 기능을 자동으로 착수하지 않는다.
+이번 구현은 **P0-3 하나**로 제한했다. 후속 범위는 사용자의 다음 지시를 따르며 운영 기능이나 새 단계를 자동으로 착수하지 않는다.
 
 ### 기존 코드의 처리
 

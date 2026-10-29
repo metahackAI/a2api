@@ -137,6 +137,10 @@ class Application:
     def describe(self, capability_id: str) -> dict:
         return json.loads(self._get(capability_id).descriptor_json)
 
+    def descriptors(self) -> tuple[dict, ...]:
+        """Host-side catalog snapshot; not the MCP tools/list payload."""
+        return tuple(self.describe(identifier) for identifier in self._calls)
+
     def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:
         try:
             definition = self._get(capability_id)

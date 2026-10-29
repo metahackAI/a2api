@@ -1,10 +1,12 @@
 # a2api 방향 재정렬: 전환해서 바로 호출하는 프로토콜 모듈
 
-작성일: 2026-10-29 · 상태: 개발 기준 설계 · P0-1/P0-2 구현 완료, P0-3 미착수
+작성일: 2026-10-29 · 상태: 개발 기준 설계 · P0-1/P0-2/P0-3 구현 완료
 
 이 문서와 [개발 계획](03-roadmap-and-evaluation.ko.md)이 이후 개발의 기준이다. 최초 아키텍처·프로토콜 초안은 배경 자료로 보존한다. P0-1의 실제 사용법은 [메모리 전환 안내](11-in-memory-conversion.ko.md)에 있다. 기존 구현을 삭제하거나 전체 계약의 승인 규칙을 우회하지 않는다.
 
 P0-2의 현재 사용법은 [Python 함수·신규 API 등록](12-python-functions.ko.md)에 있다.
+
+두 경로의 실제 stdio 연결과 공통 도구 경량화는 [P0-3 MCP 안내](13-lightweight-mcp.ko.md)에 있다.
 
 ## 1. 제품의 목적과 순서
 
@@ -51,7 +53,7 @@ HTTP adapter, importer의 schema 처리, 실제 MCP 연결, 입력·응답 검�
 
 **P0-2에서 추가한 구현:** `@capability`와 `Application`이 명시적으로 등록한 동기 Python 함수의 타입 힌트·TypedDict에서 schema를 만들고 같은 형식으로 호출한다.
 
-**아직 없는 목표:** 전체 schema를 나열하지 않는 MCP 응답 정의. 기존 Runtime/MCP의 describe와 도구 목록은 이번 P0-2에서 변경하지 않았다.
+**P0-3에서 추가한 구현:** 두 경로를 같은 MCP bridge에 연결하며 도구 목록은 공통 schema만 제공한다. MCP describe는 경량 descriptor를 반환하고 실제 업무 출력은 선택한 schema로 서버에서 검증한다. 전체 Runtime 계약의 라이브러리 조회는 유지한다.
 
 ## 3. importer·converter·protocol·runtime의 역할
 
@@ -556,7 +558,7 @@ LLM은 이 데이터로 “배송 중이며 예정 도착 시각은 …, 조회 
 
 ## 10. 계약이 원본보다 길어지는 문제: 측정과 수정 방향
 
-### 현재 코드에서 확인한 사실
+### P0-3 이전 코드에서 확인한 사실
 
 - `Capability.describe()`는 전체 `manifest_json`을 반환하고 `Catalog.describe()`도 그 전체를 내보낸다.
 - `mcp_schemas.output_schemas()`는 노출 가능한 capability마다 성공 응답 schema를 공통 `invoke`의 `oneOf`에 추가한다. 도구 세 개라는 사실만으로 문맥 비용이 일정해지지 않는다.
@@ -578,12 +580,14 @@ LLM은 이 데이터로 “배송 중이며 예정 도착 시각은 …, 조회 
 
 1,356바이트 값은 필드 투영의 크기 비교이며 실제 경량 API 구현 결과가 아니다. 토큰 수·호스트 직렬화·대화 누적량·LLM 성공률·지연을 측정하지 않았다. “토큰 N% 절감”, “정확도 향상” 같은 표현으로 바꾸지 않는다.
 
-### 개발에서 바꿀 것
+### P0-3에서 반영한 것
 
 1. describe 기본값은 agent descriptor로 제한하고 전체 실행 계약은 개발자용 조회에 남긴다.
 2. MCP tools/list의 공통 invoke 출력은 고정 envelope로 만들고 모든 business schema를 나열하지 않는다. `data`의 실제 schema는 선택한 descriptor와 서버 validator가 검사한다.
 3. discover는 제한된 후보 요약만 반환한다. 카탈로그 전체를 초기 문맥에 넣지 않는다.
 4. 결과는 공개한 필드·필요한 근거만 반환한다. UI 전용 표시 설정과 debug 기록은 호스트 경로에서 사용한다.
+
+P0-3은 새 직접 호출 객체의 작은 결과를 유지하고, 기존 Runtime invoke의 근거·표시·stats는 호환을 위해 보존한다. 현재 구현과 새 비용 비교는 [P0-3 사용 안내](13-lightweight-mcp.ko.md)에 있다. 아래 재현 코드는 현재 코드에서는 바뀐 MCP 목록 크기를 출력하며 과거 표는 당시 commit의 기록이다.
 
 공통 invoke의 `input`/`data`가 일반 객체/JSON으로 표현되면 MCP 공통 schema만으로 개별 업무 타입을 알 수 없다. 그래서 선택한 describe와 runtime 검증은 남겨야 한다. 출력 schema를 빼고 검증까지 약화하는 방식으로 줄이지 않는다.
 

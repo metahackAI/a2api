@@ -2,6 +2,8 @@
 
 구현일: 2026-10-28 · 공식 Python MCP SDK 2.3.0으로 검증 · stdio transport
 
+P0-3에서 변환 객체와 Python 함수 연결 및 공통 schema 경량화를 추가했다. 새 앱의 연결·실행 예제와 비용 측정은 [경량 MCP 사용 안내](13-lightweight-mcp.ko.md)를 참고한다.
+
 ## 설치와 재현
 
 Python 3.11+ 가상환경에서 저장소 루트를 기준으로 실행한다.
@@ -68,14 +70,14 @@ python -m a2api mcp-demo --order-id ORD-1002
 | 도구 | arguments | 결과 |
 |---|---|---|
 | `a2api.discover` | 선택: `query`, `limit`, `cursor` | 권한에 맞는 기능 요약, ID·version, catalogVersion, nextCursor |
-| `a2api.describe` | 필수: `id`, `version` | 전체 capability 계약과 입력·출력 schema |
+| `a2api.describe` | 필수: `id`, `version` | 선택한 capability의 짧은 설명과 입력·출력 schema |
 | `a2api.invoke` | 필수: `id`, `version`, `catalogVersion`, `input`; 선택: `requestId` | 기존 runtime의 성공/실패 envelope |
 
 예를 들어 에이전트는 `a2api.discover({"query":"배송 조회"})`로 기능과 카탈로그 버전을 얻고, `a2api.describe`에서 정확한 입력 형식을 확인한다. 그다음 발견한 ID·version·catalogVersion을 그대로 사용해 `input: {"orderId":"ORD-1001"}`을 전달한다.
 
 각 도구는 `inputSchema`, `outputSchema`, 읽기 전용 annotation을 제공한다. HTTP와 MCP의 요청 계약은 `src/a2api/api.py`에서 공유한다. 정의하지 않은 필드와 잘못된 타입은 거부한다. 도구 arguments로 actor·tenant·scope·backend 주소를 설정할 수 없다. 요청 `_meta`도 인증 context를 바꾸는 데 사용하지 않는다.
 
-`invoke.outputSchema`는 caller에게 보이는 capability별 ID·version과 업무 `outputSchema`를 기존 결과 envelope에 결합한다. 숨겨진 capability는 성공 variant에 포함하지 않는다. bridge는 반환값을 광고한 schema로 검사하고, runtime도 backend 단계와 최종 업무 데이터를 검사한다.
+`invoke.outputSchema`는 공통 envelope만 기술하고 capability별 ID·version·업무 schema를 나열하지 않는다. 선택한 업무 schema는 describe에서 제공하고, bridge와 runtime이 실제 성공 데이터를 검증한다. 전체 실행 계약과 검토 이력은 기존 라이브러리 API에서 확인하며 MCP describe로 전송하지 않는다.
 
 ## 구조화 결과와 오류
 
@@ -114,7 +116,7 @@ anyio.run(serve_stdio, runtime, context)
 
 ## 검증
 
-Python 3.12, MCP SDK 2.3.0, jsonschema 4.26.0에서 총 **60개 테스트**가 통과했다. 기존 계약·HTTP 테스트 40개와 MCP 테스트 20개를 포함한다.
+초기 구현에서는 Python 3.12, MCP SDK 2.3.0, jsonschema 4.26.0에서 총 **60개 테스트**가 통과했다. 현재 P0-3 검증은 [별도 사용 안내](13-lightweight-mcp.ko.md)에 정리한다.
 
 MCP 테스트에는 공식 클라이언트의 실제 subprocess stdio 통신, 이전 initialize handshake 방식, 목록 안정성, 구조화/텍스트 일치, 업무 출력 schema, 빈 배송, caller별 scope·객체 접근, context 인자 위조 거부, 카탈로그 버전 불일치, backend schema 오류, 오류 코드, stdout 분리와 EOF 종료를 포함한다. 외부 LLM이나 특정 에이전트 앱의 UI에서 수행한 평가를 뜻하지 않는다.
 

@@ -2,6 +2,8 @@
 
 구현 범위: 선택한 OpenAPI GET/HEAD operation의 1:1 전환과 라이브러리 호출. review/build 파일·중간 산출물·별도 registry가 필요하지 않다. P0-2 코드 등록과 P0-3 MCP 경량화는 이 변경에 포함하지 않는다.
 
+이후 구현한 두 객체의 MCP 연결은 [P0-3 사용 안내](13-lightweight-mcp.ko.md)를 따른다.
+
 ## 바로 실행
 
 저장소 루트에서 기본 패키지만 설치한다. 이 예제에 MCP·LLM 키는 필요 없다.

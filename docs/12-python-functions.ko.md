@@ -2,6 +2,8 @@
 
 P0-1과 같은 `a2api-call/0.1` descriptor와 `describe(id)` / `invoke(id, input, context=...)`를 사용한다. 타입 힌트·TypedDict에서 schema를 만들고 등록한 동기 조회 함수를 직접 호출한다. 파일 생성·review/build·모듈 스캔은 필요 없다. P0-3 MCP 경량화는 이번 범위에 포함하지 않는다.
 
+이후 구현한 두 객체의 MCP 연결은 [P0-3 사용 안내](13-lightweight-mcp.ko.md)를 따른다.
+
 ## 실행 예제
 
 저장소 루트에서 기본 패키지만 설치한다.

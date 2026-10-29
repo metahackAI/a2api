@@ -91,7 +91,10 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
             Draft202012Validator(description['capability']['outputSchema']).validate(result['data'])
             invalid = copy.deepcopy(result)
             invalid['data']['shipments'][0]['status'] = 'made-up-status'
-            self.assertFalse(Draft202012Validator(tools['a2api.invoke'].output_schema).is_valid(invalid))
+            self.assertTrue(Draft202012Validator(tools['a2api.invoke'].output_schema).is_valid(invalid))
+            self.assertFalse(Draft202012Validator(description['capability']['outputSchema']).is_valid(invalid['data']))
+            self.assertNotIn('provenance', description['capability'])
+            self.assertNotIn('operations', description['capability'])
 
     async def test_empty_shipping_collection(self):
         async with self.client() as client:

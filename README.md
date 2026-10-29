@@ -9,7 +9,7 @@
 - [설계 방향·코드/OpenAPI 전환 예제·LLM 호출 전체 흐름](docs/00-product-direction.ko.md)
 - [이 문서에 따른 개발 계획과 범위](docs/03-roadmap-and-evaluation.ko.md)
 
-**P0-1 메모리 `convert → invoke`와 P0-2 Python 함수 등록을 구현했다.** 선택한 OpenAPI GET/HEAD와 등록한 Python 조회 함수를 review/build 파일 없이 직접 호출한다. P0-3 MCP 경량화는 아직 진행하지 않았다. 기존 전체 Capability IR·검증기·discover/describe/invoke·MCP bridge와 선택적인 검토/변경 관리 기능도 보존한다. 문서의 기능 목록은 모두 따라야 할 사용 순서가 아니다.
+**P0-1/2/3을 구현했다.** 선택한 OpenAPI GET/HEAD와 등록한 Python 조회 함수를 review/build 파일 없이 직접 호출하고, 같은 객체를 경량 MCP discover/describe/invoke에 연결한다. 도구 목록에는 개별 API schema를 나열하지 않는다. 기존 전체 Capability IR·검증기·MCP bridge와 선택적인 검토/변경 관리 기능도 보존한다. 문서의 기능 목록은 모두 따라야 할 사용 순서가 아니다.
 
 ## OpenAPI를 바로 호출하기
 
@@ -70,6 +70,15 @@ curl -s http://127.0.0.1:8000/discover \
 전체 HTTP·라이브러리 사용법과 지원 범위는 [MVP 실행 안내](docs/04-mvp.ko.md)를 참고한다. `jsonschema`가 이미 설치된 환경에서는 설치 없이 `PYTHONPATH=src python3 -m a2api demo`도 가능하다.
 
 ## MCP 에이전트 연결
+
+변환한 OpenAPI와 등록한 Python 함수를 함께 호출하려면 다음 예제를 실행한다.
+
+```bash
+python -m pip install -e ".[mcp]"
+python examples/native-orders/mcp_client.py
+```
+
+호스트의 Python 파일에서는 `anyio.run(serve_stdio, app, caller)`로 연결한다. 두 객체는 `[http_api, functions]`로 묶을 수 있다. [호스트 설정·요청 형식·경량화와 비용 측정](docs/13-lightweight-mcp.ko.md)을 참고한다.
 
 선택 의존성을 설치하고 공식 MCP 클라이언트로 전체 흐름을 확인한다.
 
@@ -139,6 +148,8 @@ OpenAPI·JSON Schema·MCP를 재사용한다. 여러 API의 업무 조립은 선
 현재 실행 가능한 간편 전환 경로는 [P0-1 메모리 convert/invoke 안내](docs/11-in-memory-conversion.ko.md)에 있다.
 
 Python 함수와 신규 API는 [P0-2 함수 등록 안내](docs/12-python-functions.ko.md)에 있다.
+
+두 경로의 MCP 연결은 [P0-3 경량 MCP 안내](docs/13-lightweight-mcp.ko.md)에 있다.
 
 1. [API 분석과 아키텍처](docs/01-architecture.ko.md): 전통적 개발 방식, 대규모 도구 호출의 문제, 그래프와 native 개발 비교, 레거시 전환 방법.
 2. [프로토콜 초안](docs/02-protocol-draft.ko.md): 계약 필드, 검색·설명·실행 인터페이스, 오류·상태·권한·결과 표시 규칙.
