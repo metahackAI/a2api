@@ -1,0 +1,509 @@
+{
+  "rawReportSHA256": "63f3a191b83857cb4bc2be7d27d7b7246d8a208f2da6ef7868edef971d37ac1a",
+  "note": "Actual retained model arguments/results; projections here are evidence previews only, not benchmark payload changes. No API/model rerun.",
+  "examples": [
+    {
+      "id": "0/small/repository/a2api",
+      "usage": {
+        "prompt_tokens": 15080,
+        "completion_tokens": 770,
+        "total_tokens": 15850
+      },
+      "modelRequests": 5,
+      "searchCalls": 3,
+      "business": [
+        {
+          "id": "github.repos.get",
+          "input": {
+            "path": {
+              "owner": "psf",
+              "repo": "requests"
+            }
+          },
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "psf/requests",
+            "default_branch": "main",
+            "stargazers_count": 54567,
+            "archived": false
+          }
+        }
+      ],
+      "sampledSearches": [
+        {
+          "query": "github repository default branch stars archived",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "github repository get info default branch stars archived",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "repository get",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get"
+          ],
+          "moreAvailable": true
+        }
+      ],
+      "answer": "{\"repository\": \"psf/requests\", \"defaultBranch\": \"main\", \"stars\": 54567, \"archived\": false}",
+      "originalPassed": true,
+      "reviewedAssessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "psf/requests",
+          "defaultBranch": "main",
+          "stars": 54567,
+          "archived": false
+        }
+      }
+    },
+    {
+      "id": "0/small/branches/ordinary",
+      "usage": {
+        "prompt_tokens": 16695,
+        "completion_tokens": 1063,
+        "total_tokens": 17758
+      },
+      "modelRequests": 5,
+      "searchCalls": 6,
+      "business": [
+        {
+          "id": "github.repos.list_branches",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "status": "succeeded",
+          "dataPreview": [
+            {
+              "name": "master"
+            },
+            {
+              "name": "octocat-patch-1"
+            }
+          ]
+        }
+      ],
+      "sampledSearches": [
+        {
+          "query": "GitHub repository branches list",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "octocat Hello-World branches API",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "GitHub branches list API",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "branches",
+          "selectedIDs": [
+            "github.repos.list_branches"
+          ],
+          "moreAvailable": false
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"page\": 1, \"perPage\": 2, \"branches\": [\"master\", \"octocat-patch-1\"]}",
+      "originalPassed": true,
+      "reviewedAssessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "page": 1,
+          "perPage": 2,
+          "branches": [
+            "master",
+            "octocat-patch-1"
+          ]
+        }
+      }
+    },
+    {
+      "id": "0/small/default_commit/a2api",
+      "usage": {
+        "prompt_tokens": 23539,
+        "completion_tokens": 2155,
+        "total_tokens": 25694
+      },
+      "modelRequests": 5,
+      "searchCalls": 5,
+      "business": [
+        {
+          "id": "github.repos.get",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "id": "github.repos.get_commit",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "heads/master"
+            }
+          },
+          "status": "succeeded",
+          "dataPreview": {
+            "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+            "stats": {
+              "total": 2,
+              "additions": 1,
+              "deletions": 1
+            }
+          }
+        }
+      ],
+      "sampledSearches": [
+        {
+          "query": "GitHub repository info default branch",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "GitHub repository head commit SHA",
+          "selectedIDs": [
+            "github.repos.get_commit",
+            "github.repos.get_latest_release",
+            "github.issues.list_for_repo"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "GitHub repository get info default branch",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "GitHub repo metadata",
+          "selectedIDs": [
+            "github.issues.list_for_repo",
+            "github.pulls.list",
+            "github.repos.get"
+          ],
+          "moreAvailable": true
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"sha\": \"7fd1a60b01f91b314f59955a4e4d4e80d8edf11d\", \"additions\": 1, \"deletions\": 1}",
+      "originalPassed": false,
+      "reviewedAssessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "defaultBranch": "master",
+          "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+          "additions": 1,
+          "deletions": 1
+        }
+      }
+    },
+    {
+      "id": "0/large/repository/a2api",
+      "usage": {
+        "prompt_tokens": 58685,
+        "completion_tokens": 1760,
+        "total_tokens": 60445
+      },
+      "modelRequests": 12,
+      "searchCalls": 12,
+      "business": [],
+      "sampledSearches": [
+        {
+          "query": "github repository default branch stars archived",
+          "selectedIDs": [
+            "github.code_scanning.get_autofix",
+            "github.pulls.get",
+            "github.repos.list_pull_requests_associated_with_commit"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "github repository get info default branch stars archived",
+          "selectedIDs": [
+            "github.pulls.get",
+            "github.actions.get_github_actions_default_workflow_permissions_repository",
+            "github.actions.list_workflow_runs"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "repos get repository",
+          "selectedIDs": [
+            "github.actions.get_actions_cache_list",
+            "github.actions.get_actions_cache_retention_limit_for_repository",
+            "github.actions.get_actions_cache_storage_limit_for_repository"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "repository",
+          "selectedIDs": [
+            "github.actions.get_actions_cache_list",
+            "github.actions.get_actions_cache_retention_limit_for_repository",
+            "github.actions.get_actions_cache_storage_limit_for_repository"
+          ],
+          "moreAvailable": true
+        }
+      ],
+      "answer": "",
+      "originalPassed": false,
+      "reviewedAssessment": {
+        "passed": false,
+        "goalReached": false,
+        "factsMatched": false,
+        "firstAttemptClean": false,
+        "failures": [
+          "ANSWER_VALUES_OR_FORMAT",
+          "GOAL_NOT_REACHED",
+          "HOST:MODEL_TURN_LIMIT"
+        ],
+        "businessCalls": 0,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "unparseable",
+        "expectedAnswer": null
+      }
+    },
+    {
+      "id": "0/large/branches/ordinary",
+      "usage": {
+        "prompt_tokens": 68900,
+        "completion_tokens": 5374,
+        "total_tokens": 74274
+      },
+      "modelRequests": 12,
+      "searchCalls": 28,
+      "business": [
+        {
+          "id": "github.git.list_matching_refs",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "heads"
+            }
+          },
+          "status": "succeeded",
+          "dataPreview": [
+            {
+              "ref": "refs/heads/master"
+            },
+            {
+              "ref": "refs/heads/octocat-patch-1"
+            },
+            {
+              "ref": "refs/heads/test"
+            }
+          ]
+        }
+      ],
+      "sampledSearches": [
+        {
+          "query": "GitHub repository branches list",
+          "selectedIDs": [
+            "github.git.list_matching_refs",
+            "github.migrations.get_import_status",
+            "github.repos.compare_commits"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "octocat Hello-World branches API",
+          "selectedIDs": [
+            "github.git.get_ref",
+            "github.git.list_matching_refs",
+            "github.migrations.get_import_status"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "github repos list branches",
+          "selectedIDs": [
+            "github.git.list_matching_refs",
+            "github.migrations.get_import_status",
+            "github.repos.compare_commits"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "branches pagination",
+          "selectedIDs": [
+            "github.repos.compare_commits",
+            "github.actions.list_concurrency_groups_for_workflow_run",
+            "github.gists.list_public"
+          ],
+          "moreAvailable": true
+        }
+      ],
+      "answer": "",
+      "originalPassed": false,
+      "reviewedAssessment": {
+        "passed": false,
+        "goalReached": false,
+        "factsMatched": false,
+        "firstAttemptClean": false,
+        "failures": [
+          "ANSWER_VALUES_OR_FORMAT",
+          "GOAL_NOT_REACHED",
+          "HOST:MODEL_TURN_LIMIT"
+        ],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "unparseable",
+        "expectedAnswer": null
+      }
+    },
+    {
+      "id": "0/large/default_commit/a2api",
+      "usage": {
+        "prompt_tokens": 91945,
+        "completion_tokens": 3306,
+        "total_tokens": 95251
+      },
+      "modelRequests": 12,
+      "searchCalls": 30,
+      "business": [],
+      "sampledSearches": [
+        {
+          "query": "github repository default branch info",
+          "selectedIDs": [
+            "github.pulls.get",
+            "github.actions.get_github_actions_default_workflow_permissions_repository",
+            "github.actions.list_workflow_runs"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "github repository head commit sha",
+          "selectedIDs": [
+            "github.checks.list_suites_for_ref",
+            "github.pulls.get",
+            "github.repos.compare_commits"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "get commit",
+          "selectedIDs": [
+            "github.actions.get_artifact_and_log_retention_settings_organization",
+            "github.actions.get_artifact_and_log_retention_settings_repository",
+            "github.code_scanning.get_analysis"
+          ],
+          "moreAvailable": true
+        },
+        {
+          "query": "commit get",
+          "selectedIDs": [
+            "github.actions.get_artifact_and_log_retention_settings_organization",
+            "github.actions.get_artifact_and_log_retention_settings_repository",
+            "github.code_scanning.get_analysis"
+          ],
+          "moreAvailable": true
+        }
+      ],
+      "answer": "",
+      "originalPassed": false,
+      "reviewedAssessment": {
+        "passed": false,
+        "goalReached": false,
+        "factsMatched": false,
+        "firstAttemptClean": false,
+        "failures": [
+          "ANSWER_VALUES_OR_FORMAT",
+          "GOAL_NOT_REACHED",
+          "HOST:MODEL_TURN_LIMIT"
+        ],
+        "businessCalls": 0,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "unparseable",
+        "expectedAnswer": null
+      }
+    }
+  ]
+}

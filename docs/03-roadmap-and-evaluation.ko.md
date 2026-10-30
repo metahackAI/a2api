@@ -2,7 +2,9 @@
 
 갱신일: 2026-10-29 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
 
-현재 착수 범위는 2026-10-30 사용자가 요청한 [전체 호출 비용 계획](23-total-call-cost-plan.ko.md)이다. 목표·규칙 확정 → 호스트 도구 바인딩 → 실행 예제·모델 연결 → 규모/요청 유형별 검증 순서로 모두 수행한다. 아래 완료된 작업은 이력으로 보존한다. 이번 완료에 운영 플랫폼이나 추가 importer 개발을 요구하지 않는다.
+현재 최신 요청인 [실제 GitHub 검증](26-real-github-evaluation-plan.ko.md)은 완료했다. [결과](27-real-github-evaluation-results.ko.md)는 소규모 성공과 대규모 탐색 실패를 구분하며, [후속 개선 계획](28-cost-improvement-plan.ko.md)은 아직 구현하지 않았다. 이번 요청은 검증·개선 계획까지이며 후속 제품 변경을 자동 시작하지 않는다.
+
+이전 [전체 호출 비용 계획](23-total-call-cost-plan.ko.md)의 호스트 바인딩과 제한된 합성 카탈로그 비교는 완료 이력이다. 아래 완료된 작업도 이력으로 보존한다. 운영 플랫폼이나 추가 importer 개발을 완료 조건에 넣지 않는다.
 
 과거의 넓은 로드맵을 이 계획으로 대체했다. 현재 **P0-1/2/3 구현 완료**이며 [OpenAPI 호출](11-in-memory-conversion.ko.md), [Python 함수 등록](12-python-functions.ko.md), [경량 MCP 연결](13-lightweight-mcp.ko.md) 안내가 있다.
 

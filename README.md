@@ -17,6 +17,8 @@
 
 **[a2api-tools/0.1과 ToolSession](docs/24-selected-tools.ko.md)** 은 같은 계약에서 필요한 입력 schema만 모델의 function tool로 제공한다. 호스트가 아는 기능은 바로 호출하고, 모르는 기능은 검색 한 모델 단계 후 호출 가능한 도구를 받는다. 식별자·계약 버전은 호스트가 관리하며 선택한 도구는 후속 요청에서 재사용한다. MCP 서버의 세 도구와 기존 호출 방식은 유지한다. [이번 개발 계획](docs/23-total-call-cost-plan.ko.md), [비교 방법과 실측 결과](docs/25-total-call-cost-results.ko.md)를 참고한다.
 
+합성 기능을 제외한 [실제 GitHub 8개/633개 카탈로그의 Muse 비교](docs/27-real-github-evaluation-results.ko.md)도 기록했다. 작은 구성은 두 모드 모두 성공했고 큰 구성은 두 모드 모두 탐색에 실패했다. [실제 실행 예제](examples/real-github-evaluation/README.md)와 [아직 구현하지 않은 개선 계획](docs/28-cost-improvement-plan.ko.md)을 제공한다. 이 결과를 대규모 API 성공률이나 일반 function 도구보다의 우위로 표현하지 않는다.
+
 ## OpenAPI를 바로 호출하기
 
 ```python
