@@ -31,9 +31,15 @@ def lookup(orderId: str) -> str:
 
 위 existing_service_lookup은 호스트의 기존 구현이다. Python write나 async 지원을 추가한 예제가 아니다.
 
-검색은 query의 공백 분리·대소문자 정리·문자열 포함 여부를 사용하는 기존 방식이다. 일치 단어 수가 높은 항목을 먼저 반환하고 ID/버전으로 순서를 고정한다. 등록한 “주문”, “배송”은 찾을 수 있지만 모든 한국어 활용형·동의어·문장의 의미를 해석하는 검색기는 아니다. 원본 데이터의 I-1이나 새 항목 이름은 업무 인자이며, 그 값을 keywords에 넣지 않았다면 검색 결과가 없어도 정상이다. 빈 query는 노출한 카탈로그를 페이지로 조회한다.
+직접 `ConvertedAPI`/`Application`의 경량 카탈로그는 ID·원본 operationId/함수 이름·summary·명시적 keywords·공개 입출력 field를 구분한다. 표기 경계와 흔한 단어를 정규화하고, 질의 개념의 주요 field 포함 정도를 먼저 본 뒤 필드별 가중치·단어 빈도로 정렬한다. 긴 본문은 낮은 비중이고 반복 횟수로 점수를 올리지 않는다. 배열 항목/가까운 자식은 root field보다 낮은 근거다. 순환/복합 schema는 보수적으로 건너뛰며 데이터 값이나 업무 관계를 추측하지 않는다.
+
+완전한 capability ID는 그 ID의 버전들만 반환한다. prefix 이웃을 섞지 않는다. 원본 alias는 `/`, `.`, `_`, `-`, camelCase 차이를 처리하되 서로 다른 namespace나 실제 버전을 임의로 하나로 확정하지 않는다. 점수가 같으면 ID/버전으로 순서를 고정한다. 기존 한글 부분 일치·명시적 keywords도 유지하지만 한국어 활용형/동의어 전체를 해석하는 검색기는 아니다.
+
+field와 원본 alias는 서버 index에만 있다. descriptor 6필드와 MCP tools/list에는 추가하지 않는다. `app.search_metadata()`의 기존 tuple 값은 유지하며, 호스트 내부에서는 `structured=True`로 역할을 구분할 수 있다. 원본 데이터의 I-1이나 새 항목 이름은 업무 인자이며, 그 값을 keywords에 넣지 않았다면 검색 결과가 없어도 정상이다. 빈 query는 노출한 카탈로그를 페이지로 조회한다. 선택적 전체 manifest Runtime의 기존 검색/정책 엔진을 이번에 교체하지 않는다.
 
 metadata 변경도 검색 결과와 순위에 영향을 주므로 catalogVersion/cursor를 구분한다. 기존 cursor를 바뀐 metadata에 재사용하면 INVALID_CURSOR다. invoke의 버전 검사·입력/원본/출력 검증·credential/context 연결은 그대로 유지한다.
+
+검색 revision도 catalog fingerprint에 포함해 이전 순서의 cursor를 새 순서에 재사용하지 않는다. 호스트의 조건부 다음 페이지와 범위는 [a2api-tools/0.2](24-selected-tools.ko.md), [이번 구현 범위](29-search-improvement.ko.md)를 따른다.
 
 합성 소스 예제는 `examples/source-http/application.py`의 작은 한국어 설명 목록을 사용한다. `mcp_server.py --plain-descriptions`는 원본 source 제목으로 비교하는 검증 옵션이다. 기본값은 metadata 적용이며, 업무 API 선택과 효과는 두 모드에서 같다.
 

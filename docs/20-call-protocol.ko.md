@@ -117,7 +117,7 @@ MCP는 공통 도구 a2api.discover/describe/invoke 세 개와 고정 input/outp
 
 Chat Completions 같은 function host는 이름 제약에 맞춰 a2api_discover 등으로 고정 매핑할 수 있다. 실제 MCP 이름·요청/응답 필드는 바꾸지 않는다. 모델 endpoint가 MCP 실행을 대신하는 것이 아니라 호스트가 tool_calls를 전달하고 결과를 돌려준다.
 
-호스트가 선택한 descriptor의 입력 schema만 별도 function tool로 제공하는 [a2api-tools/0.1](24-selected-tools.ko.md)도 지원한다. 이때 discover/describe는 호스트가 처리하고 id/version/catalogVersion을 모델 대신 보관한다. 기존 wire나 MCP tools/list는 바꾸지 않으며, 모든 모델 요청에 탐색과 설명을 강제하지 않는다.
+호스트가 선택한 descriptor의 입력 schema만 별도 function tool로 제공하는 [a2api-tools/0.2](24-selected-tools.ko.md)도 지원한다. 이때 discover/describe는 호스트가 처리하고 id/version/catalogVersion을 모델 대신 보관한다. 기존 wire나 MCP tools/list는 바꾸지 않으며, 모든 모델 요청에 탐색과 설명을 강제하지 않는다.
 
 ## 검증 가능한 예시
 

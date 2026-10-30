@@ -34,6 +34,10 @@ def summarize(report, review):
             'modelRequests': len(models), 'modelToolCalls': sum(len(run['calls']) for run in runs),
             'businessCalls': sum(row['businessCalls'] for row in assessments),
             'searchCalls': sum(call['tool'] == 'a2api_search' for run in runs for call in run['calls']),
+            'moreRequests': sum(call['tool'] == 'a2api_search' and call['input'].get('more') is True
+                                for run in runs for call in run['calls']),
+            'noProgressSearches': sum(call['tool'] == 'a2api_search' and call['output'].get('progress') is False
+                                      for run in runs for call in run['calls']),
             'failedBusinessAttempts': sum(row['failedBusinessAttempts'] for row in assessments),
             'readsAboveMinimum': sum(row['readsAboveMinimum'] for row in assessments),
             'githubRequests': sum(bool(row.get('sent')) for row in http),

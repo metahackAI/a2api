@@ -14,6 +14,8 @@ from unittest.mock import patch
 from a2api import A2APIError, ToolSession
 from a2api.sample import running
 from a2api.tool_session import tool_bytes
+from a2api.tool_session import TOOL_PROFILE
+from a2api.discovery_metadata import SEARCH_REVISION
 from assess import CASES, assess
 from baseline import BaselineSession
 from catalog import CONTEXT, ROOT, create, load_source
@@ -60,6 +62,8 @@ async def stdio_smoke(origin, state):
     async with Client(params, read_timeout_seconds=60) as client:
         before = (await client.list_tools()).model_dump(mode='json', by_alias=True)
         host = await ToolSession.from_mcp(client)
+        first = await host.select('repository')
+        second = await host.select('repository', more=True)
         async def named(identifier):
             selected = await host.select(identifier)
             return next(item['name'] for item in selected['selected'] if item['id'] == identifier)
@@ -72,6 +76,7 @@ async def stdio_smoke(origin, state):
         after = (await client.list_tools(cache_mode='refresh')).model_dump(mode='json', by_alias=True)
         return {'passed': before == after and len(before['tools']) == 3 and commit.get('status') == 'succeeded',
             'toolsListUnchanged': before == after, 'stats': host.stats, 'seconds': time.monotonic() - started,
+            'conditionalPage': {'first': first['page'], 'second': second['page'], 'progress': second['progress']},
             'defaultBranch': branch, 'sha': commit.get('data', {}).get('sha')}
 
 
@@ -94,6 +99,7 @@ async def evaluate(args):
         'quotaBefore': quota, 'inventory': inventory, 'catalogs': [], 'runs': [],
         'settings': {'temperature': 0, 'max_tokens': 2048, 'stream': False, 'maxTurns': 12,
                      'questionTimeoutSeconds': 120, 'maxToolBytes': 16000, 'searchLimit': 3,
+                     'searchRevision': SEARCH_REVISION, 'toolProfile': TOOL_PROFILE, 'maxSearchPages': 3,
                      'knowledge': 'unknown for both sizes', 'modes': ['ordinary', 'a2api']},
         'limits': ['Both modes share converted apps/validation/ranking, not independent SDKs.',
                    'Primary comparison is in-process HTTP for both; stdio is a separate smoke.',

@@ -1,8 +1,8 @@
 # a2api 개발 계획: 전환 모듈을 먼저 끝내기
 
-갱신일: 2026-10-29 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
+갱신일: 2026-10-30 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
 
-현재 최신 요청인 [실제 GitHub 검증](26-real-github-evaluation-plan.ko.md)은 완료했다. [결과](27-real-github-evaluation-results.ko.md)는 소규모 성공과 대규모 탐색 실패를 구분하며, [후속 개선 계획](28-cost-improvement-plan.ko.md)은 아직 구현하지 않았다. 이번 요청은 검증·개선 계획까지이며 후속 제품 변경을 자동 시작하지 않는다.
+현재 최신 요청인 [28 문서](28-cost-improvement-plan.ko.md)의 **1번 검색 개선만 완료**했다. [범위](29-search-improvement.ko.md)대로 정확 ID·입출력 field 순위·조건부 다음 페이지를 구현하고, 같은 실제 GitHub 8개/633개와 Muse 24질문을 재검증했다. [새 결과](30-search-improvement-results.ko.md)와 [최초 실패 기록](27-real-github-evaluation-results.ko.md)을 함께 보존한다. 2번 전달 정보·3번 별도 LLM holdout 확장은 진행하지 않았으며 자동 착수하지 않는다.
 
 이전 [전체 호출 비용 계획](23-total-call-cost-plan.ko.md)의 호스트 바인딩과 제한된 합성 카탈로그 비교는 완료 이력이다. 아래 완료된 작업도 이력으로 보존한다. 운영 플랫폼이나 추가 importer 개발을 완료 조건에 넣지 않는다.
 

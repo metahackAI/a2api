@@ -71,6 +71,8 @@ class _Call:
     output_schema: Mapping
     selected: tuple[str, ...] | None
     search_terms: tuple[str, ...] = ()
+    keywords: tuple[str, ...] = ()
+    aliases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -96,8 +98,11 @@ class ConvertedAPI:
         """Host-side catalog snapshot; not the MCP tools/list payload."""
         return tuple(self.describe(identifier) for identifier in self._calls)
 
-    def search_metadata(self) -> dict[str, tuple[str, ...]]:
+    def search_metadata(self, *, structured=False):
         """Host-only index terms; never added to the public descriptor."""
+        if structured:
+            return {identifier: {'terms': call.search_terms, 'keywords': call.keywords, 'aliases': call.aliases}
+                    for identifier, call in self._calls.items()}
         return {identifier: call.search_terms for identifier, call in self._calls.items()}
 
     def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:
@@ -182,5 +187,6 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
                                   headers=dict(deployment.headers), credential_provider=deployment.credential_provider)
         routes[(wire.service_ref, wire.operation_ref)] = route
         calls[descriptor['id']] = _Call(json.dumps(descriptor, ensure_ascii=False, allow_nan=False), wire,
-                                       freeze(public_output), selected, tuple(dict.fromkeys((*keywords, *source_terms))))
+                                       freeze(public_output), selected, tuple(dict.fromkeys((*keywords, *source_terms))),
+                                       keywords, (record.operation_id,))
     return ConvertedAPI(MappingProxyType(calls), HTTPAdapter(routes))

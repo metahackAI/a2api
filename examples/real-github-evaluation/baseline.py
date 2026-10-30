@@ -21,9 +21,9 @@ class BaselineSession(OrdinarySession):
         super().__init__(apps, context)
         self.max_tool_bytes = max_tool_bytes
 
-    async def select(self, query):
+    async def select(self, query, *, more=False):
         original = OrderedDict(self._active)
-        result = await super().select(query)
+        result = await super().select(query, more=more)
         available = self._active
         retained, protected = original, set()
         selected, omitted, evicted = [], [], []

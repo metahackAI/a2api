@@ -144,7 +144,11 @@ class Application:
         """Host-side catalog snapshot; not the MCP tools/list payload."""
         return tuple(self.describe(identifier) for identifier in self._calls)
 
-    def search_metadata(self) -> dict[str, tuple[str, ...]]:
+    def search_metadata(self, *, structured=False):
+        if structured:
+            return {identifier: {'terms': definition.search_terms, 'keywords': definition.search_terms,
+                                 'aliases': (definition.handler.__name__,)}
+                    for identifier, definition in self._calls.items()}
         return {identifier: definition.search_terms for identifier, definition in self._calls.items()}
 
     def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:

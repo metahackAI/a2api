@@ -1,0 +1,12 @@
+[
+  {"query":"list repository languages","operationId":"repos/list-languages"},
+  {"query":"get repository license","operationId":"licenses/get-for-repo"},
+  {"query":"list repository tags","operationId":"repos/list-tags"},
+  {"query":"list repository contributors","operationId":"repos/list-contributors"},
+  {"query":"get repository readme","operationId":"repos/get-readme"},
+  {"query":"get all repository topics","operationId":"repos/get-all-topics"},
+  {"query":"list commit comments","operationId":"repos/list-comments-for-commit"},
+  {"query":"get release by tag","operationId":"repos/get-release-by-tag"},
+  {"query":"get repository deployment","operationId":"repos/get-deployment"},
+  {"query":"list repository webhooks","operationId":"repos/list-webhooks"}
+]

@@ -1,0 +1,1389 @@
+{
+  "searchRevision": "field-search/1",
+  "sourceSha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
+  "count": 633,
+  "seconds": 23.676808875985444,
+  "replayedQueries": [
+    {
+      "scenario": "repository",
+      "query": "github repository default branch stars archived",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.repos.list_pull_requests_associated_with_commit"
+      ],
+      "targetRanks": {
+        "github.repos.get": 241
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.actions.get_workflow_run"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "github repository get info default branch stars archived",
+      "top3": [
+        "github.pulls.get",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.list_workflow_runs"
+      ],
+      "targetRanks": {
+        "github.repos.get": 80
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.actions.get_workflow_run"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "repository get default branch stars archived",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.search.code"
+      ],
+      "targetRanks": {
+        "github.repos.get": 156
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.actions.get_workflow_run"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "get repository information default branch stars archived",
+      "top3": [
+        "github.pulls.get",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.list_workflow_runs"
+      ],
+      "targetRanks": {
+        "github.repos.get": 80
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.actions.get_workflow_run"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "get repository",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.actions.get_concurrency_group_for_repository",
+        "github.security_advisories.get_repository_advisory"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "repository get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.actions.get_concurrency_group_for_repository",
+        "github.security_advisories.get_repository_advisory"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "repos get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_enterprise",
+        "github.actions.get_actions_cache_retention_limit_for_organization"
+      ],
+      "targetRanks": {
+        "github.repos.get": 135
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "get repository info",
+      "top3": [
+        "github.actions.get_allowed_actions_repository",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.get_workflow_access_to_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 38
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.code_scanning.get_sarif",
+        "github.actions.get_github_actions_default_workflow_permissions_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "get repository details",
+      "top3": [
+        "github.code_scanning.get_sarif",
+        "github.copilot_spaces.get_for_org",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.get": 117
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.security_advisories.get_repository_advisory",
+        "github.repos.get_repo_rule_suite"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "get repository metadata",
+      "top3": [
+        "github.code_scanning.get_codeql_database",
+        "github.packages.get_package_for_user",
+        "github.search.code"
+      ],
+      "targetRanks": {
+        "github.repos.get": 108
+      },
+      "newTop3": [
+        "github.migrations.get_status_for_authenticated_user",
+        "github.migrations.get_status_for_org",
+        "github.repos.get"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 3
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "repos get repository",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_repository",
+        "github.repos.custom_properties_for_repos_get_repository_values"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "repository",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 190
+      },
+      "newTop3": [
+        "github.orgs.list_attestation_repositories",
+        "github.actions.get_concurrency_group_for_repository",
+        "github.actions.list_concurrency_groups_for_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 33
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "GitHub repository branches list",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 115
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "octocat Hello-World branches API",
+      "top3": [
+        "github.git.get_ref",
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 113
+      },
+      "newTop3": [
+        "github.meta.get_all_versions",
+        "github.meta.root",
+        "github.repos.get_branch"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 4
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "list branches repository",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 115
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "list branches with pagination per_page page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.actions.list_concurrency_groups_for_workflow_run",
+        "github.gists.list_public"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 135
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_deployment_branch_policies",
+        "github.actions.list_workflow_runs"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "github branches list per_page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 9
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_deployment_branch_policies",
+        "github.actions.list_workflow_runs"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "list branches repository per_page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 115
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_deployment_branch_policies",
+        "github.actions.list_workflow_runs_for_repo"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "github repos list branches",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 9
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "branches list per_page page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.actions.list_concurrency_groups_for_workflow_run",
+        "github.agent_automations.list_repo_automations"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 16
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_deployment_branch_policies",
+        "github.actions.list_workflow_runs"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "list branches repository per_page page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.actions.list_concurrency_groups_for_workflow_run",
+        "github.agent_automations.list_repo_automations"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 121
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_deployment_branch_policies",
+        "github.actions.list_workflow_runs_for_repo"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "branches list API",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 64
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "list branches",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 9
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "branches per_page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.git.get_ref",
+        "github.git.list_matching_refs"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 18
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.get_branch_rules",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "github repos branches list",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 9
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "branches",
+      "top3": [
+        "github.git.get_ref",
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 18
+      },
+      "newTop3": [
+        "github.repos.get_branch",
+        "github.repos.list_branches",
+        "github.repos.get_branch_protection"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 2
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "list refs",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.repos.compare_commits",
+        "github.actions.get_actions_cache_list"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 259
+      },
+      "newTop3": [
+        "github.checks.list_for_ref",
+        "github.git.list_matching_refs",
+        "github.checks.list_suites_for_ref"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 77
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "heads branches",
+      "top3": [
+        "github.git.get_ref",
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 18
+      },
+      "newTop3": [
+        "github.repos.list_branches_for_head_commit",
+        "github.actions.get_job_for_workflow_run",
+        "github.checks.get_suite"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 9
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "refs heads",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.git.get_ref",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": null
+      },
+      "newTop3": [
+        "github.checks.list_for_ref",
+        "github.checks.list_suites_for_ref",
+        "github.checks.get_suite"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": null
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "github repos branches",
+      "top3": [
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 17
+      },
+      "newTop3": [
+        "github.repos.get_branch",
+        "github.repos.list_branches",
+        "github.repos.get_branch_protection"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 2
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "branches list per_page",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.git.list_matching_refs",
+        "github.migrations.get_import_status"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 9
+      },
+      "newTop3": [
+        "github.repos.list_branches",
+        "github.repos.list_deployment_branch_policies",
+        "github.actions.list_workflow_runs"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "branches pagination",
+      "top3": [
+        "github.repos.compare_commits",
+        "github.actions.list_concurrency_groups_for_workflow_run",
+        "github.gists.list_public"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 23
+      },
+      "newTop3": [
+        "github.repos.get_branch",
+        "github.repos.list_branches",
+        "github.repos.get_branch_protection"
+      ],
+      "newTargetRanks": {
+        "github.repos.list_branches": 2
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository default branch info",
+      "top3": [
+        "github.pulls.get",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.list_workflow_runs"
+      ],
+      "targetRanks": {
+        "github.repos.get": 95,
+        "github.repos.get_commit": 16
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.dependabot.repository_access_for_enterprise"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 268
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository head commit sha",
+      "top3": [
+        "github.checks.list_suites_for_ref",
+        "github.pulls.get",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.get": 224,
+        "github.repos.get_commit": 4
+      },
+      "newTop3": [
+        "github.checks.get_suite",
+        "github.actions.get_workflow_run",
+        "github.actions.get_workflow_run_attempt"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 25,
+        "github.repos.get_commit": 9
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github commit additions deletions stats",
+      "top3": [
+        "github.repos.get_code_frequency_stats",
+        "github.repos.get_contributors_stats",
+        "github.repos.get_commit_activity_stats"
+      ],
+      "targetRanks": {
+        "github.repos.get": 493,
+        "github.repos.get_commit": 41
+      },
+      "newTop3": [
+        "github.pulls.get",
+        "github.repos.get_commit",
+        "github.repos.compare_commits"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 24,
+        "github.repos.get_commit": 2
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository get default branch",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.search.code"
+      ],
+      "targetRanks": {
+        "github.repos.get": 156,
+        "github.repos.get_commit": 24
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.repos.get_branch"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 150
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repo info default branch",
+      "top3": [
+        "github.pulls.get",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.list_workflow_runs"
+      ],
+      "targetRanks": {
+        "github.repos.get": 119,
+        "github.repos.get_commit": 22
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.repos.get_branch_protection"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 104
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105,
+        "github.repos.get_commit": 116
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.security_advisories.get_repository_advisory",
+        "github.actions.get_concurrency_group_for_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 119
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "get repository",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105,
+        "github.repos.get_commit": 116
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.actions.get_concurrency_group_for_repository",
+        "github.security_advisories.get_repository_advisory"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 119
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repository info",
+      "top3": [
+        "github.actions.get_allowed_actions_repository",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.get_workflow_access_to_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 47,
+        "github.repos.get_commit": 51
+      },
+      "newTop3": [
+        "github.dependency_graph.export_sbom",
+        "github.code_scanning.get_sarif",
+        "github.actions.get_github_actions_default_workflow_permissions_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 7,
+        "github.repos.get_commit": 224
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repo default branch",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.repos.list_pull_requests_associated_with_commit"
+      ],
+      "targetRanks": {
+        "github.repos.get": 320,
+        "github.repos.get_commit": 38
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.repos.get_branch"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 103
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "get repository information",
+      "top3": [
+        "github.actions.get_allowed_actions_repository",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.get_workflow_access_to_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 38,
+        "github.repos.get_commit": 42
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.code_scanning.get_sarif",
+        "github.users.get_context_for_user"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 122
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repos get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_enterprise",
+        "github.actions.get_actions_cache_retention_limit_for_organization"
+      ],
+      "targetRanks": {
+        "github.repos.get": 135,
+        "github.repos.get_commit": 151
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 46
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repos get repository",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105,
+        "github.repos.get_commit": 116
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_repository",
+        "github.repos.custom_properties_for_repos_get_repository_values"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 82
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "get repo",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_enterprise",
+        "github.actions.get_actions_cache_retention_limit_for_organization"
+      ],
+      "targetRanks": {
+        "github.repos.get": 155,
+        "github.repos.get_commit": 171
+      },
+      "newTop3": [
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 4,
+        "github.repos.get_commit": 46
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "default branch repository",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.repos.list_pull_requests_associated_with_commit"
+      ],
+      "targetRanks": {
+        "github.repos.get": 241,
+        "github.repos.get_commit": 30
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.dependabot.repository_access_for_enterprise"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 265
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repo get default branch",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.search.code"
+      ],
+      "targetRanks": {
+        "github.repos.get": 215,
+        "github.repos.get_commit": 32
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.repos.get_branch",
+        "github.orgs.get"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 53
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repository get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_repository",
+        "github.actions.get_actions_cache_storage_limit_for_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 105,
+        "github.repos.get_commit": 116
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.actions.get_concurrency_group_for_repository",
+        "github.security_advisories.get_repository_advisory"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 119
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "get repo info",
+      "top3": [
+        "github.actions.get_allowed_actions_repository",
+        "github.actions.get_github_actions_default_workflow_permissions_repository",
+        "github.actions.get_workflow_access_to_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 50,
+        "github.repos.get_commit": 58
+      },
+      "newTop3": [
+        "github.code_scanning.get_sarif",
+        "github.orgs.external_properties_for_repos_get_organization_app_installations",
+        "github.repos.get"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 3,
+        "github.repos.get_commit": 16
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repos get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_enterprise",
+        "github.actions.get_actions_cache_retention_limit_for_organization"
+      ],
+      "targetRanks": {
+        "github.repos.get": 135,
+        "github.repos.get_commit": 151
+      },
+      "newTop3": [
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 4,
+        "github.repos.get_commit": 46
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "repos.get",
+      "top3": [
+        "github.repos.get",
+        "github.repos.get_access_restrictions",
+        "github.repos.get_admin_branch_protection"
+      ],
+      "targetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 17
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 46
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "get commit stats additions deletions",
+      "top3": [
+        "github.repos.get_code_frequency_stats",
+        "github.repos.get_contributors_stats",
+        "github.repos.get_commit_activity_stats"
+      ],
+      "targetRanks": {
+        "github.repos.get": 306,
+        "github.repos.get_commit": 38
+      },
+      "newTop3": [
+        "github.pulls.get",
+        "github.repos.get_commit",
+        "github.repos.get_code_frequency_stats"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 19,
+        "github.repos.get_commit": 2
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "commit additions deletions api",
+      "top3": [
+        "github.repos.get_code_frequency_stats",
+        "github.repos.get_contributors_stats",
+        "github.code_scanning.get_analysis"
+      ],
+      "targetRanks": {
+        "github.repos.get": null,
+        "github.repos.get_commit": 18
+      },
+      "newTop3": [
+        "github.pulls.get",
+        "github.meta.root",
+        "github.meta.get"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 57,
+        "github.repos.get_commit": 4
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github commit stats",
+      "top3": [
+        "github.repos.get_code_frequency_stats",
+        "github.repos.get_commit_activity_stats",
+        "github.repos.get_contributors_stats"
+      ],
+      "targetRanks": {
+        "github.repos.get": 493,
+        "github.repos.get_commit": 41
+      },
+      "newTop3": [
+        "github.repos.get_commit_activity_stats",
+        "github.repos.get_participation_stats",
+        "github.repos.get_code_frequency_stats"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 19,
+        "github.repos.get_commit": 6
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "get commit",
+      "top3": [
+        "github.actions.get_artifact_and_log_retention_settings_organization",
+        "github.actions.get_artifact_and_log_retention_settings_repository",
+        "github.code_scanning.get_analysis"
+      ],
+      "targetRanks": {
+        "github.repos.get": 306,
+        "github.repos.get_commit": 25
+      },
+      "newTop3": [
+        "github.repos.get_commit",
+        "github.git.get_commit",
+        "github.migrations.get_commit_authors"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 30,
+        "github.repos.get_commit": 1
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "commit get",
+      "top3": [
+        "github.actions.get_artifact_and_log_retention_settings_organization",
+        "github.actions.get_artifact_and_log_retention_settings_repository",
+        "github.code_scanning.get_analysis"
+      ],
+      "targetRanks": {
+        "github.repos.get": 306,
+        "github.repos.get_commit": 25
+      },
+      "newTop3": [
+        "github.repos.get_commit",
+        "github.git.get_commit",
+        "github.migrations.get_commit_authors"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 30,
+        "github.repos.get_commit": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "github repos get",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_enterprise",
+        "github.actions.get_actions_cache_retention_limit_for_organization"
+      ],
+      "targetRanks": {
+        "github.repos.get": 135
+      },
+      "newTop3": [
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 4
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "get repository default branch stars archived",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.search.code"
+      ],
+      "targetRanks": {
+        "github.repos.get": 156
+      },
+      "newTop3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.actions.get_workflow_run"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "repos",
+      "top3": [
+        "github.actions.get_actions_cache_list",
+        "github.actions.get_actions_cache_retention_limit_for_enterprise",
+        "github.actions.get_actions_cache_retention_limit_for_organization"
+      ],
+      "targetRanks": {
+        "github.repos.get": 239
+      },
+      "newTop3": [
+        "github.agent_tasks.get_task_by_repo_and_id",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_organization",
+        "github.actions.get_private_repo_fork_pr_workflows_settings_repository"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 4
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "default branch",
+      "top3": [
+        "github.code_scanning.get_autofix",
+        "github.pulls.get",
+        "github.repos.list_pull_requests_associated_with_commit"
+      ],
+      "targetRanks": {
+        "github.repos.get": null
+      },
+      "newTop3": [
+        "github.orgs.get",
+        "github.repos.get",
+        "github.dependabot.repository_access_for_enterprise"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 2
+      }
+    },
+    {
+      "scenario": "repository",
+      "query": "stars",
+      "top3": [
+        "github.activity.get_stargazer_history_for_repo",
+        "github.search.repos"
+      ],
+      "targetRanks": {
+        "github.repos.get": null
+      },
+      "newTop3": [
+        "github.activity.get_stargazer_history_for_repo",
+        "github.activity.list_stargazers_for_repo",
+        "github.activity.get_stargazer_count_for_repo"
+      ],
+      "newTargetRanks": {
+        "github.repos.get": 22
+      }
+    }
+  ],
+  "separateOfflineQueries": [
+    {
+      "query": "list repository languages",
+      "operationId": "repos/list-languages",
+      "target": "github.repos.list_languages",
+      "rank": 1,
+      "top3": [
+        "github.repos.list_languages",
+        "github.codespaces.list_repositories_for_secret_for_authenticated_user",
+        "github.copilot.list_copilot_coding_agent_selected_repositories_for_organization"
+      ]
+    },
+    {
+      "query": "get repository license",
+      "operationId": "licenses/get-for-repo",
+      "target": "github.licenses.get_for_repo",
+      "rank": 1,
+      "top3": [
+        "github.licenses.get_for_repo",
+        "github.repos.get",
+        "github.licenses.get"
+      ]
+    },
+    {
+      "query": "list repository tags",
+      "operationId": "repos/list-tags",
+      "target": "github.repos.list_tags",
+      "rank": 1,
+      "top3": [
+        "github.repos.list_tags",
+        "github.codespaces.list_repositories_for_secret_for_authenticated_user",
+        "github.copilot.list_copilot_coding_agent_selected_repositories_for_organization"
+      ]
+    },
+    {
+      "query": "list repository contributors",
+      "operationId": "repos/list-contributors",
+      "target": "github.repos.list_contributors",
+      "rank": 1,
+      "top3": [
+        "github.repos.list_contributors",
+        "github.codespaces.list_repositories_for_secret_for_authenticated_user",
+        "github.copilot.list_copilot_coding_agent_selected_repositories_for_organization"
+      ]
+    },
+    {
+      "query": "get repository readme",
+      "operationId": "repos/get-readme",
+      "target": "github.repos.get_readme",
+      "rank": 1,
+      "top3": [
+        "github.repos.get_readme",
+        "github.repos.get_readme_in_directory",
+        "github.repos.get"
+      ]
+    },
+    {
+      "query": "get all repository topics",
+      "operationId": "repos/get-all-topics",
+      "target": "github.repos.get_all_topics",
+      "rank": 1,
+      "top3": [
+        "github.repos.get_all_topics",
+        "github.repos.get",
+        "github.repos.get_repo_rulesets"
+      ]
+    },
+    {
+      "query": "list commit comments",
+      "operationId": "repos/list-comments-for-commit",
+      "target": "github.repos.list_comments_for_commit",
+      "rank": 1,
+      "top3": [
+        "github.repos.list_comments_for_commit",
+        "github.repos.list_commits",
+        "github.reactions.list_for_commit_comment"
+      ]
+    },
+    {
+      "query": "get release by tag",
+      "operationId": "repos/get-release-by-tag",
+      "target": "github.repos.get_release_by_tag",
+      "rank": 2,
+      "top3": [
+        "github.repos.get_release",
+        "github.repos.get_release_by_tag",
+        "github.repos.get_latest_release"
+      ]
+    },
+    {
+      "query": "get repository deployment",
+      "operationId": "repos/get-deployment",
+      "target": "github.repos.get_deployment",
+      "rank": 1,
+      "top3": [
+        "github.repos.get_deployment",
+        "github.repos.get",
+        "github.repos.get_deployment_status"
+      ]
+    },
+    {
+      "query": "list repository webhooks",
+      "operationId": "repos/list-webhooks",
+      "target": "github.repos.list_webhooks",
+      "rank": 1,
+      "top3": [
+        "github.repos.list_webhooks",
+        "github.repos.list_webhook_deliveries",
+        "github.apps.list_webhook_deliveries"
+      ]
+    }
+  ],
+  "top3Count": 10,
+  "note": "Fixed offline queries distinct from the 24 live questions; not a live holdout-model evaluation."
+}

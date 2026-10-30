@@ -10,6 +10,7 @@ import json
 from .conversion import ConvertedAPI
 from .errors import A2APIError
 from .native import Application
+from .discovery_metadata import SearchIndex, SEARCH_REVISION
 
 
 def agent_descriptor(raw: dict) -> dict:
@@ -30,7 +31,7 @@ class DirectApplications:
         self._entries = {}
         self._search_terms = {}
         for app in apps:
-            metadata = app.search_metadata()
+            metadata = app.search_metadata(structured=True)
             for descriptor in app.descriptors():
                 key = (descriptor['id'], descriptor['version'])
                 if key in self._entries:
@@ -38,9 +39,11 @@ class DirectApplications:
                 self._entries[key] = (app, descriptor)
                 self._search_terms[key] = metadata[descriptor['id']]
         serialized = json.dumps({'descriptors': [self._entries[key][1] for key in sorted(self._entries)],
-                                 'search': [list(self._search_terms[key]) for key in sorted(self._entries)]},
+                                 'search': [self._search_terms[key] for key in sorted(self._entries)],
+                                 'retrieval': SEARCH_REVISION},
                                 ensure_ascii=False, sort_keys=True, allow_nan=False, separators=(',', ':'))
         self.version = 'sha256:' + hashlib.sha256(serialized.encode()).hexdigest()
+        self._index = SearchIndex({key: entry[1] for key, entry in self._entries.items()}, self._search_terms)
         self.writable = any(descriptor['effects']['kind'] == 'write' for _, descriptor in self._entries.values())
 
     def _get(self, identifier, version):
@@ -50,17 +53,12 @@ class DirectApplications:
         return entry
 
     def discover(self, query, context, *, limit=10, cursor=None):
-        words = query.casefold().split()
         matches = []
-        for (identifier, version), (_, descriptor) in self._entries.items():
-            text = ' '.join((identifier, descriptor['summary'], *self._search_terms[(identifier, version)])).casefold()
-            terms = [word for word in words if word in text]
-            if words and not terms:
-                continue
-            matches.append((-len(terms), identifier, version, {
+        for (identifier, version), terms in self._index.rank(query):
+            descriptor = self._entries[(identifier, version)][1]
+            matches.append({
                 'id': identifier, 'version': version, 'title': identifier, 'summary': descriptor['summary'],
-                'effects': descriptor['effects'], 'matchedTerms': terms}))
-        matches.sort(key=lambda match: match[:3])
+                'effects': descriptor['effects'], 'matchedTerms': terms})
         view = hashlib.sha256(json.dumps([self.version, query, limit, context.actor, context.tenant,
                                          sorted(context.scopes)]).encode()).hexdigest()
         offset = 0
@@ -75,7 +73,7 @@ class DirectApplications:
         next_offset = offset + limit
         next_cursor = (base64.urlsafe_b64encode(json.dumps({'view': view, 'offset': next_offset}).encode()).decode()
                        if next_offset < len(matches) else None)
-        return {'catalogVersion': self.version, 'capabilities': [entry[3] for entry in matches[offset:next_offset]],
+        return {'catalogVersion': self.version, 'capabilities': matches[offset:next_offset],
                 'nextCursor': next_cursor}
 
     def describe(self, identifier, version, context):

@@ -1,6 +1,8 @@
-# a2api-tools/0.1: 필요한 호출 계약만 모델에 제공하기
+# a2api-tools/0.2: 필요한 호출 계약만 모델에 제공하기
 
 기준: [제품 목표](00-product-direction.ko.md), [이번 개발 계획](23-total-call-cost-plan.ko.md). 서버 wire는 기존 [a2api-call/0.1](20-call-protocol.ko.md)을 그대로 사용한다. 이 문서는 호스트의 도구 표현과 호출 규칙을 정의한다.
+
+0.2는 선택적 다음 페이지와 진행 상태를 추가한다. 기존 0.1의 query-only 요청은 계속 유효하다. [검색 1번 구현 범위](29-search-improvement.ko.md)이며 결과 선택/업무 함수의 반환 설명은 이번에 바꾸지 않았다.
 
 ## 계약과 모델 도구의 관계
 
@@ -27,24 +29,31 @@
 6. catalog 변경 발견 시 이전 선택을 폐기한다. invoke가 `CONTRACT_DRIFT`이면 재실행하지 않고 오류를 반환한다. 다시 검색해야 한다. 사용자/tenant/scopes/server 변경 시 호스트가 새 세션을 만든다. 새 권한이 자동으로 감지된다고 가정하지 않는다.
 7. 입력은 호스트와 기존 실행기에서 검사한다. raw HTTP·공개 출력 검사도 유지한다. 결과의 `completeness.scope=single_api_response`는 전체 업무/모든 페이지 완료를 의미하지 않는다.
 
-검색은 기존 lexical 검색을 사용한다. 이 규칙은 검색 품질이나 업무 관계를 자동 보장하지 않는다. 입력 schema만으로 사용자의 “3개”와 모델이 보낸 “5개”가 다르다는 사실을 알 수 없다. 모델/호스트의 요청 해석과 사용자 조건 준수는 별도 평가한다. default는 입력을 생략했을 때의 API 동작이며 명시적 값을 덮어쓰지 않는다.
+직접 앱의 검색은 원본 ID·용도·공개 입출력 field를 사용하는 [필드 기반 lexical index](21-discovery-metadata.ko.md)다. 이 규칙은 검색 품질이나 업무 관계를 자동 보장하지 않는다. 입력 schema만으로 사용자의 “3개”와 모델이 보낸 “5개”가 다르다는 사실을 알 수 없다. 모델/호스트의 요청 해석과 사용자 조건 준수는 별도 평가한다. default는 입력을 생략했을 때의 API 동작이며 명시적 값을 덮어쓰지 않는다.
 
 MCP `tools/list`는 항상 discover/describe/invoke 세 개다. 위 function tools는 **모델 호스트의 표현**이다. 검색 결과에 따라 MCP 서버 도구 목록을 변경하지 않는다. 특정 provider의 deferred-tool 확장 필드도 요구하지 않는다.
 
 ## 검색 결과와 오류 형식
 
-검색 입력은 `{"query":"주문"}`이며 query는 0~1000자 문자열이다. 추가 키는 거부한다. 후보 수는 모델 입력이 아니라 호스트의 `search_limit`(1~20)이다. 한 페이지의 후보만 처리하고 더 있으면 질의를 좁히도록 `moreAvailable`을 반환한다. 전체 카탈로그를 자동으로 순회하지 않는다.
+검색 입력은 `{"query":"주문"}`이며 query는 0~1000자 문자열이다. 선택적 `more`는 boolean이고 기본 false다. 나머지 추가 키는 거부한다. 후보 수는 모델 입력이 아니라 호스트의 `search_limit`(1~20, 기본 3)이다. 전체 카탈로그를 자동으로 순회하지 않는다.
+
+`moreAvailable=true`이면 `{"query":"주문","more":true}`로 다음 후보를 요청한다. 라이브러리에서는 `await session.select('주문', more=True)`다. cursor는 모델에게 주지 않는다. 같은 query를 more 없이 반복하면 현재 페이지를 재사용한다. query의 공백/대소문자 변화는 같은 view로 취급하고 원래 wire query/limit을 유지한다. 질의당 최대 3페이지(기본 후보 9개), 세션은 최근 32개 query view를 보관한다. 이미 제공한 후보를 다시 받은 경우 해당 query의 `progress=false`다.
 
 ```json
 {
   "selected": [{"name": "a2api_call_<24자리 hash>", "id": "legacy.getorder"}],
   "omitted": [],
   "evicted": [],
-  "moreAvailable": false
+  "moreAvailable": false,
+  "page": 1,
+  "pageLimitReached": false,
+  "progress": true
 }
 ```
 
 `omitted`는 `[{"id":"...","reason":"SCHEMA_BUDGET"}]`, `evicted`는 제거한 function 이름 배열이다. 빈 검색은 한 페이지를 반환하며 적절한 기능이 선택되었다는 보장이 아니다. 검색 결과는 다음 모델 요청에서 사용할 도구를 알리는 데이터다.
+
+`moreAvailable`은 호스트 예산 안에서 다음 페이지를 요청할 수 있는지다. 3페이지 한도에 도달했고 서버에 더 있으면 `pageLimitReached=true`로 알려주므로 전체 카탈로그를 다 봤다는 뜻이 아니다. 시작 전 more는 `SEARCH_NOT_STARTED`, 실제 끝은 `SEARCH_EXHAUSTED`, 3페이지 이후는 `SEARCH_PAGE_LIMIT`다. 잘못된 more 타입은 `INVALID_INPUT`이다. limit 변경은 해당 query view를 새로 시작해야 한다. stale cursor는 선택 도구/페이지 상태를 폐기하고 `CONTRACT_DRIFT`로 반환하며 자동 재시도하지 않는다.
 
 `call`은 검증된 기존 invoke envelope 또는 `{"error": problem}`을 반환한다. 잘못된 인자는 `INVALID_INPUT`, 활성 목록에 없는 이름은 `NOT_SELECTED`, 계약 변경은 `CONTRACT_DRIFT`, 형식이 다른 응답은 `SCHEMA_MISMATCH`다. 연결/호스트 오류는 원문 예외를 노출하지 않는 `HOST_PROTOCOL_ERROR`다. 호출 중 연결이 끊기면 실제 실행 여부가 불명확할 수 있으므로 재시도하지 않는다. 이 호스트 프로파일이 쓰기 권한이나 업무 승인을 자동 부여하지 않는다.
 
@@ -69,7 +78,9 @@ async def main():
 asyncio.run(main())
 ```
 
-`ConvertedAPI`와 앱 목록도 동일하게 받는다. `ToolSession.from_mcp(client)`는 연결된 공식 MCP client를 받으며 연결 수명은 호출자가 관리한다. 기본 `max_tool_bytes=16000`, `search_limit=3`은 호스트 설정이다. 실제 모델 token budget이 아니고 API 개수 전환 임계값도 아니다. `prime`은 ID가 유일하게 발견되고 전체 요청 집합이 예산에 들어야 한다. 모호하면 오류를 반환한다. 필요하면 검색/예산을 조정한다.
+`ConvertedAPI`와 앱 목록도 동일하게 받는다. `ToolSession.from_mcp(client)`는 연결된 공식 MCP client를 받으며 연결 수명은 호출자가 관리한다. 기본 `max_tool_bytes=16000`, `search_limit=3`은 호스트 설정이다. 실제 모델 token budget이 아니고 API 개수 전환 임계값도 아니다. `prime`은 정확한 ID로 첫 페이지에서 버전을 확인하고 전체 요청 집합이 예산에 들어야 한다. 실제 복수 버전은 오류이며 마지막 페이지의 한 버전을 임의로 고르지 않는다. 필요하면 검색/예산을 조정한다.
+
+필드 기반 순위는 업데이트한 직접 앱 서버에서 제공한다. 호스트의 more 지원만으로 외부/기존 관리 Runtime 서버의 검색 알고리즘까지 바뀌는 것은 아니다. 인증 주체/tenant/scopes/server가 바뀌면 새 ToolSession을 사용한다.
 
 선택한 함수 호출에는 inputSchema의 업무 객체를 그대로 전달한다. 기존 OpenAPI의 `path/query/body`와 등록 함수의 평탄한 인자 차이도 그대로다. 임의 flatten이나 인자 보정을 하지 않는다. `tools()`와 `binding(name)`은 복사본이다. `binding`과 `stats`는 호스트의 로그/측정용이며 모델 메시지에 넣을 필요가 없다.
 

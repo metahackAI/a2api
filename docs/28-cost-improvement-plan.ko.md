@@ -1,12 +1,12 @@
 # 실제 카탈로그 결과에 따른 전체 비용 개선 계획
 
-2026-10-30 · 상태: **계획, 미구현**. 사용자가 이번에 요청한 범위는 실제 검증과 개선 계획까지다. 제품 변경은 다음 개발 지시에서 이 세 작업을 순서대로 수행한다. [현재 결과](27-real-github-evaluation-results.ko.md), [원 평가 범위](26-real-github-evaluation-plan.ko.md)가 근거다.
+2026-10-30 · 상태: **1번 구현·재검증 완료, 2·3번 미착수**. 이 계획은 [최초 결과](27-real-github-evaluation-results.ko.md), [원 평가 범위](26-real-github-evaluation-plan.ko.md)를 근거로 작성했다. 이후 사용자가 1번만 요청해 [범위 기록](29-search-improvement.ko.md) 후 구현하고 [같은 Muse 요청으로 재검증](30-search-improvement-results.ko.md)했다. 아래 최초 관찰과 남은 계획은 보존하며, 2·3번은 다음 지시 전까지 진행하지 않는다.
 
 ## 목표와 우선순위
 
 먼저 대규모에서 필요한 API를 실제로 찾고 사용자 조건을 만족하게 만든다. 성공한 소규모의 정확성을 유지하면서 검색·계약 설명·반복 전송·실행을 합친 비용을 줄인다. 실패를 빨리 끝낸 것만으로 정확한 호출이 더 효율적이 됐다고 주장하지 않는다.
 
-관찰한 근거는 다음과 같다.
+계획을 작성할 때 최초 실행에서 관찰한 근거는 다음과 같다.
 
 - 633개에서 두 모드 모두 필수 계약 조합을 찾지 못해 12회 모델 단계 제한에 도달했다. 저장소 질문의 `repos/get` 순위는 실제 질의에서 38~241위, 브랜치 목록은 9~259위였다. 본문 substring 일치 개수와 ID 사전순이 기능 적합성을 제대로 반영하지 못했다.
 - 연쇄 질문에서 `repos/get`을 도구로 제공한 경우도 있었지만 `repos/get-commit`은 제공되지 않았다. 먼저 가능한 조회를 실행하지 않고 검색을 계속한 모델 행동도 관찰했다. 검색 품질과 전달 정보가 함께 필요하다.
@@ -17,7 +17,9 @@
 
 ## 1. 필요한 기능을 찾고 검색을 수렴시키기
 
-예정 변경: `src/a2api/mcp_application.py`, `discovery_metadata.py`, `conversion.py`, `tool_session.py`, 관련 테스트와 24 문서. 기존 관리 Runtime의 정책 엔진·사용자 권한 시스템을 새로 만들지 않는다.
+**완료.** 정확 ID·필드별 검색 index·조건부 3페이지를 구현했다. 전체 회귀 290개와 실제 MCP stdio 페이지 전환이 통과했고, 같은 Muse 평가에서 8개/633개 모두 두 방식이 각 6/6을 완료했다. 상세 규칙·한계·비용은 [30 문서](30-search-improvement-results.ko.md)에 기록했다. 모델의 more 사용은 0회였으므로 성공 회복을 pagination 효과로 해석하지 않는다.
+
+변경 범위: `src/a2api/mcp_application.py`, `discovery_metadata.py`, `conversion.py`, `native.py`, `tool_session.py`, 관련 테스트와 24 문서. 기존 관리 Runtime의 정책 엔진·사용자 권한 시스템을 새로 만들지 않는다.
 
 ### 1.1 원본에 근거한 검색 index
 

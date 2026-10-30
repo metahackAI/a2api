@@ -20,14 +20,17 @@ from .mcp_application import DirectApplications
 from .openapi_schema import check_draft_schema
 from .protocol import protocol_schema
 from .schema import validate_value
+from .discovery_metadata import SearchPages
 
-TOOL_PROFILE = 'a2api-tools/0.1'
+TOOL_PROFILE = 'a2api-tools/0.2'
 SEARCH_NAME = 'a2api_search'
 SEARCH_TOOL = {'type': 'function', 'function': {
     'name': SEARCH_NAME,
     'description': 'Find functions by task keywords. Selected functions become callable in the next model request. '
-                   'Use an already available function directly. Refine the query when the needed function is absent.',
-    'parameters': {'type': 'object', 'properties': {'query': {'type': 'string', 'maxLength': 1000}},
+                   'Use an already available function directly. If moreAvailable is true, request the same query with '
+                   'more=true for the next page. Repeating without more reuses the page. Refine the query if no progress.',
+    'parameters': {'type': 'object', 'properties': {'query': {'type': 'string', 'maxLength': 1000},
+                                                  'more': {'type': 'boolean', 'default': False}},
                    'required': ['query'], 'additionalProperties': False}}}
 
 
@@ -74,6 +77,7 @@ class ToolSession:
         self._catalog = None
         self._active: OrderedDict[str, _Bound] = OrderedDict()
         self._lock = asyncio.Lock()
+        self._pages = SearchPages()
         self._stats = {'discover': 0, 'describe': 0, 'invoke': 0, 'reused': 0, 'evicted': 0}
 
     @classmethod
@@ -122,14 +126,26 @@ class ToolSession:
     def _adopt_catalog(self, catalog):
         if self._catalog != catalog:
             self._active.clear()
+            self._pages.clear()
             self._catalog = catalog
 
     def _clear(self):
         self._active.clear()
         self._catalog = None
+        self._pages.clear()
 
-    async def _select(self, query, *, exact=False):
-        found = await self._request('discover', {'query': query, 'limit': self.search_limit})
+    async def _select(self, query, *, exact=False, more=False):
+        prepared = self._pages.prepare(query, more, limit=self.search_limit, restart=exact)
+        try:
+            found = await self._request('discover', prepared['arguments'])
+        except A2APIError as error:
+            if prepared['arguments'].get('cursor') is not None and error.code in ('INVALID_CURSOR', 'CONTRACT_DRIFT'):
+                self._clear()
+                raise A2APIError('CONTRACT_DRIFT', 'Search view changed; start a new search.', status=409) from None
+            raise
+        if prepared['arguments'].get('cursor') is not None and prepared['catalog'] != found['catalogVersion']:
+            self._clear()
+            raise A2APIError('CONTRACT_DRIFT', 'Search catalog changed; start a new search.', status=409)
         self._adopt_catalog(found['catalogVersion'])
         entries = found['capabilities']
         if exact:
@@ -179,14 +195,14 @@ class ToolSession:
             evicted.extend(removed)
             protected.add(name)
             selected.append({'name': name, 'id': item['id']})
-        return {'selected': selected, 'omitted': omitted, 'evicted': evicted,
-                'moreAvailable': found['nextCursor'] is not None}
+        page = self._pages.commit(prepared, found)
+        return {'selected': selected, 'omitted': omitted, 'evicted': evicted, **page}
 
-    async def select(self, query: str):
+    async def select(self, query: str, *, more=False):
         """A host search: discover + descriptions without an intervening model turn."""
         async with self._lock:
-            validate_value(SEARCH_TOOL['function']['parameters'], {'query': query}, code='INVALID_INPUT', status=400)
-            return await self._select(query)
+            validate_value(SEARCH_TOOL['function']['parameters'], {'query': query, 'more': more}, code='INVALID_INPUT', status=400)
+            return await self._select(query, more=more)
 
     async def prime(self, identifiers: list[str]):
         """Host-known IDs become callable before the first model request.
@@ -213,7 +229,7 @@ class ToolSession:
                     raise A2APIError('INVALID_INPUT', 'Arguments must be finite JSON.') from None
                 if name == SEARCH_NAME:
                     validate_value(SEARCH_TOOL['function']['parameters'], arguments, code='INVALID_INPUT', status=400)
-                    return await self._select(arguments['query'])
+                    return await self._select(arguments['query'], more=arguments.get('more', False))
                 bound = self._active.get(name)
                 if bound is None:
                     raise A2APIError('NOT_SELECTED', 'Function is not active in this session; search again.')

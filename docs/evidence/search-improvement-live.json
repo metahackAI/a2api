@@ -1,0 +1,583 @@
+{
+  "checkedAt": "2026-10-30T08:11:54.026762+00:00",
+  "model": "muse-glimmer-30b",
+  "completed": true,
+  "rawReportSHA256": "9b4d1c7ae27903b3d1a06d71a810d0c009e15be48d1047a9fcf014ec886626f0",
+  "settings": {
+    "temperature": 0,
+    "max_tokens": 2048,
+    "stream": false,
+    "maxTurns": 12,
+    "questionTimeoutSeconds": 120,
+    "maxToolBytes": 16000,
+    "searchLimit": 3,
+    "searchRevision": "field-search/1",
+    "toolProfile": "a2api-tools/0.2",
+    "maxSearchPages": 3,
+    "knowledge": "unknown for both sizes",
+    "modes": [
+      "ordinary",
+      "a2api"
+    ]
+  },
+  "repetitions": 2,
+  "githubAuth": "gh",
+  "limits": [
+    "Both modes share converted apps/validation/ranking, not independent SDKs.",
+    "Primary comparison is in-process HTTP for both; stdio is a separate smoke.",
+    "Only the two specified public repositories are forwarded; no local response cache.",
+    "Two repetitions are exploratory, not a general accuracy or latency guarantee."
+  ],
+  "source": {
+    "repository": "https://github.com/github/rest-api-description",
+    "revision": "443ef1513a17aad7f781391c4fb4e132b9b549fd",
+    "sourceUrl": "https://raw.githubusercontent.com/github/rest-api-description/443ef1513a17aad7f781391c4fb4e132b9b549fd/descriptions/api.github.com/api.github.com.json",
+    "sha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
+    "bytes": 13897231,
+    "openapi": "3.0.3",
+    "paths": 827,
+    "operations": 1254,
+    "methods": {
+      "get": 655,
+      "post": 197,
+      "patch": 76,
+      "delete": 191,
+      "put": 135
+    },
+    "license": "MIT"
+  },
+  "coverage": {
+    "getOperations": 655,
+    "statuses": {
+      "imported": 633,
+      "skipped": 599,
+      "unsupported": 22
+    },
+    "loadAndImportSeconds": 7.304906932986341
+  },
+  "catalogs": [
+    {
+      "scale": "small",
+      "count": 8,
+      "descriptorBytes": 189292,
+      "convertSeconds": 0.5838377740001306,
+      "projection": {}
+    },
+    {
+      "scale": "large",
+      "count": 633,
+      "descriptorBytes": 5266304,
+      "convertSeconds": 13.355809436994605,
+      "projection": {}
+    }
+  ],
+  "configurations": [
+    {
+      "scale": "large",
+      "mode": "a2api",
+      "questions": 6,
+      "passed": 6,
+      "factsMatched": 6,
+      "firstAttemptClean": 6,
+      "byKind": {
+        "simple": {
+          "questions": 4,
+          "passed": 4
+        },
+        "chain": {
+          "questions": 2,
+          "passed": 2
+        }
+      },
+      "usageComplete": true,
+      "tokens": {
+        "prompt_tokens": 84448,
+        "completion_tokens": 6008,
+        "total_tokens": 90456
+      },
+      "questionSeconds": 117.759,
+      "sessionSetupSeconds": 1.763,
+      "modelSeconds": 112.605,
+      "hostNonModelSeconds": 5.154,
+      "modelRequests": 25,
+      "modelToolCalls": 22,
+      "businessCalls": 9,
+      "searchCalls": 13,
+      "moreRequests": 0,
+      "noProgressSearches": 0,
+      "failedBusinessAttempts": 0,
+      "readsAboveMinimum": 1,
+      "githubRequests": 9,
+      "httpStatuses": {
+        "200": 9
+      },
+      "upstreamSeconds": 3.769,
+      "httpBodyBytes": 35544,
+      "normalizedToolBytesSum": 112924,
+      "normalizedHistoryBytesSum": 151529,
+      "modelToolResultBytes": 41098,
+      "requiredContractsOffered": 6,
+      "hostProtocol": {
+        "requests": 56,
+        "seconds": 4.476,
+        "responseBytes": 672043
+      },
+      "failures": []
+    },
+    {
+      "scale": "large",
+      "mode": "ordinary",
+      "questions": 6,
+      "passed": 6,
+      "factsMatched": 6,
+      "firstAttemptClean": 6,
+      "byKind": {
+        "simple": {
+          "questions": 4,
+          "passed": 4
+        },
+        "chain": {
+          "questions": 2,
+          "passed": 2
+        }
+      },
+      "usageComplete": true,
+      "tokens": {
+        "prompt_tokens": 84448,
+        "completion_tokens": 6008,
+        "total_tokens": 90456
+      },
+      "questionSeconds": 117.614,
+      "sessionSetupSeconds": 1.752,
+      "modelSeconds": 113.004,
+      "hostNonModelSeconds": 4.61,
+      "modelRequests": 25,
+      "modelToolCalls": 22,
+      "businessCalls": 9,
+      "searchCalls": 13,
+      "moreRequests": 0,
+      "noProgressSearches": 0,
+      "failedBusinessAttempts": 0,
+      "readsAboveMinimum": 1,
+      "githubRequests": 9,
+      "httpStatuses": {
+        "200": 9
+      },
+      "upstreamSeconds": 3.912,
+      "httpBodyBytes": 35544,
+      "normalizedToolBytesSum": 112924,
+      "normalizedHistoryBytesSum": 151529,
+      "modelToolResultBytes": 41098,
+      "requiredContractsOffered": 6,
+      "hostProtocol": {
+        "requests": 0,
+        "seconds": 0,
+        "responseBytes": 0
+      },
+      "failures": []
+    },
+    {
+      "scale": "small",
+      "mode": "a2api",
+      "questions": 6,
+      "passed": 6,
+      "factsMatched": 6,
+      "firstAttemptClean": 6,
+      "byKind": {
+        "simple": {
+          "questions": 4,
+          "passed": 4
+        },
+        "chain": {
+          "questions": 2,
+          "passed": 2
+        }
+      },
+      "usageComplete": true,
+      "tokens": {
+        "prompt_tokens": 73768,
+        "completion_tokens": 5483,
+        "total_tokens": 79251
+      },
+      "questionSeconds": 107.28,
+      "sessionSetupSeconds": 0.059,
+      "modelSeconds": 102.12,
+      "hostNonModelSeconds": 5.16,
+      "modelRequests": 22,
+      "modelToolCalls": 20,
+      "businessCalls": 10,
+      "searchCalls": 10,
+      "moreRequests": 0,
+      "noProgressSearches": 0,
+      "failedBusinessAttempts": 0,
+      "readsAboveMinimum": 2,
+      "githubRequests": 10,
+      "httpStatuses": {
+        "200": 10
+      },
+      "upstreamSeconds": 4.275,
+      "httpBodyBytes": 39476,
+      "normalizedToolBytesSum": 105992,
+      "normalizedHistoryBytesSum": 129338,
+      "modelToolResultBytes": 43836,
+      "requiredContractsOffered": 6,
+      "hostProtocol": {
+        "requests": 42,
+        "seconds": 4.365,
+        "responseBytes": 742057
+      },
+      "failures": []
+    },
+    {
+      "scale": "small",
+      "mode": "ordinary",
+      "questions": 6,
+      "passed": 6,
+      "factsMatched": 6,
+      "firstAttemptClean": 6,
+      "byKind": {
+        "simple": {
+          "questions": 4,
+          "passed": 4
+        },
+        "chain": {
+          "questions": 2,
+          "passed": 2
+        }
+      },
+      "usageComplete": true,
+      "tokens": {
+        "prompt_tokens": 80133,
+        "completion_tokens": 5685,
+        "total_tokens": 85818
+      },
+      "questionSeconds": 110.405,
+      "sessionSetupSeconds": 0.049,
+      "modelSeconds": 106.166,
+      "hostNonModelSeconds": 4.239,
+      "modelRequests": 23,
+      "modelToolCalls": 21,
+      "businessCalls": 10,
+      "searchCalls": 11,
+      "moreRequests": 0,
+      "noProgressSearches": 0,
+      "failedBusinessAttempts": 0,
+      "readsAboveMinimum": 2,
+      "githubRequests": 10,
+      "httpStatuses": {
+        "200": 10
+      },
+      "upstreamSeconds": 4.152,
+      "httpBodyBytes": 39476,
+      "normalizedToolBytesSum": 116496,
+      "normalizedHistoryBytesSum": 141084,
+      "modelToolResultBytes": 44191,
+      "requiredContractsOffered": 6,
+      "hostProtocol": {
+        "requests": 0,
+        "seconds": 0,
+        "responseBytes": 0
+      },
+      "failures": []
+    }
+  ],
+  "totals": {
+    "ordinary": {
+      "questions": 12,
+      "passed": 12,
+      "factsMatched": 12,
+      "firstAttemptClean": 12,
+      "byKind": {
+        "simple": {
+          "questions": 8,
+          "passed": 8
+        },
+        "chain": {
+          "questions": 4,
+          "passed": 4
+        }
+      },
+      "usageComplete": true,
+      "tokens": {
+        "prompt_tokens": 164581,
+        "completion_tokens": 11693,
+        "total_tokens": 176274
+      },
+      "questionSeconds": 228.019,
+      "sessionSetupSeconds": 1.801,
+      "modelSeconds": 219.169,
+      "hostNonModelSeconds": 8.85,
+      "modelRequests": 48,
+      "modelToolCalls": 43,
+      "businessCalls": 19,
+      "searchCalls": 24,
+      "moreRequests": 0,
+      "noProgressSearches": 0,
+      "failedBusinessAttempts": 0,
+      "readsAboveMinimum": 3,
+      "githubRequests": 19,
+      "httpStatuses": {
+        "200": 19
+      },
+      "upstreamSeconds": 8.065,
+      "httpBodyBytes": 75020,
+      "normalizedToolBytesSum": 229420,
+      "normalizedHistoryBytesSum": 292613,
+      "modelToolResultBytes": 85289,
+      "requiredContractsOffered": 12,
+      "hostProtocol": {
+        "requests": 0,
+        "seconds": 0,
+        "responseBytes": 0
+      },
+      "failures": [],
+      "withSessionSetupSeconds": 229.82,
+      "withOneSharedCatalogBuildSeconds": 251.065,
+      "tokensPerStrictSuccessIncludingFailures": 14689.5
+    },
+    "a2api": {
+      "questions": 12,
+      "passed": 12,
+      "factsMatched": 12,
+      "firstAttemptClean": 12,
+      "byKind": {
+        "simple": {
+          "questions": 8,
+          "passed": 8
+        },
+        "chain": {
+          "questions": 4,
+          "passed": 4
+        }
+      },
+      "usageComplete": true,
+      "tokens": {
+        "prompt_tokens": 158216,
+        "completion_tokens": 11491,
+        "total_tokens": 169707
+      },
+      "questionSeconds": 225.039,
+      "sessionSetupSeconds": 1.823,
+      "modelSeconds": 214.724,
+      "hostNonModelSeconds": 10.315,
+      "modelRequests": 47,
+      "modelToolCalls": 42,
+      "businessCalls": 19,
+      "searchCalls": 23,
+      "moreRequests": 0,
+      "noProgressSearches": 0,
+      "failedBusinessAttempts": 0,
+      "readsAboveMinimum": 3,
+      "githubRequests": 19,
+      "httpStatuses": {
+        "200": 19
+      },
+      "upstreamSeconds": 8.044,
+      "httpBodyBytes": 75020,
+      "normalizedToolBytesSum": 218916,
+      "normalizedHistoryBytesSum": 280867,
+      "modelToolResultBytes": 84934,
+      "requiredContractsOffered": 12,
+      "hostProtocol": {
+        "requests": 98,
+        "seconds": 8.842,
+        "responseBytes": 1414100
+      },
+      "failures": [],
+      "withSessionSetupSeconds": 226.862,
+      "withOneSharedCatalogBuildSeconds": 248.107,
+      "tokensPerStrictSuccessIncludingFailures": 14142.2
+    }
+  },
+  "stdio": {
+    "passed": true,
+    "toolsListUnchanged": true,
+    "stats": {
+      "discover": 4,
+      "describe": 8,
+      "invoke": 2,
+      "reused": 0,
+      "evicted": 0
+    },
+    "seconds": 22.53988274099538,
+    "conditionalPage": {
+      "first": 1,
+      "second": 2,
+      "progress": true
+    },
+    "defaultBranch": "master",
+    "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+  },
+  "knownIDProbe": {
+    "passed": true
+  },
+  "scoringCorrection": [],
+  "rankDiagnostics": [
+    {
+      "scenario": "repository",
+      "query": "github repository default branch stars archived",
+      "page": 1,
+      "top3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.actions.get_workflow_run"
+      ],
+      "targetRanks": {
+        "github.repos.get": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "github repository branches list",
+      "page": 1,
+      "top3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "branches",
+      "query": "GitHub repository branches list",
+      "page": 1,
+      "top3": [
+        "github.repos.list_branches",
+        "github.repos.list_branches_for_head_commit",
+        "github.repos.list_deployment_branch_policies"
+      ],
+      "targetRanks": {
+        "github.repos.list_branches": 1
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository default branch info",
+      "page": 1,
+      "top3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.dependabot.repository_access_for_enterprise"
+      ],
+      "targetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 268
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github branch head commit SHA additions deletions",
+      "page": 1,
+      "top3": [
+        "github.pulls.get",
+        "github.repos.list_branches_for_head_commit",
+        "github.checks.get_suite"
+      ],
+      "targetRanks": {
+        "github.repos.get": 24,
+        "github.repos.get_commit": 7
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github commit SHA branch head",
+      "page": 1,
+      "top3": [
+        "github.repos.list_branches_for_head_commit",
+        "github.checks.get_suite",
+        "github.actions.get_workflow_run"
+      ],
+      "targetRanks": {
+        "github.repos.get": 19,
+        "github.repos.get_commit": 13
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github get branch commit SHA",
+      "page": 1,
+      "top3": [
+        "github.repos.get_branch",
+        "github.checks.get_suite",
+        "github.actions.get_workflow_run"
+      ],
+      "targetRanks": {
+        "github.repos.get": 14,
+        "github.repos.get_commit": 5
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github commit stats additions deletions",
+      "page": 1,
+      "top3": [
+        "github.pulls.get",
+        "github.repos.get_commit",
+        "github.repos.compare_commits"
+      ],
+      "targetRanks": {
+        "github.repos.get": 24,
+        "github.repos.get_commit": 2
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository default branch",
+      "page": 1,
+      "top3": [
+        "github.repos.get",
+        "github.orgs.get",
+        "github.dependabot.repository_access_for_enterprise"
+      ],
+      "targetRanks": {
+        "github.repos.get": 1,
+        "github.repos.get_commit": 265
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github repository info",
+      "page": 1,
+      "top3": [
+        "github.dependency_graph.export_sbom",
+        "github.code_scanning.get_sarif",
+        "github.actions.get_github_actions_default_workflow_permissions_repository"
+      ],
+      "targetRanks": {
+        "github.repos.get": 7,
+        "github.repos.get_commit": 224
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github commit sha additions deletions",
+      "page": 1,
+      "top3": [
+        "github.pulls.get",
+        "github.repos.get_commit",
+        "github.repos.list_commits"
+      ],
+      "targetRanks": {
+        "github.repos.get": 62,
+        "github.repos.get_commit": 2
+      }
+    },
+    {
+      "scenario": "default_commit",
+      "query": "github branch head commit",
+      "page": 1,
+      "top3": [
+        "github.repos.list_branches_for_head_commit",
+        "github.checks.get_suite",
+        "github.actions.get_workflow_run"
+      ],
+      "targetRanks": {
+        "github.repos.get": 9,
+        "github.repos.get_commit": 20
+      }
+    }
+  ],
+  "httpRequestsIncludingPreflightAndStdio": 42
+}
