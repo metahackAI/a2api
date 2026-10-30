@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "a2api"
 version = "0.1.0"
-description = "Capability contracts and a read-only HTTP composition runtime for agents"
+description = "Lightweight capability protocol, explicit conversion and HTTP calls for agents"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["jsonschema>=4.19,<5"]

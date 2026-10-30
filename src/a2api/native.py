@@ -16,6 +16,7 @@ from .function_schema import json_copy, type_schema
 from .ir import ExecutionContext, freeze
 from .openapi_schema import check_draft_schema
 from .schema import validate_value
+from .discovery_metadata import search_keywords
 
 
 @dataclass(frozen=True)
@@ -26,9 +27,10 @@ class _Function:
     output_schema: object
     defaults_json: str
     inject_context: bool
+    search_terms: tuple[str, ...] = ()
 
 
-def _definition(function, identifier, effect, summary, input_schema, output_schema):
+def _definition(function, identifier, effect, summary, input_schema, output_schema, keywords):
     original = inspect.unwrap(function)
     if (not (inspect.isfunction(original) or inspect.ismethod(original))
             or inspect.iscoroutinefunction(original) or inspect.isgeneratorfunction(original)
@@ -92,14 +94,15 @@ def _definition(function, identifier, effect, summary, input_schema, output_sche
     descriptor = {'id': identifier, 'version': '0.1.0', 'summary': description.strip(), 'effects': {'kind': 'read'},
                   'inputSchema': input_schema, 'outputSchema': output_schema}
     return _Function(function, json.dumps(descriptor, ensure_ascii=False, allow_nan=False),
-                     freeze(input_schema), freeze(output_schema), json.dumps(defaults, ensure_ascii=False), inject_context)
+                     freeze(input_schema), freeze(output_schema), json.dumps(defaults, ensure_ascii=False), inject_context,
+                     search_keywords(keywords, code='INVALID_FUNCTION'))
 
 
 def capability(*, id: str, effect: str, summary: str | None = None, input_schema: dict | None = None,
-               output_schema: dict | None = None):
+               output_schema: dict | None = None, keywords: list[str] | tuple[str, ...] | None = None):
     """Declare a read function explicitly. Decoration does not execute its body."""
     def register(function):
-        definition = _definition(function, id, effect, summary, input_schema, output_schema)
+        definition = _definition(function, id, effect, summary, input_schema, output_schema, keywords)
         @wraps(function)
         def exported(*args, **kwargs):
             return function(*args, **kwargs)
@@ -140,6 +143,9 @@ class Application:
     def descriptors(self) -> tuple[dict, ...]:
         """Host-side catalog snapshot; not the MCP tools/list payload."""
         return tuple(self.describe(identifier) for identifier in self._calls)
+
+    def search_metadata(self) -> dict[str, tuple[str, ...]]:
+        return {identifier: definition.search_terms for identifier, definition in self._calls.items()}
 
     def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:
         try:

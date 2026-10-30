@@ -13,6 +13,8 @@
 
 후속 구현으로 **Java/Spring MVC·Go net/http·Rust Axum 소스 importer**와 직접 HTTP 앱의 GET/HEAD/POST/PUT/PATCH/DELETE를 지원한다. `effect="read"/"write"`를 명시하고 같은 convert·MCP를 사용한다. [소스에서 바로 호출하는 사용법·지원 문법·실행 예제](docs/18-source-importers.ko.md)를 참고한다.
 
+**경량 호출의 기준은 [a2api-call/0.1 명세](docs/20-call-protocol.ko.md)와 패키지의 [JSON Schema](src/a2api/schemas/call.schema.json)다.** API dispatch/MCP가 같은 스키마를 사용한다. 선택적 `summary`·서버 검색용 `keywords`는 [작은 설명 설정](docs/21-discovery-metadata.ko.md)으로 제공한다. 처음 시작하려면 [설치부터 직접·MCP·실제 모델 호출까지](docs/22-quickstart-and-model.ko.md)를 따른다.
+
 ## OpenAPI를 바로 호출하기
 
 ```python

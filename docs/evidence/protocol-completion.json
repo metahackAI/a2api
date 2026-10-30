@@ -1,0 +1,169 @@
+{
+  "checkedAt": "2026-10-30T13:29:53.238718+09:00",
+  "scope": "Three fixed tasks from docs/19: canonical lightweight protocol, explicit search metadata, public quickstart/model examples. Synthetic source servers plus existing order samples only.",
+  "protocol": {
+    "profile": "a2api-call/0.1",
+    "schema": "src/a2api/schemas/call.schema.json",
+    "comparedWithBaseCommit": "90a9b9bf5166abaabfb585de659567e5af4bcf23",
+    "requestAndResponseSchemasUnchanged": true,
+    "canonicalWireSHA256": "16468bc487d5834a229aebb41f2ca7367a283f2e98519c7f3796232d5ce42375",
+    "descriptorFieldCount": 6,
+    "commonMCPToolCount": 3,
+    "checks": [
+      "Published positive/negative packets",
+      "Real MCP success, business failure and preflight error",
+      "Existing Runtime output extensions preserved",
+      "No business schemas or keywords in tools/list"
+    ]
+  },
+  "tests": {
+    "command": ".venv-mcp/bin/python -m unittest discover -s tests -v",
+    "passed": 272,
+    "modelFixturesAreLiveLLMEvidence": false,
+    "covered": [
+      "Native/OpenAPI/source metadata",
+      "Rank and unknown searches",
+      "Metadata snapshot/cursor changes",
+      "Invalid annotations",
+      "Unmodified model arguments",
+      "Structured API errors",
+      "No provider retries",
+      "Key/reasoning handling"
+    ]
+  },
+  "liveModel": {
+    "model": "muse-glimmer-30b",
+    "endpoint": "User-provided Chat Completions compatible server; hostname omitted from public evidence",
+    "sameQuestionsAndSystemInstructionsAsBaseline": true,
+    "temperature": 0,
+    "maxTokens": 2048,
+    "scenariosPassed": 7,
+    "modelDrivenAPIInvocations": 24,
+    "independentHTTPReads": 6,
+    "originalItemPreservedAndCreatedItemDeleted": true,
+    "baseline": {
+      "emptyDiscover": 10,
+      "mcpCalls": 68,
+      "modelRequests": 75
+    },
+    "current": {
+      "emptyDiscover": 3,
+      "mcpCalls": 65,
+      "modelRequests": 72
+    },
+    "expectedNotFoundResults": 3,
+    "unexpectedToolErrors": 0,
+    "argumentsRepaired": false,
+    "automaticRetries": false,
+    "reasoningStored": false,
+    "rows": [
+      {
+        "language": "spring",
+        "scenario": "read",
+        "passed": true,
+        "invokeCount": 2,
+        "baselineModelRequests": 8,
+        "currentModelRequests": 6,
+        "answerReview": "matched recorded IDs, names, response statuses and deletion failure"
+      },
+      {
+        "language": "spring",
+        "scenario": "crud",
+        "passed": true,
+        "invokeCount": 6,
+        "baselineModelRequests": 16,
+        "currentModelRequests": 20,
+        "answerReview": "matched recorded IDs, names, response statuses and deletion failure"
+      },
+      {
+        "language": "go",
+        "scenario": "read",
+        "passed": true,
+        "invokeCount": 2,
+        "baselineModelRequests": 8,
+        "currentModelRequests": 6,
+        "answerReview": "matched recorded IDs, names, response statuses and deletion failure"
+      },
+      {
+        "language": "go",
+        "scenario": "crud",
+        "passed": true,
+        "invokeCount": 6,
+        "baselineModelRequests": 15,
+        "currentModelRequests": 16,
+        "answerReview": "matched recorded IDs, names, response statuses and deletion failure"
+      },
+      {
+        "language": "go",
+        "scenario": "clarify",
+        "passed": true,
+        "invokeCount": 0,
+        "baselineModelRequests": 5,
+        "currentModelRequests": 3,
+        "answerReview": "matched recorded tool results; clarification asks for ID without invoke"
+      },
+      {
+        "language": "rust",
+        "scenario": "read",
+        "passed": true,
+        "invokeCount": 2,
+        "baselineModelRequests": 8,
+        "currentModelRequests": 6,
+        "answerReview": "matched recorded IDs, names, response statuses and deletion failure"
+      },
+      {
+        "language": "rust",
+        "scenario": "crud",
+        "passed": true,
+        "invokeCount": 6,
+        "baselineModelRequests": 15,
+        "currentModelRequests": 15,
+        "answerReview": "matched recorded IDs, names, response statuses and deletion failure"
+      }
+    ],
+    "observations": [
+      "Empty discover fell from 10 to 3 in this single comparison. Remaining empty searches used new item names rather than registered intent terms.",
+      "Spring CRUD model requests increased from 16 to 20 and Go CRUD from 15 to 16. No claim that every scenario became faster or cheaper.",
+      "No randomized/repeated model benchmark, tokenizer reduction or universal success-rate claim."
+    ]
+  },
+  "packaging": {
+    "freshVenv": true,
+    "installedWheel": "a2api-0.1.0-py3-none-any.whl",
+    "wheelSHA256": "8ccd06f510fb34e8e1f4c2ff0426cfade3d23ee95f670367169ad6dadd74287f",
+    "isolatedImportOutsideRepository": true,
+    "canonicalJSONIncluded": true,
+    "httpQuickstart": true,
+    "pythonQuickstart": true,
+    "actualStdioQuickstart": true,
+    "modelQuickstarts": [
+      {
+        "example": "quickstart-model.json",
+        "invokeCount": 2,
+        "hostError": false,
+        "answerReview": "matched actual order and shipment IDs/state/time fields"
+      },
+      {
+        "example": "quickstart-openapi-model.json",
+        "invokeCount": 3,
+        "hostError": false,
+        "answerReview": "matched actual order and shipment IDs/state/time fields"
+      }
+    ],
+    "versions": {
+      "jsonschema": "4.26.0",
+      "mcp": "2.3.0",
+      "tree-sitter": "0.26.0",
+      "tree-sitter-java": "0.23.5",
+      "tree-sitter-go": "0.25.0",
+      "tree-sitter-rust": "0.24.2"
+    }
+  },
+  "limits": [
+    "Direct Python functions remain read-only; legacy management Runtime behavior is preserved.",
+    "String search with supplied annotations, not general semantic search or automatic business inference.",
+    "No new language/framework, production company API, CI/deployment platform or approval workflow.",
+    "Current lightweight transport example is MCP stdio; old full-manifest HTTP gateway is a separate interface.",
+    "Credentials/context/authorization remain host and original-service responsibilities."
+  ]
+}

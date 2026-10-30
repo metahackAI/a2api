@@ -1,0 +1,304 @@
+{
+  "discover_request": {
+    "valid": [
+      {},
+      {
+        "query": "항목 조회",
+        "limit": 3
+      },
+      {
+        "cursor": "opaque-cursor"
+      }
+    ],
+    "invalid": [
+      {
+        "limit": 0
+      },
+      {
+        "limit": 51
+      },
+      {
+        "limit": true
+      },
+      {
+        "query": null
+      },
+      {
+        "cursor": ""
+      },
+      {
+        "actor": "alice"
+      }
+    ]
+  },
+  "describe_request": {
+    "valid": [
+      {
+        "id": "orders.get",
+        "version": "0.1.0"
+      }
+    ],
+    "invalid": [
+      {
+        "id": "orders.get"
+      },
+      {
+        "capabilityId": "orders.get",
+        "version": "0.1.0"
+      },
+      {
+        "id": "",
+        "version": "0.1.0"
+      }
+    ]
+  },
+  "invoke_request": {
+    "valid": [
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "catalogVersion": "opaque-catalog",
+        "input": {
+          "path": {
+            "id": "I-1"
+          }
+        },
+        "requestId": "trace-1"
+      }
+    ],
+    "invalid": [
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "input": {}
+      },
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "catalogVersion": "opaque-catalog",
+        "input": []
+      },
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "catalogVersion": "opaque-catalog",
+        "input": {},
+        "context": {
+          "actor": "bob"
+        }
+      }
+    ]
+  },
+  "descriptor": {
+    "valid": [
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "summary": "항목 조회",
+        "effects": {
+          "kind": "read"
+        },
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "null"
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "summary": "항목 조회",
+        "effects": {
+          "kind": "unknown"
+        },
+        "inputSchema": {},
+        "outputSchema": {}
+      },
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "summary": "항목 조회",
+        "effects": {
+          "kind": "read"
+        },
+        "inputSchema": {},
+        "outputSchema": {},
+        "keywords": [
+          "조회"
+        ]
+      }
+    ]
+  },
+  "discover_response": {
+    "valid": [
+      {
+        "catalogVersion": "opaque-catalog",
+        "capabilities": [],
+        "nextCursor": null
+      },
+      {
+        "catalogVersion": "opaque-catalog",
+        "capabilities": [
+          {
+            "id": "orders.get",
+            "version": "0.1.0",
+            "title": "orders.get",
+            "summary": "항목 조회",
+            "effects": {
+              "kind": "read"
+            },
+            "matchedTerms": [
+              "조회"
+            ]
+          }
+        ],
+        "nextCursor": "opaque-next"
+      }
+    ],
+    "invalid": [
+      {
+        "catalogVersion": "opaque-catalog",
+        "capabilities": []
+      },
+      {
+        "catalogVersion": "opaque-catalog",
+        "capabilities": [],
+        "nextCursor": 3
+      }
+    ]
+  },
+  "invoke_response": {
+    "valid": [
+      {
+        "status": "succeeded",
+        "data": null,
+        "httpStatus": 204,
+        "completeness": {
+          "complete": true,
+          "scope": "single_api_response"
+        }
+      },
+      {
+        "status": "succeeded",
+        "data": [
+          {
+            "id": "I-1"
+          }
+        ],
+        "completeness": {
+          "complete": true
+        }
+      },
+      {
+        "status": "failed",
+        "error": {
+          "type": "urn:a2api:problem:outcome-unknown",
+          "title": "OUTCOME_UNKNOWN",
+          "status": 504,
+          "detail": "Outcome cannot be confirmed.",
+          "code": "OUTCOME_UNKNOWN"
+        },
+        "completeness": {
+          "complete": false
+        }
+      },
+      {
+        "error": {
+          "type": "urn:a2api:problem:invalid-request",
+          "title": "INVALID_REQUEST",
+          "status": 400,
+          "detail": "Invalid fields.",
+          "code": "INVALID_REQUEST"
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "status": "succeeded",
+        "data": null,
+        "httpStatus": 404,
+        "completeness": {
+          "complete": true
+        }
+      },
+      {
+        "status": "succeeded",
+        "data": null,
+        "completeness": {
+          "complete": false
+        }
+      },
+      {
+        "status": "failed",
+        "completeness": {
+          "complete": false
+        }
+      },
+      {
+        "status": "running",
+        "data": null,
+        "completeness": {
+          "complete": true
+        }
+      }
+    ]
+  },
+  "describe_response": {
+    "valid": [
+      {
+        "catalogVersion": "opaque-catalog",
+        "capability": {
+          "id": "orders.get",
+          "version": "0.1.0",
+          "summary": "항목 조회",
+          "effects": {
+            "kind": "read"
+          },
+          "inputSchema": {
+            "type": "object"
+          },
+          "outputSchema": {
+            "type": "null"
+          }
+        }
+      }
+    ],
+    "invalid": [
+      {
+        "id": "orders.get",
+        "version": "0.1.0",
+        "summary": "항목 조회",
+        "effects": {
+          "kind": "read"
+        },
+        "inputSchema": {
+          "type": "object"
+        },
+        "outputSchema": {
+          "type": "null"
+        }
+      },
+      {
+        "catalogVersion": "opaque-catalog",
+        "capability": {
+          "id": "orders.get",
+          "version": "0.1.0",
+          "summary": "항목 조회",
+          "effects": {
+            "kind": "read"
+          },
+          "inputSchema": {
+            "type": "object"
+          },
+          "outputSchema": {
+            "type": "null"
+          }
+        },
+        "origin": "https://backend.invalid"
+      }
+    ]
+  }
+}

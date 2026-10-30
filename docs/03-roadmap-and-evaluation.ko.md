@@ -31,6 +31,8 @@ P0-3 이후 이번 요청은 **기존 GitHub OpenAPI로 공개 저장소 조회�
 
 2026-10-30 요청은 **Java/Spring·Go·Rust 소스 importer와 여러 HTTP 메서드의 직접 호출 지원**이다. [이번 상세 계획](17-source-importers-plan.ko.md)의 1 → 5 순서와 파일/프레임워크 범위로 구현·검증한다. UPDATE는 PUT/PATCH로 지원한다. 기존의 읽기 전용 제한을 새 직접 호출 경로에서 명시적 effect로 확장하며 회사 API나 기존 관리 Runtime의 쓰기 활성화는 포함하지 않는다.
 
+이후 사용자가 확정한 범위는 **경량 프로토콜 기준 명세 → 설명·탐색 metadata → 공식 시작·모델 연결 예제**의 세 작업이다. [확정 개발 범위](19-protocol-completion-plan.ko.md)의 순서·파일·완료 조건에 따라 모두 구현한다. Python 쓰기나 새 운영 기능을 이 완료 조건에 추가하지 않는다.
+
 ### 기존 코드의 처리
 
 - 재사용: OpenAPI 읽기/진단, JSON Schema 처리, HTTP 직렬화·응답 처리, credential provider, context, 기존 호출·오류 인터페이스, MCP SDK 연결.

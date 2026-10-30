@@ -19,8 +19,10 @@ from .pointers import tokens
 from .review_projection import ANNOTATIONS, dereference
 from .reviewed_adapter import HTTPDeployment
 from .schema import validate_value
+from .protocol import PROTOCOL_PROFILE
+from .discovery_metadata import search_keywords, summary_override
 
-CALL_PROFILE = 'a2api-call/0.1'
+CALL_PROFILE = PROTOCOL_PROFILE
 
 
 def _bundle(node, root: dict) -> dict:
@@ -68,6 +70,7 @@ class _Call:
     wire: Operation
     output_schema: Mapping
     selected: tuple[str, ...] | None
+    search_terms: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -92,6 +95,10 @@ class ConvertedAPI:
     def descriptors(self) -> tuple[dict, ...]:
         """Host-side catalog snapshot; not the MCP tools/list payload."""
         return tuple(self.describe(identifier) for identifier in self._calls)
+
+    def search_metadata(self) -> dict[str, tuple[str, ...]]:
+        """Host-only index terms; never added to the public descriptor."""
+        return {identifier: call.search_terms for identifier, call in self._calls.items()}
 
     def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:
         """Return a compact success/error envelope; never automatically retry."""
@@ -126,7 +133,7 @@ class ConvertedAPI:
 def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeployment) -> ConvertedAPI:
     """Bind selected source/OpenAPI operations without activating imported drafts.
 
-    operations maps a source operation ID to {"effect": "read"|"write", "select": [fields]}.
+    operations maps IDs to effect, optional select, summary and search keywords.
     Omit select to expose the original JSON response. It never implies authorization.
     """
     if not isinstance(source, (OpenAPIImporter, SourceImporter)) or not isinstance(deployment, HTTPDeployment):
@@ -136,13 +143,15 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
     settings = {}
     for identifier, options in operations.items():
         if (not isinstance(identifier, str) or not identifier or not isinstance(options, Mapping)
-                or set(options) - {'effect', 'select'} or options.get('effect') not in ('read', 'write')):
+                or set(options) - {'effect', 'select', 'summary', 'keywords'} or options.get('effect') not in ('read', 'write')):
             raise A2APIError('INVALID_CONVERSION', 'Each operation must explicitly declare effect=read or write and only supported options.')
         selected = options.get('select')
         if 'select' in options and (not isinstance(selected, list) or not selected
                 or any(not isinstance(name, str) or not name for name in selected) or len(set(selected)) != len(selected)):
             raise A2APIError('INVALID_SELECTION', 'select must be a nonempty list of unique top-level field names.')
-        settings[identifier] = (tuple(selected) if selected is not None else None, options['effect'])
+        summary = summary_override(options['summary']) if 'summary' in options else None
+        keywords = search_keywords(options.get('keywords'))
+        settings[identifier] = (tuple(selected) if selected is not None else None, options['effect'], summary, keywords)
     calls, routes = {}, {}
     for record in source.iter_operations(set(settings)):
         if record.status != 'imported' or (record.operation if isinstance(record, SourceRecord) else record.capability) is None:
@@ -150,20 +159,28 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
                              issues=[{'operationId': record.operation_id, 'status': record.status,
                                       'diagnostics': thaw(record.diagnostics)}])
         wire = record.operation if isinstance(record, SourceRecord) else record.capability.operations[record.operation_id]
-        selected, effect = settings[record.operation_id]
+        selected, effect, summary, keywords = settings[record.operation_id]
         if (wire.http_method in ('PUT', 'PATCH', 'DELETE') and effect != 'write'
                 or wire.http_method in ('GET', 'HEAD') and effect != 'read'):
             raise A2APIError('INVALID_CONVERSION', 'GET/HEAD require read; PUT/PATCH/DELETE require write. POST needs an explicit read/write effect.')
         public_output = _output_schema(wire, selected)
         public_input = thaw(wire.input_schema)
         check_draft_schema(public_input)
+        source_summary = record.title if isinstance(record, SourceRecord) else record.capability.title
+        source_terms = (source_summary,)
+        if not isinstance(record, SourceRecord):
+            imported = record.capability.describe()
+            source_terms += (imported['intent']['summary'],)
+            tags = imported['provenance']['source'].get('tags', [])
+            if isinstance(tags, list):
+                source_terms += tuple(tag for tag in tags if isinstance(tag, str))
         descriptor = {'id': record.id if isinstance(record, SourceRecord) else record.capability.id,
                       'version': record.version if isinstance(record, SourceRecord) else record.capability.version,
-                      'summary': record.title if isinstance(record, SourceRecord) else record.capability.title, 'effects': {'kind': effect},
+                      'summary': summary if summary is not None else source_summary, 'effects': {'kind': effect},
                       'inputSchema': public_input, 'outputSchema': public_output}
         route = record.http_route(deployment.base_url, path_prefix=deployment.path_prefix,
                                   headers=dict(deployment.headers), credential_provider=deployment.credential_provider)
         routes[(wire.service_ref, wire.operation_ref)] = route
         calls[descriptor['id']] = _Call(json.dumps(descriptor, ensure_ascii=False, allow_nan=False), wire,
-                                       freeze(public_output), selected)
+                                       freeze(public_output), selected, tuple(dict.fromkeys((*keywords, *source_terms))))
     return ConvertedAPI(MappingProxyType(calls), HTTPAdapter(routes))

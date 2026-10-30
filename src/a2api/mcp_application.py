@@ -28,13 +28,17 @@ class DirectApplications:
         if not apps or any(not isinstance(app, (ConvertedAPI, Application)) for app in apps):
             raise TypeError('Supply a ConvertedAPI, Application, or a nonempty list of these applications.')
         self._entries = {}
+        self._search_terms = {}
         for app in apps:
+            metadata = app.search_metadata()
             for descriptor in app.descriptors():
                 key = (descriptor['id'], descriptor['version'])
                 if key in self._entries:
                     raise A2APIError('INVALID_CONTRACT', 'MCP applications must have distinct capability ID/version pairs.')
                 self._entries[key] = (app, descriptor)
-        serialized = json.dumps([self._entries[key][1] for key in sorted(self._entries)],
+                self._search_terms[key] = metadata[descriptor['id']]
+        serialized = json.dumps({'descriptors': [self._entries[key][1] for key in sorted(self._entries)],
+                                 'search': [list(self._search_terms[key]) for key in sorted(self._entries)]},
                                 ensure_ascii=False, sort_keys=True, allow_nan=False, separators=(',', ':'))
         self.version = 'sha256:' + hashlib.sha256(serialized.encode()).hexdigest()
         self.writable = any(descriptor['effects']['kind'] == 'write' for _, descriptor in self._entries.values())
@@ -49,7 +53,7 @@ class DirectApplications:
         words = query.casefold().split()
         matches = []
         for (identifier, version), (_, descriptor) in self._entries.items():
-            text = (identifier + ' ' + descriptor['summary']).casefold()
+            text = ' '.join((identifier, descriptor['summary'], *self._search_terms[(identifier, version)])).casefold()
             terms = [word for word in words if word in text]
             if words and not terms:
                 continue

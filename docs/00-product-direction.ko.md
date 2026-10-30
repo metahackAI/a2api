@@ -8,6 +8,8 @@ P0-2의 현재 사용법은 [Python 함수·신규 API 등록](12-python-functio
 
 두 경로의 실제 stdio 연결과 공통 도구 경량화는 [P0-3 MCP 안내](13-lightweight-mcp.ko.md)에 있다.
 
+현재 경량 wire의 기준은 [a2api-call/0.1 명세](20-call-protocol.ko.md)와 패키지 JSON Schema다. [선택적 설명·탐색 설정](21-discovery-metadata.ko.md), [설치부터 실제 모델 호출까지](22-quickstart-and-model.ko.md)가 기존 방향을 구현한다. 이 마무리의 개발 범위는 [세 작업 계획](19-protocol-completion-plan.ko.md)으로 고정한다.
+
 ## 1. 제품의 목적과 순서
 
 **a2api는 기존 API·함수를 에이전트가 찾고 호출할 수 있는 공통 인터페이스로 전환하는 프로토콜과 라이브러리다.**
