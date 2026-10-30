@@ -1,0 +1,221 @@
+{
+  "rawReportSHA256": "a73860176d4d2910e3158a4895bb00af81306589f7897cc0976a689d14cd4c3b",
+  "method": "Manual comparison by the coding agent of all 33 final answers with their actual tool outputs; not an independent human or model judge.",
+  "rules": {
+    "ASOF_DESCRIBED_AS_REQUEST_TIME": "asOf is a data reference time; calling it the HTTP request time is unsupported.",
+    "UNSUPPORTED_REASON_FOR_NULL_ETA": "delivered and estimatedArrival=null do not prove why the value is absent."
+  },
+  "runs": [
+    {
+      "id": "0/orders/2/ordinary/simple",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/ordinary/chain",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/ordinary/followup",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/generic/simple",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/generic/chain",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/generic/followup",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/selected/simple",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/2/selected/chain",
+      "dataValuesMatched": true,
+      "state": "checked_with_notes",
+      "issues": [
+        "ASOF_DESCRIBED_AS_REQUEST_TIME"
+      ]
+    },
+    {
+      "id": "0/orders/2/selected/followup",
+      "dataValuesMatched": true,
+      "state": "checked_with_notes",
+      "issues": [
+        "ASOF_DESCRIBED_AS_REQUEST_TIME"
+      ]
+    },
+    {
+      "id": "0/orders/1000/generic/simple",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/1000/generic/chain",
+      "dataValuesMatched": true,
+      "state": "checked_with_notes",
+      "issues": [
+        "ASOF_DESCRIBED_AS_REQUEST_TIME"
+      ]
+    },
+    {
+      "id": "0/orders/1000/generic/followup",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/1000/selected/simple",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/1000/selected/chain",
+      "dataValuesMatched": true,
+      "state": "unsupported_inference",
+      "issues": [
+        "ASOF_DESCRIBED_AS_REQUEST_TIME",
+        "UNSUPPORTED_REASON_FOR_NULL_ETA"
+      ]
+    },
+    {
+      "id": "0/orders/1000/selected/followup",
+      "dataValuesMatched": true,
+      "state": "checked_with_notes",
+      "issues": [
+        "ASOF_DESCRIBED_AS_REQUEST_TIME"
+      ]
+    },
+    {
+      "id": "0/orders/1000/ordinary/simple",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/orders/1000/ordinary/chain",
+      "dataValuesMatched": true,
+      "state": "checked_with_notes",
+      "issues": [
+        "ASOF_DESCRIBED_AS_REQUEST_TIME"
+      ]
+    },
+    {
+      "id": "0/orders/1000/ordinary/followup",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/generic/repository_issues",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/generic/next_page",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/generic/missing_input",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/selected/repository_issues",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/selected/next_page",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/selected/missing_input",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/ordinary/repository_issues",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/ordinary/next_page",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/2/ordinary/missing_input",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/1000/selected/repository_issues",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/1000/selected/next_page",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/1000/ordinary/repository_issues",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/1000/ordinary/next_page",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/1000/generic/repository_issues",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    },
+    {
+      "id": "0/github/1000/generic/next_page",
+      "dataValuesMatched": true,
+      "state": "checked",
+      "issues": []
+    }
+  ]
+}

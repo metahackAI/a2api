@@ -14,9 +14,10 @@ from .reapproval import prepare_review, approve_review, write_review
 from .conversion import ConvertedAPI, convert
 from .native import Application, capability
 from .protocol import PROTOCOL_PROFILE, protocol_schema
+from .tool_session import TOOL_PROFILE, ToolSession
 
 __all__ = ["A2APIError", "Capability", "Catalog", "ExecutionContext", "HTTPAdapter", "HTTPHeaderParameter", "HTTPQueryParameter", "HTTPResponse", "HTTPRoute",
            "Runtime", "compile_contract", "load_contract", "BuildResult", "build_contracts", "load_build", "load_review",
            "source_digest", "write_build", "HTTPDeployment", "ReviewedHTTPAdapter", "dependency_index", "diff_openapi",
            "IncrementalBuild", "regenerate", "prepare_review", "approve_review", "write_review", "ConvertedAPI", "convert",
-           "Application", "capability", "PROTOCOL_PROFILE", "protocol_schema"]
+           "Application", "capability", "PROTOCOL_PROFILE", "protocol_schema", "TOOL_PROFILE", "ToolSession"]

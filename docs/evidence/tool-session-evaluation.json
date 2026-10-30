@@ -1,0 +1,560 @@
+{
+  "checkedAt": "2026-10-30T05:45:38.985283+00:00",
+  "model": "muse-glimmer-30b",
+  "completed": true,
+  "repetitions": 1,
+  "limits": [
+    "pilot, no claim of general superiority",
+    "1000 = 2 real operations + 998 synthetic distractors",
+    "ordinary uses same converted app/validation; measures binding, not independent SDK or development cost",
+    "ordinary is in-process; a2api modes use actual MCP stdio",
+    "identical lexical ranking; no automatic context compaction; provider cache/load uncontrolled"
+  ],
+  "preflight": {
+    "modelAvailable": true,
+    "githubRemaining": 60
+  },
+  "configurations": [
+    {
+      "domain": "github",
+      "count": 2,
+      "knowledge": "known",
+      "mode": "generic",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 3
+      },
+      "seconds": 44.619,
+      "meanSeconds": 14.873,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 20941,
+        "completion_tokens": 2489,
+        "total_tokens": 23430
+      },
+      "modelRequests": 10,
+      "modelToolCalls": 8,
+      "businessCalls": 3,
+      "backendRequests": 3,
+      "failures": []
+    },
+    {
+      "domain": "github",
+      "count": 2,
+      "knowledge": "known",
+      "mode": "ordinary",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 3
+      },
+      "seconds": 33.945,
+      "meanSeconds": 11.315,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 8885,
+        "completion_tokens": 2089,
+        "total_tokens": 10974
+      },
+      "modelRequests": 6,
+      "modelToolCalls": 3,
+      "businessCalls": 3,
+      "backendRequests": 3,
+      "failures": []
+    },
+    {
+      "domain": "github",
+      "count": 2,
+      "knowledge": "known",
+      "mode": "selected",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 3
+      },
+      "seconds": 32.817,
+      "meanSeconds": 10.939,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 8831,
+        "completion_tokens": 1960,
+        "total_tokens": 10791
+      },
+      "modelRequests": 6,
+      "modelToolCalls": 3,
+      "businessCalls": 3,
+      "backendRequests": 3,
+      "failures": []
+    },
+    {
+      "domain": "github",
+      "count": 1000,
+      "knowledge": "unknown",
+      "mode": "generic",
+      "questions": 2,
+      "strictPassed": 2,
+      "answerReviews": {
+        "checked": 2
+      },
+      "seconds": 37.522,
+      "meanSeconds": 18.761,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 14790,
+        "completion_tokens": 2222,
+        "total_tokens": 17012
+      },
+      "modelRequests": 6,
+      "modelToolCalls": 6,
+      "businessCalls": 3,
+      "backendRequests": 3,
+      "failures": []
+    },
+    {
+      "domain": "github",
+      "count": 1000,
+      "knowledge": "unknown",
+      "mode": "ordinary",
+      "questions": 2,
+      "strictPassed": 2,
+      "answerReviews": {
+        "checked": 2
+      },
+      "seconds": 31.476,
+      "meanSeconds": 15.738,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 9875,
+        "completion_tokens": 1872,
+        "total_tokens": 11747
+      },
+      "modelRequests": 5,
+      "modelToolCalls": 6,
+      "businessCalls": 3,
+      "backendRequests": 3,
+      "failures": []
+    },
+    {
+      "domain": "github",
+      "count": 1000,
+      "knowledge": "unknown",
+      "mode": "selected",
+      "questions": 2,
+      "strictPassed": 2,
+      "answerReviews": {
+        "checked": 2
+      },
+      "seconds": 37.097,
+      "meanSeconds": 18.549,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 9503,
+        "completion_tokens": 2165,
+        "total_tokens": 11668
+      },
+      "modelRequests": 5,
+      "modelToolCalls": 6,
+      "businessCalls": 3,
+      "backendRequests": 3,
+      "failures": []
+    },
+    {
+      "domain": "orders",
+      "count": 2,
+      "knowledge": "known",
+      "mode": "generic",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 3
+      },
+      "seconds": 36.652,
+      "meanSeconds": 12.217,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 30553,
+        "completion_tokens": 2107,
+        "total_tokens": 32660
+      },
+      "modelRequests": 12,
+      "modelToolCalls": 9,
+      "businessCalls": 6,
+      "backendRequests": 6,
+      "failures": []
+    },
+    {
+      "domain": "orders",
+      "count": 2,
+      "knowledge": "known",
+      "mode": "ordinary",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 3
+      },
+      "seconds": 22.445,
+      "meanSeconds": 7.482,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 14301,
+        "completion_tokens": 1287,
+        "total_tokens": 15588
+      },
+      "modelRequests": 9,
+      "modelToolCalls": 6,
+      "businessCalls": 6,
+      "backendRequests": 6,
+      "failures": []
+    },
+    {
+      "domain": "orders",
+      "count": 2,
+      "knowledge": "known",
+      "mode": "selected",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 1,
+        "checked_with_notes": 2
+      },
+      "seconds": 22.407,
+      "meanSeconds": 7.469,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 14399,
+        "completion_tokens": 1288,
+        "total_tokens": 15687
+      },
+      "modelRequests": 9,
+      "modelToolCalls": 6,
+      "businessCalls": 6,
+      "backendRequests": 6,
+      "failures": []
+    },
+    {
+      "domain": "orders",
+      "count": 1000,
+      "knowledge": "unknown",
+      "mode": "generic",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 2,
+        "checked_with_notes": 1
+      },
+      "seconds": 42.237,
+      "meanSeconds": 14.079,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 52467,
+        "completion_tokens": 2406,
+        "total_tokens": 54873
+      },
+      "modelRequests": 13,
+      "modelToolCalls": 10,
+      "businessCalls": 6,
+      "backendRequests": 6,
+      "failures": []
+    },
+    {
+      "domain": "orders",
+      "count": 1000,
+      "knowledge": "unknown",
+      "mode": "ordinary",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 2,
+        "checked_with_notes": 1
+      },
+      "seconds": 22.7,
+      "meanSeconds": 7.567,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 15991,
+        "completion_tokens": 1325,
+        "total_tokens": 17316
+      },
+      "modelRequests": 8,
+      "modelToolCalls": 9,
+      "businessCalls": 6,
+      "backendRequests": 6,
+      "failures": []
+    },
+    {
+      "domain": "orders",
+      "count": 1000,
+      "knowledge": "unknown",
+      "mode": "selected",
+      "questions": 3,
+      "strictPassed": 3,
+      "answerReviews": {
+        "checked": 1,
+        "checked_with_notes": 1,
+        "unsupported_inference": 1
+      },
+      "seconds": 25.108,
+      "meanSeconds": 8.369,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 16185,
+        "completion_tokens": 1413,
+        "total_tokens": 17598
+      },
+      "modelRequests": 8,
+      "modelToolCalls": 9,
+      "businessCalls": 6,
+      "backendRequests": 6,
+      "failures": []
+    }
+  ],
+  "totals": {
+    "generic": {
+      "questions": 11,
+      "strictPassed": 11,
+      "answerReviews": {
+        "checked": 10,
+        "checked_with_notes": 1
+      },
+      "seconds": 161.03,
+      "meanSeconds": 14.639,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 118751,
+        "completion_tokens": 9224,
+        "total_tokens": 127975
+      },
+      "modelRequests": 41,
+      "modelToolCalls": 33,
+      "businessCalls": 18,
+      "backendRequests": 18,
+      "failures": []
+    },
+    "ordinary": {
+      "questions": 11,
+      "strictPassed": 11,
+      "answerReviews": {
+        "checked": 10,
+        "checked_with_notes": 1
+      },
+      "seconds": 110.566,
+      "meanSeconds": 10.051,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 49052,
+        "completion_tokens": 6573,
+        "total_tokens": 55625
+      },
+      "modelRequests": 28,
+      "modelToolCalls": 24,
+      "businessCalls": 18,
+      "backendRequests": 18,
+      "failures": []
+    },
+    "selected": {
+      "questions": 11,
+      "strictPassed": 11,
+      "answerReviews": {
+        "checked": 7,
+        "checked_with_notes": 3,
+        "unsupported_inference": 1
+      },
+      "seconds": 117.429,
+      "meanSeconds": 10.675,
+      "usageAvailable": true,
+      "tokens": {
+        "prompt_tokens": 48918,
+        "completion_tokens": 6826,
+        "total_tokens": 55744
+      },
+      "modelRequests": 28,
+      "modelToolCalls": 24,
+      "businessCalls": 18,
+      "backendRequests": 18,
+      "failures": []
+    }
+  },
+  "startup": [
+    {
+      "id": "0/orders/2/ordinary",
+      "seconds": 0.0121,
+      "initialToolBytes": 979,
+      "hostPreparationCalls": {
+        "discover": 2,
+        "describe": 0,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/orders/2/generic",
+      "seconds": 0.3948,
+      "initialToolBytes": 1611,
+      "hostPreparationCalls": null
+    },
+    {
+      "id": "0/orders/2/selected",
+      "seconds": 0.4241,
+      "initialToolBytes": 979,
+      "hostPreparationCalls": {
+        "discover": 2,
+        "describe": 2,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/orders/1000/generic",
+      "seconds": 1.5636,
+      "initialToolBytes": 1611,
+      "hostPreparationCalls": null
+    },
+    {
+      "id": "0/orders/1000/selected",
+      "seconds": 1.5021,
+      "initialToolBytes": 403,
+      "hostPreparationCalls": {
+        "discover": 0,
+        "describe": 0,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/orders/1000/ordinary",
+      "seconds": 1.1468,
+      "initialToolBytes": 403,
+      "hostPreparationCalls": {
+        "discover": 0,
+        "describe": 0,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/github/2/generic",
+      "seconds": 0.9288,
+      "initialToolBytes": 1611,
+      "hostPreparationCalls": null
+    },
+    {
+      "id": "0/github/2/selected",
+      "seconds": 0.9531,
+      "initialToolBytes": 1035,
+      "hostPreparationCalls": {
+        "discover": 2,
+        "describe": 2,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/github/2/ordinary",
+      "seconds": 0.6177,
+      "initialToolBytes": 1035,
+      "hostPreparationCalls": {
+        "discover": 2,
+        "describe": 0,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/github/1000/selected",
+      "seconds": 2.1116,
+      "initialToolBytes": 403,
+      "hostPreparationCalls": {
+        "discover": 0,
+        "describe": 0,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/github/1000/ordinary",
+      "seconds": 1.68,
+      "initialToolBytes": 403,
+      "hostPreparationCalls": {
+        "discover": 0,
+        "describe": 0,
+        "invoke": 0,
+        "reused": 0,
+        "evicted": 0
+      }
+    },
+    {
+      "id": "0/github/1000/generic",
+      "seconds": 2.1021,
+      "initialToolBytes": 1611,
+      "hostPreparationCalls": null
+    }
+  ],
+  "githubRequests": 18,
+  "rawReportSHA256": "a73860176d4d2910e3158a4895bb00af81306589f7897cc0976a689d14cd4c3b",
+  "answerReview": {
+    "method": "Manual comparison by the coding agent of all 33 final answers with their actual tool outputs; not an independent human or model judge.",
+    "rules": {
+      "ASOF_DESCRIBED_AS_REQUEST_TIME": "asOf is a data reference time; calling it the HTTP request time is unsupported.",
+      "UNSUPPORTED_REASON_FOR_NULL_ETA": "delivered and estimatedArrival=null do not prove why the value is absent."
+    },
+    "notes": [
+      {
+        "id": "0/orders/2/selected/chain",
+        "dataValuesMatched": true,
+        "state": "checked_with_notes",
+        "issues": [
+          "ASOF_DESCRIBED_AS_REQUEST_TIME"
+        ]
+      },
+      {
+        "id": "0/orders/2/selected/followup",
+        "dataValuesMatched": true,
+        "state": "checked_with_notes",
+        "issues": [
+          "ASOF_DESCRIBED_AS_REQUEST_TIME"
+        ]
+      },
+      {
+        "id": "0/orders/1000/generic/chain",
+        "dataValuesMatched": true,
+        "state": "checked_with_notes",
+        "issues": [
+          "ASOF_DESCRIBED_AS_REQUEST_TIME"
+        ]
+      },
+      {
+        "id": "0/orders/1000/selected/chain",
+        "dataValuesMatched": true,
+        "state": "unsupported_inference",
+        "issues": [
+          "ASOF_DESCRIBED_AS_REQUEST_TIME",
+          "UNSUPPORTED_REASON_FOR_NULL_ETA"
+        ]
+      },
+      {
+        "id": "0/orders/1000/selected/followup",
+        "dataValuesMatched": true,
+        "state": "checked_with_notes",
+        "issues": [
+          "ASOF_DESCRIBED_AS_REQUEST_TIME"
+        ]
+      },
+      {
+        "id": "0/orders/1000/ordinary/chain",
+        "dataValuesMatched": true,
+        "state": "checked_with_notes",
+        "issues": [
+          "ASOF_DESCRIBED_AS_REQUEST_TIME"
+        ]
+      }
+    ]
+  }
+}
