@@ -166,7 +166,7 @@ class ConversionTests(unittest.TestCase):
         self.assertEqual(result['error']['code'], 'NOT_FOUND')
         self.assertEqual(self.backend.sample_requests, [])
 
-    def test_conversion_rejects_bad_options_unsupported_sources_and_non_read_methods(self):
+    def test_conversion_rejects_bad_options_and_unsupported_source_contracts(self):
         source = OpenAPIImporter(self.document)
         deployment = HTTPDeployment('http://127.0.0.1:1')
         for options in [{}, {'effect': 'write'}, {'effect': 'unknown'}, {'effect': 'read', 'selekt': ['orderId']}]:
@@ -179,7 +179,9 @@ class ConversionTests(unittest.TestCase):
         self.assert_error('CONVERT_OPERATION_UNSUPPORTED', lambda: convert(bad, operations={'getOrder': {'effect': 'read'}}, deployment=deployment))
         bad.document['paths']['/orders/{orderId}']['post'] = bad.document['paths']['/orders/{orderId}'].pop('get')
         write_source = OpenAPIImporter(bad.document, methods={'POST'})
-        self.assert_error('CONVERT_METHOD_UNSUPPORTED', lambda: convert(write_source, operations={'getOrder': {'effect': 'read'}}, deployment=deployment))
+        # A POST can be an explicitly selected read; the old GET/HEAD restriction
+        # remains on the management Runtime, not this direct HTTP application.
+        self.assert_error('CONVERT_OPERATION_UNSUPPORTED', lambda: convert(write_source, operations={'getOrder': {'effect': 'read'}}, deployment=deployment))
 
     def test_unselected_unsupported_operations_are_not_converted(self):
         self.document['paths']['/shipments/{shipmentId}']['get']['responses'] = {}

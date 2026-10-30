@@ -37,6 +37,7 @@ class DirectApplications:
         serialized = json.dumps([self._entries[key][1] for key in sorted(self._entries)],
                                 ensure_ascii=False, sort_keys=True, allow_nan=False, separators=(',', ':'))
         self.version = 'sha256:' + hashlib.sha256(serialized.encode()).hexdigest()
+        self.writable = any(descriptor['effects']['kind'] == 'write' for _, descriptor in self._entries.values())
 
     def _get(self, identifier, version):
         entry = self._entries.get((identifier, version))

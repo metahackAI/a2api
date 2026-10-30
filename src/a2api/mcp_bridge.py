@@ -27,7 +27,7 @@ from .schema import validate_value
 _DESCRIPTIONS = {
     "discover": "Find capabilities available to this caller using task keywords. Returns IDs, versions, catalogVersion and an optional pagination cursor. Start here.",
     "describe": 'Get the selected capability purpose and exact input/output schemas. Required request shape: {"id":"<id from discover>","version":"<version from discover>"}. Both keys are required; capabilityId is invalid.',
-    "invoke": "Execute a read-only capability with its ID, version and catalogVersion. Follow a2api.describe for business arguments under input. The server validates the selected business schema; this tool advertises only the common result envelope.",
+    "invoke": "Execute a host-selected capability with its ID, version and catalogVersion. Check its described read/write effect and follow a2api.describe for business arguments under input. The server validates the selected business schema; this tool advertises only the common result envelope.",
 }
 
 
@@ -37,6 +37,7 @@ def create_mcp_server(runtime, context: ExecutionContext) -> Server:
         raise TypeError("A trusted ExecutionContext is required")
     if not isinstance(runtime, Runtime):
         runtime = DirectApplications(runtime)
+    writable = isinstance(runtime, DirectApplications) and runtime.writable
     schemas = output_schemas()
     for schema in schemas.values():
         Draft202012Validator.check_schema(schema)
@@ -45,8 +46,9 @@ def create_mcp_server(runtime, context: ExecutionContext) -> Server:
         description=_DESCRIPTIONS[method],
         input_schema=input_schema(method),
         output_schema=schemas[method],
-        annotations=types.ToolAnnotations(read_only_hint=True, destructive_hint=False,
-                                          idempotent_hint=True, open_world_hint=method == "invoke"),
+        annotations=types.ToolAnnotations(read_only_hint=not (method == 'invoke' and writable),
+                                          destructive_hint=method == 'invoke' and writable,
+                                          idempotent_hint=not (method == 'invoke' and writable), open_world_hint=method == "invoke"),
     ) for method in METHODS]
 
     async def list_tools(_ctx, params):

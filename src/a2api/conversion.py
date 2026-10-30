@@ -1,4 +1,4 @@
-"""In-memory OpenAPI conversion and single-call GET/HEAD execution."""
+"""In-memory HTTP contract conversion with explicitly selected read/write effects."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from .errors import A2APIError
 from .execution import Budget
 from .http_adapter import HTTPAdapter
 from .importers import OpenAPIImporter
+from .importers.source import SourceImporter, SourceRecord
 from .ir import ExecutionContext, Operation, freeze, thaw
 from .openapi_schema import check_draft_schema, schema_nodes
 from .pointers import tokens
@@ -71,7 +72,7 @@ class _Call:
 
 @dataclass(frozen=True)
 class ConvertedAPI:
-    """A bound read-only application. No review/build files or registry needed."""
+    """A host-selected HTTP application. No review/build files or registry needed."""
 
     _calls: Mapping[str, _Call] = field(repr=False)
     _adapter: HTTPAdapter = field(repr=False)
@@ -122,42 +123,43 @@ class ConvertedAPI:
                     'completeness': {'complete': False}}
 
 
-def convert(source: OpenAPIImporter, *, operations: Mapping[str, Mapping], deployment: HTTPDeployment) -> ConvertedAPI:
-    """Bind explicitly selected read operations in memory, without activating drafts.
+def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeployment) -> ConvertedAPI:
+    """Bind selected source/OpenAPI operations without activating imported drafts.
 
-    operations maps source operationId to {"effect": "read", "select": [fields]}.
+    operations maps a source operation ID to {"effect": "read"|"write", "select": [fields]}.
     Omit select to expose the original JSON response. It never implies authorization.
     """
-    if not isinstance(source, OpenAPIImporter) or not isinstance(deployment, HTTPDeployment):
-        raise A2APIError('INVALID_CONVERSION', 'convert requires an OpenAPIImporter and an explicit HTTPDeployment.')
+    if not isinstance(source, (OpenAPIImporter, SourceImporter)) or not isinstance(deployment, HTTPDeployment):
+        raise A2APIError('INVALID_CONVERSION', 'convert requires a supported importer and an explicit HTTPDeployment.')
     if not isinstance(operations, Mapping) or not operations:
-        raise A2APIError('INVALID_SELECTION', 'Select one or more operation IDs with read effect settings.')
+        raise A2APIError('INVALID_SELECTION', 'Select one or more operation IDs with explicit effect settings.')
     settings = {}
     for identifier, options in operations.items():
         if (not isinstance(identifier, str) or not identifier or not isinstance(options, Mapping)
-                or set(options) - {'effect', 'select'} or options.get('effect') != 'read'):
-            raise A2APIError('INVALID_CONVERSION', 'Each operation must explicitly declare effect=read and only supported options.')
+                or set(options) - {'effect', 'select'} or options.get('effect') not in ('read', 'write')):
+            raise A2APIError('INVALID_CONVERSION', 'Each operation must explicitly declare effect=read or write and only supported options.')
         selected = options.get('select')
         if 'select' in options and (not isinstance(selected, list) or not selected
                 or any(not isinstance(name, str) or not name for name in selected) or len(set(selected)) != len(selected)):
             raise A2APIError('INVALID_SELECTION', 'select must be a nonempty list of unique top-level field names.')
-        settings[identifier] = tuple(selected) if selected is not None else None
+        settings[identifier] = (tuple(selected) if selected is not None else None, options['effect'])
     calls, routes = {}, {}
     for record in source.iter_operations(set(settings)):
-        if record.method.upper() not in {'GET', 'HEAD'}:
-            raise A2APIError('CONVERT_METHOD_UNSUPPORTED', 'Direct conversion executes GET/HEAD operations only.',
-                             issues=[{'operationId': record.operation_id, 'method': record.method.upper()}])
-        if record.status != 'imported' or record.capability is None:
+        if record.status != 'imported' or (record.operation if isinstance(record, SourceRecord) else record.capability) is None:
             raise A2APIError('CONVERT_OPERATION_UNSUPPORTED', 'A selected operation is unavailable for conversion.',
                              issues=[{'operationId': record.operation_id, 'status': record.status,
                                       'diagnostics': thaw(record.diagnostics)}])
-        wire = record.capability.operations[record.operation_id]
-        selected = settings[record.operation_id]
+        wire = record.operation if isinstance(record, SourceRecord) else record.capability.operations[record.operation_id]
+        selected, effect = settings[record.operation_id]
+        if (wire.http_method in ('PUT', 'PATCH', 'DELETE') and effect != 'write'
+                or wire.http_method in ('GET', 'HEAD') and effect != 'read'):
+            raise A2APIError('INVALID_CONVERSION', 'GET/HEAD require read; PUT/PATCH/DELETE require write. POST needs an explicit read/write effect.')
         public_output = _output_schema(wire, selected)
         public_input = thaw(wire.input_schema)
         check_draft_schema(public_input)
-        descriptor = {'id': record.capability.id, 'version': record.capability.version,
-                      'summary': record.capability.title, 'effects': {'kind': 'read'},
+        descriptor = {'id': record.id if isinstance(record, SourceRecord) else record.capability.id,
+                      'version': record.version if isinstance(record, SourceRecord) else record.capability.version,
+                      'summary': record.title if isinstance(record, SourceRecord) else record.capability.title, 'effects': {'kind': effect},
                       'inputSchema': public_input, 'outputSchema': public_output}
         route = record.http_route(deployment.base_url, path_prefix=deployment.path_prefix,
                                   headers=dict(deployment.headers), credential_provider=deployment.credential_provider)

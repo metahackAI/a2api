@@ -11,6 +11,8 @@
 
 **P0-1/2/3을 구현했다.** 선택한 OpenAPI GET/HEAD와 등록한 Python 조회 함수를 review/build 파일 없이 직접 호출하고, 같은 객체를 경량 MCP discover/describe/invoke에 연결한다. 도구 목록에는 개별 API schema를 나열하지 않는다. 기존 전체 Capability IR·검증기·MCP bridge와 선택적인 검토/변경 관리 기능도 보존한다. 문서의 기능 목록은 모두 따라야 할 사용 순서가 아니다.
 
+후속 구현으로 **Java/Spring MVC·Go net/http·Rust Axum 소스 importer**와 직접 HTTP 앱의 GET/HEAD/POST/PUT/PATCH/DELETE를 지원한다. `effect="read"/"write"`를 명시하고 같은 convert·MCP를 사용한다. [소스에서 바로 호출하는 사용법·지원 문법·실행 예제](docs/18-source-importers.ko.md)를 참고한다.
+
 ## OpenAPI를 바로 호출하기
 
 ```python
@@ -36,7 +38,7 @@ python examples/native-orders/register_and_invoke.py
 
 [함수 등록·기본값·명시적 schema 사용법](docs/12-python-functions.ko.md)에 예제와 지원 범위를 정리했다.
 
-HTTP 어댑터는 **GET/HEAD/POST/PUT/PATCH/DELETE, JSON 본문, 명시적인 2xx·빈 응답, 호스트 인증 주입**을 지원한다. 활성 MVP runtime은 GET/HEAD 조회 정책을 적용하며, 다른 메서드의 import와 transport 검증은 비활성 계약으로 진행한다. [HTTP 어댑터 안내](docs/07-http-adapter.ko.md)를 참고한다.
+HTTP 어댑터는 **GET/HEAD/POST/PUT/PATCH/DELETE, JSON 본문, 명시적인 2xx·빈 응답, 호스트 인증 주입**을 지원한다. 기존 전체 manifest Runtime은 GET/HEAD 조회 정책을 유지하며, 새 직접 `convert` 경로는 명시적 read/write 설정으로 여러 메서드를 실행한다. [HTTP 어댑터 안내](docs/07-http-adapter.ko.md), [현재 메서드 정책](docs/18-source-importers.ko.md)을 참고한다.
 
 ## 빠른 실행
 

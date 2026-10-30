@@ -38,7 +38,7 @@ def output_schemas(runtime=None, context=None) -> dict[str, dict]:
     }, ["status", "error", "completeness"])
     descriptor = _object({
         "id": string, "version": string, "summary": string,
-        "effects": _object({"kind": {"const": "read"}}),
+        "effects": _object({"kind": {"enum": ["read", "write"]}}),
         "inputSchema": {"type": "object"}, "outputSchema": {"type": "object"},
     })
     successes = {

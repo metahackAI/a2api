@@ -104,6 +104,8 @@ OpenAPI 주문 조회의 요청 예시:
 
 [측정 기록](evidence/p0-3-context-bytes.json)은 같은 Order TypedDict 조회 함수를 1개/100개의 다른 ID로 등록한 합성 사례다. 새 MCP 쪽은 SDK client로 실제 tools/list와 cold discover/describe/invoke를 실행했다. 직접 도구 쪽은 동일한 업무 schema와 결과로 도구 정의·단일 요청/응답을 구성한 비교 기준이다.
 
+이 표는 P0-3 당시의 측정이다. 이후 호출 설명과 직접 HTTP 앱의 read/write effect 지원이 추가됐으므로 현재 tools/list의 정확한 바이트 수와 동일하다고 해석하지 않는다. [현재 소스/메서드 지원](18-source-importers.ko.md)을 참고한다.
+
 | 항목 | API 1개 | API 100개 |
 |---|---:|---:|
 | 직접 도구 정의 | 645 B | 57,858 B |

@@ -1,4 +1,4 @@
-"""a2api read-only capability MVP."""
+"""a2api capability contracts and explicitly bound HTTP applications."""
 
 from .catalog import Catalog
 from .contracts import compile_contract, load_contract

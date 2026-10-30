@@ -29,6 +29,8 @@ P0-3 이후 이번 요청은 **기존 GitHub OpenAPI로 공개 저장소 조회�
 
 해당 예제 완료 후 사용자가 지시한 다음 개발은 **실제 LLM의 GitHub MCP 사용 검증**이다. [상세 개발 계획](15-agent-usage-plan.ko.md)에 파일·질문·수정 허용 범위·완료 기준을 고정했다. 문서의 1 → 2 → 3 → 4 순서대로 끝내며 계획 밖의 확장 후보를 구현하지 않는다.
 
+2026-10-30 요청은 **Java/Spring·Go·Rust 소스 importer와 여러 HTTP 메서드의 직접 호출 지원**이다. [이번 상세 계획](17-source-importers-plan.ko.md)의 1 → 5 순서와 파일/프레임워크 범위로 구현·검증한다. UPDATE는 PUT/PATCH로 지원한다. 기존의 읽기 전용 제한을 새 직접 호출 경로에서 명시적 effect로 확장하며 회사 API나 기존 관리 Runtime의 쓰기 활성화는 포함하지 않는다.
+
 ### 기존 코드의 처리
 
 - 재사용: OpenAPI 읽기/진단, JSON Schema 처리, HTTP 직렬화·응답 처리, credential provider, context, 기존 호출·오류 인터페이스, MCP SDK 연결.

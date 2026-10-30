@@ -1,0 +1,147 @@
+{
+  "checkedAt": "2026-10-30T01:45:22.286837+00:00",
+  "runtimeVerificationAt": "2026-10-30T01:44:32.095709+00:00",
+  "scope": "Synthetic static source import, actual Spring/net-http/Axum processes and actual MCP stdio. No company source/API or LLM execution.",
+  "installation": {
+    "mode": "project-local ignored artifacts/toolchains",
+    "sudoAttempt": "Interactive authentication required; no sudo installation performed.",
+    "systemPathChanged": false,
+    "javaSource": "Official Ubuntu OpenJDK packages extracted locally; system CA trust roots copied into local JKS.",
+    "goSource": "Official go.dev distribution with SHA-256 verification",
+    "rustSource": "Official rustup minimal toolchain",
+    "linkerSource": "Official Zig distribution with SHA-256 verification; installed because cc was absent.",
+    "tlsVerificationDisabled": false
+  },
+  "versions": {
+    "java": "openjdk version \"25.0.4.1\" 2026-08-18",
+    "go": "go version go1.26.10 linux/amd64",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "maven": "Apache Maven 3.9.9",
+    "zig": "0.17.0",
+    "tree-sitter": "0.26.0",
+    "tree-sitter-java": "0.23.5",
+    "tree-sitter-go": "0.25.0",
+    "tree-sitter-rust": "0.24.2",
+    "mcp": "2.3.0"
+  },
+  "results": [
+    {
+      "language": "spring",
+      "capabilities": 7,
+      "directRequests": 8,
+      "stdioRequests": 8,
+      "methods": [
+        "DELETE",
+        "GET",
+        "HEAD",
+        "PATCH",
+        "POST",
+        "PUT"
+      ],
+      "createdStatus": 201,
+      "deletedStatus": 204,
+      "postDeleteRead": "RESOURCE_NOT_FOUND",
+      "postSearchEffect": "read",
+      "mutationEffect": "write",
+      "writeInvokeHints": {
+        "readOnly": false,
+        "idempotent": false,
+        "destructive": true
+      },
+      "tools": [
+        "a2api.discover",
+        "a2api.describe",
+        "a2api.invoke"
+      ],
+      "result": "passed"
+    },
+    {
+      "language": "go",
+      "capabilities": 7,
+      "directRequests": 8,
+      "stdioRequests": 8,
+      "methods": [
+        "DELETE",
+        "GET",
+        "HEAD",
+        "PATCH",
+        "POST",
+        "PUT"
+      ],
+      "createdStatus": 201,
+      "deletedStatus": 204,
+      "postDeleteRead": "RESOURCE_NOT_FOUND",
+      "postSearchEffect": "read",
+      "mutationEffect": "write",
+      "writeInvokeHints": {
+        "readOnly": false,
+        "idempotent": false,
+        "destructive": true
+      },
+      "tools": [
+        "a2api.discover",
+        "a2api.describe",
+        "a2api.invoke"
+      ],
+      "result": "passed"
+    },
+    {
+      "language": "rust",
+      "capabilities": 7,
+      "directRequests": 8,
+      "stdioRequests": 8,
+      "methods": [
+        "DELETE",
+        "GET",
+        "HEAD",
+        "PATCH",
+        "POST",
+        "PUT"
+      ],
+      "createdStatus": 201,
+      "deletedStatus": 204,
+      "postDeleteRead": "RESOURCE_NOT_FOUND",
+      "postSearchEffect": "read",
+      "mutationEffect": "write",
+      "writeInvokeHints": {
+        "readOnly": false,
+        "idempotent": false,
+        "destructive": true
+      },
+      "tools": [
+        "a2api.discover",
+        "a2api.describe",
+        "a2api.invoke"
+      ],
+      "result": "passed"
+    }
+  ],
+  "tests": {
+    "command": ".venv-mcp/bin/python -m unittest discover -s tests -v",
+    "passed": 258,
+    "checked": [
+      "AST routes/DTOs and unsupported diagnostics",
+      "Input and raw/output schemas",
+      "Explicit effect and selected-only exposure",
+      "201 JSON and 204/HEAD empty codecs",
+      "Write OUTCOME_UNKNOWN without retry",
+      "Existing management Runtime stays read-only",
+      "Actual MCP stdio and effect hints"
+    ]
+  },
+  "packaging": {
+    "editableExtras": "source,mcp installed successfully",
+    "wheelBuilt": true,
+    "wheelImportedOutsideRepository": true,
+    "wheelSha256": "001d7c47ca806c01cdc8c51b507b4eec0855fcc7b76c861cb28f40ca766f4cd9",
+    "coreImportWithoutSourceExtrasVerified": true
+  },
+  "observedInterruption": "Standalone tests initially hit EndOfStream because the new test restored the entire sys.modules dictionary after importing the MCP verifier, splitting dynamically imported Anyio modules and exception identities. The test now restores only its application module. No SDK change or exception suppression was used.",
+  "limits": [
+    "Supported framework/syntax profiles only; not a whole-program type/effect/authorization proof.",
+    "Static route extraction does not establish deployed component/profile/classpath/serializer behavior.",
+    "No universal Java/Go/Rust FFI or native in-process callable execution.",
+    "UPDATE uses standard PUT/PATCH; old full Runtime and native Python functions retain read-only execution."
+  ]
+}
