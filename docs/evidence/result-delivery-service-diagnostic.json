@@ -1,0 +1,28 @@
+{
+  "requests": [
+    {
+      "url": "https://api.github.com/repos/octocat/Hello-World/stargazers?per_page=2&page=1",
+      "authMode": "gh",
+      "note": "Separate diagnostic after all model questions; no runtime fallback or model rerun.",
+      "status": 404,
+      "bodyBytes": 123,
+      "bodySHA256": "9069b0b6c78b80a96780b1808f0304a7c19bcb409bc2cb9fb13398debff96b1d",
+      "requestId": "95D8:388991:1589D6:235FEA:6AE46256",
+      "message": "Not Found",
+      "documentation_url": "https://docs.github.com/rest/activity/starring#list-stargazers",
+      "seconds": 0.3512265490135178
+    },
+    {
+      "url": "https://api.github.com/repos/octocat/Hello-World/stargazers?per_page=2&page=1",
+      "authMode": "none",
+      "note": "Separate diagnostic after all model questions; no runtime fallback or model rerun.",
+      "status": 401,
+      "bodyBytes": 137,
+      "bodySHA256": "fbf5e06008994f216205669f0fbfb23f9277d5b0988c0887c53e1b22444963fa",
+      "requestId": "95E4:32C867:1568A6:2349B6:6AE46257",
+      "message": "Requires authentication",
+      "documentation_url": "https://docs.github.com/rest/activity/starring#list-stargazers",
+      "seconds": 0.2997893620049581
+    }
+  ]
+}

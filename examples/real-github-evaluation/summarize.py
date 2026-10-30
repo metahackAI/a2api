@@ -62,6 +62,7 @@ def summarize(report, review):
         value['tokensPerStrictSuccessIncludingFailures'] = (round(value['tokens']['total_tokens'] / value['passed'], 1)
             if value['passed'] and value['tokens'] else None)
     return {'checkedAt': report['checkedAt'], 'model': report['model'], 'completed': report['completed'],
+        'suite': report.get('suite', 'core'), 'cases': report.get('cases'), 'scorerSHA256': review['scorerSHA256'],
         'rawReportSHA256': review['rawReportSHA256'], 'settings': report['settings'],
         'repetitions': report['repetitions'], 'githubAuth': report['githubAuth'], 'limits': report['limits'],
         'source': report['inventory']['source'],
@@ -70,6 +71,11 @@ def summarize(report, review):
                      for row in report['catalogs']],
         'configurations': config, 'totals': total, 'stdio': report.get('stdio'),
         'knownIDProbe': report['knownIDProbe'], 'scoringCorrection': review['changed'],
+        'preflight': ({'passed': report['preflight']['passed'],
+            'calls': [{'id': row['id'], 'status': row['output'].get('status'),
+                       'errorCode': row['output'].get('error', {}).get('code')}
+                      for row in report['preflight']['calls']]}
+            if 'passed' in report['preflight'] else {'passed': all(row.get('status') == 'succeeded' for row in report['preflight'].values())}),
         'rankDiagnostics': review['rankDiagnostics'],
         'httpRequestsIncludingPreflightAndStdio': sum(bool(row.get('sent')) for row in report['httpRequests'])}
 

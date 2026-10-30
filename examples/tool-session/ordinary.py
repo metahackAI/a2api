@@ -14,6 +14,7 @@ import json
 from a2api.mcp_application import DirectApplications
 from a2api.tool_session import SEARCH_NAME, SEARCH_TOOL
 from a2api.discovery_metadata import SearchPages
+from a2api.tool_description import function_description
 
 
 class OrdinarySession:
@@ -46,7 +47,7 @@ class OrdinarySession:
                 app, desc = self.runtime._get(item['id'], item['version'])
                 self._active[name] = {'app': app, 'binding': {'id': item['id'], 'version': item['version'],
                     'catalogVersion': self.runtime.version}, 'tool': {'type': 'function', 'function': {
-                        'name': name, 'description': desc['summary'] + ' [effect: ' + desc['effects']['kind'] + ']',
+                        'name': name, 'description': function_description(desc),
                         'parameters': deepcopy(desc['inputSchema'])}}}
             else:self._stats['reused'] += 1
             selected.append({'name': name, 'id': item['id']})

@@ -21,8 +21,9 @@ from .openapi_schema import check_draft_schema
 from .protocol import protocol_schema
 from .schema import validate_value
 from .discovery_metadata import SearchPages
+from .tool_description import function_description
 
-TOOL_PROFILE = 'a2api-tools/0.2'
+TOOL_PROFILE = 'a2api-tools/0.3'
 SEARCH_NAME = 'a2api_search'
 SEARCH_TOOL = {'type': 'function', 'function': {
     'name': SEARCH_NAME,
@@ -174,7 +175,7 @@ class ToolSession:
                 for schema in (descriptor['inputSchema'], descriptor['outputSchema']):
                     check_draft_schema(schema)
                 tool = {'type': 'function', 'function': {'name': name,
-                    'description': descriptor['summary'] + ' [effect: ' + descriptor['effects']['kind'] + ']',
+                    'description': function_description(descriptor),
                     'parameters': deepcopy(descriptor['inputSchema'])}}
                 bound = _Bound(deepcopy(descriptor), tool)
             retained = OrderedDict(self._active)

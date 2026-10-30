@@ -15,9 +15,9 @@
 
 **경량 호출의 기준은 [a2api-call/0.1 명세](docs/20-call-protocol.ko.md)와 패키지의 [JSON Schema](src/a2api/schemas/call.schema.json)다.** API dispatch/MCP가 같은 스키마를 사용한다. 선택적 `summary`·서버 검색용 `keywords`는 [작은 설명 설정](docs/21-discovery-metadata.ko.md)으로 제공한다. 처음 시작하려면 [설치부터 직접·MCP·실제 모델 호출까지](docs/22-quickstart-and-model.ko.md)를 따른다.
 
-**[a2api-tools/0.2와 ToolSession](docs/24-selected-tools.ko.md)** 은 같은 계약에서 필요한 입력 schema만 모델의 function tool로 제공한다. 호스트가 아는 기능은 바로 호출하고, 모르는 기능은 검색 한 모델 단계 후 호출 가능한 도구를 받는다. 정확 ID·입출력 field 순위와 선택적 `more`로 탐색하며 cursor는 호스트가 관리한다. 식별자·계약 버전은 호스트가 관리하고 선택 도구는 후속 요청에서 재사용한다. MCP 서버의 세 도구와 기존 query-only 호출은 유지한다. [호스트 바인딩 계획](docs/23-total-call-cost-plan.ko.md), [최초 비교 방법과 실측](docs/25-total-call-cost-results.ko.md)을 참고한다.
+**[a2api-tools/0.3와 ToolSession](docs/24-selected-tools.ko.md)** 은 같은 계약의 필요한 입력 schema와 짧은 반환 설명을 모델의 function tool로 제공한다. 호스트가 아는 기능은 바로 호출하고, 모르는 기능은 검색 한 모델 단계 후 호출 가능한 도구를 받는다. 정확 ID·입출력 field 순위와 선택적 `more`로 탐색하며 cursor는 호스트가 관리한다. 식별자·계약 버전은 호스트가 관리하고 선택 도구는 후속 요청에서 재사용한다. MCP 서버의 세 도구와 기존 query-only 호출은 유지한다. [호스트 바인딩 계획](docs/23-total-call-cost-plan.ko.md), [최초 비교 방법과 실측](docs/25-total-call-cost-results.ko.md)을 참고한다.
 
-합성 기능을 제외한 [실제 GitHub 최초 Muse 비교](docs/27-real-github-evaluation-results.ko.md)의 대규모 탐색 실패를 보존했다. 이후 [개선 계획](docs/28-cost-improvement-plan.ko.md)의 **1번 검색만 구현**해 같은 8개/633개·24질문을 [다시 비교](docs/30-search-improvement-results.ko.md)했고 두 방식 모두 완료했다. [실행 예제](examples/real-github-evaluation/README.md)를 제공한다. 같은 개선 검색을 사용하는 일반 검색+function도 비용이 감소했으므로 프로토콜의 보편적 우위를 주장하지 않는다. 2번 전달 정보·3번 별도 LLM holdout 확장은 미착수다.
+합성 기능을 제외한 [실제 GitHub 최초 Muse 비교](docs/27-real-github-evaluation-results.ko.md)의 실패와 [검색 개선 후 회복](docs/30-search-improvement-results.ko.md)을 보존했다. 이어 [결과 전달과 고정 요청 평가](docs/32-result-delivery-and-holdout-results.ko.md)를 수행해 기존 8개/633개·24질문을 모두 완료하고 전체 토큰을 줄였다. 별도 12질문은 9개가 엄격 완료했으며 서비스 timeout/접근 실패도 비용에 포함했다. 같은 검색·projection·설명을 사용하는 일반 검색+function도 개선됐으므로 프로토콜의 보편적 우위를 주장하지 않는다. [실행 예제](examples/real-github-evaluation/README.md)를 제공한다.
 
 ## OpenAPI를 바로 호출하기
 

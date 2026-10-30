@@ -13,6 +13,7 @@ from a2api.schema import validate_value
 from a2api.tool_session import SEARCH_TOOL
 from assess import CASES, assess
 from catalog import SOURCE_DIR, CONTEXT
+import holdout
 
 TARGETS = {'repository': ['github.repos.get'], 'branches': ['github.repos.list_branches'],
            'default_commit': ['github.repos.get', 'github.repos.get_commit']}
@@ -22,19 +23,33 @@ def review(report, raw_digest):
     source = OpenAPIImporter.from_file(SOURCE_DIR / 'api.github.com.json.gz', namespace='github')
     if source.source_hash != report['inventory']['source']['sha256']:raise ValueError('Source mismatch.')
     all_mapping = next(row['mapping'] for row in report['catalogs'] if row['scale'] == 'large')
+    projection = next(row['projection'] for row in report['catalogs'] if row['scale'] == 'large')
+    def options(info):
+        op = info['operationId']
+        return {'effect': 'read', **({'select': projection[op]} if op in projection else {})}
     used = {call['binding']['id'] for run in report['runs'] for call in run['calls'] if call.get('binding')}
-    app = (convert(source, operations={all_mapping[identifier]['operationId']: {'effect': 'read'} for identifier in used},
+    app = (convert(source, operations={all_mapping[identifier]['operationId']: options(all_mapping[identifier]) for identifier in used},
                    deployment=HTTPDeployment('https://api.github.com')) if used else None)
     descriptors = {item['id']: item for item in app.descriptors()} if app else {}
     runtime = None
     revision = report['settings'].get('searchRevision')
     if revision:
         if revision != SEARCH_REVISION:raise ValueError('Use the search implementation recorded by this report.')
-        full = convert(source, operations={item['operationId']: {'effect': 'read'} for item in all_mapping.values()},
+        full = convert(source, operations={item['operationId']: options(item) for item in all_mapping.values()},
                        deployment=HTTPDeployment('https://api.github.com'))
         runtime = DirectApplications(full)
-    cases = {case['id']: case for case in CASES}
-    # Reproduce the CURRENT substring ranker exactly from original source text.
+    held = report.get('suite') == 'holdout'
+    suite_cases = holdout.CASES if held else CASES
+    scorer = holdout.assess if held else assess
+    scorer_path = Path(__file__).with_name('holdout.py' if held else 'assess.py')
+    case_bytes = holdout.CASES_PATH.read_bytes() if held else json.dumps(CASES, ensure_ascii=False, sort_keys=True).encode()
+    if report['settings'].get('caseSHA256', hashlib.sha256(case_bytes).hexdigest()) != hashlib.sha256(case_bytes).hexdigest():
+        raise ValueError('Case file changed since this run.')
+    if report.get('cases', suite_cases) != suite_cases:raise ValueError('Frozen cases changed since this run.')
+    if report['settings'].get('scorerSHA256', hashlib.sha256(scorer_path.read_bytes()).hexdigest()) != hashlib.sha256(scorer_path.read_bytes()).hexdigest():
+        raise ValueError('Scorer changed since this run.')
+    cases = {case['id']: case for case in suite_cases}
+    # Older reports without a search revision used the original substring rank.
     documents = {}
     for identifier, info in all_mapping.items():
         operation = source.document['paths'][info['path']]['get']
@@ -45,12 +60,14 @@ def review(report, raw_digest):
     ranks, changed, runs = {}, [], []
     for run in report['runs']:
         pages = SearchPages()
-        revised = assess(cases[run['scenario']], run, descriptors, all_mapping)
+        revised = scorer(cases[run['scenario']], run, descriptors, all_mapping)
         if revised != run['assessment']:
             changed.append({'id': run['id'], 'originalPassed': run['assessment']['passed'],
                 'revisedPassed': revised['passed'], 'removedFailures': sorted(set(run['assessment']['failures']) - set(revised['failures']))})
         offered = {identifier for request in run['modelRequests'] for identifier in request['offeredIDs']}
-        target_exposure = {target: target in offered for target in TARGETS[run['scenario']]}
+        targets = ([identifier for identifier, info in all_mapping.items()
+                    if info['operationId'] in cases[run['scenario']]['targetOperations']] if held else TARGETS[run['scenario']])
+        target_exposure = {target: target in offered for target in targets}
         for call in run['calls']:
             if call['tool'] != 'a2api_search' or run['scale'] != 'large':continue
             query = call['input'].get('query')
@@ -77,14 +94,14 @@ def review(report, raw_digest):
                 hits = [(sum(word in text for word in words), identifier) for identifier, text in documents.items()]
                 ordered = [identifier for score, identifier in sorted(hits, key=lambda item: (-item[0], item[1])) if score or not words]
                 candidates = ordered[:3]
-            positions = {target: ordered.index(target) + 1 if target in ordered else None for target in TARGETS[run['scenario']]}
+            positions = {target: ordered.index(target) + 1 if target in ordered else None for target in targets}
             actual = [item['id'] for item in call['output'].get('selected', [])]
             if any(identifier not in candidates for identifier in actual):raise ValueError('Offline ranking does not reproduce observed candidates.')
             ranks[(run['scenario'], query, page)] = {'scenario': run['scenario'], 'query': query, 'page': page,
                 'top3': candidates, 'targetRanks': positions}
         runs.append({'id': run['id'], 'assessment': revised, 'requiredContractsOffered': target_exposure})
     return {'rawReportSHA256': raw_digest,
-        'scorerSHA256': hashlib.sha256(Path(__file__).with_name('assess.py').read_bytes()).hexdigest(),
+        'scorerSHA256': hashlib.sha256(scorer_path.read_bytes()).hexdigest(),
         'method': 'Offline re-scoring of retained actual calls/results; no model/API rerun or argument repair.',
         'ruleCorrection': 'Qualified heads/<observed branch> and refs/heads/<observed branch> are valid observed-branch derivations.',
         'changed': changed, 'runs': runs, 'rankDiagnostics': list(ranks.values())}

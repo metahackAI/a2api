@@ -39,7 +39,7 @@ field와 원본 alias는 서버 index에만 있다. descriptor 6필드와 MCP to
 
 metadata 변경도 검색 결과와 순위에 영향을 주므로 catalogVersion/cursor를 구분한다. 기존 cursor를 바뀐 metadata에 재사용하면 INVALID_CURSOR다. invoke의 버전 검사·입력/원본/출력 검증·credential/context 연결은 그대로 유지한다.
 
-검색 revision도 catalog fingerprint에 포함해 이전 순서의 cursor를 새 순서에 재사용하지 않는다. 호스트의 조건부 다음 페이지와 범위는 [a2api-tools/0.2](24-selected-tools.ko.md), [이번 구현 범위](29-search-improvement.ko.md)를 따른다.
+검색 revision도 catalog fingerprint에 포함해 이전 순서의 cursor를 새 순서에 재사용하지 않는다. 호스트의 조건부 다음 페이지는 [a2api-tools/0.3](24-selected-tools.ko.md), [검색 구현 범위](29-search-improvement.ko.md)를 따른다. 명시적 select로 공개 output schema가 바뀌면 index의 공개 field도 바뀌므로 catalog/cursor를 함께 구분한다.
 
 합성 소스 예제는 `examples/source-http/application.py`의 작은 한국어 설명 목록을 사용한다. `mcp_server.py --plain-descriptions`는 원본 source 제목으로 비교하는 검증 옵션이다. 기본값은 metadata 적용이며, 업무 API 선택과 효과는 두 모드에서 같다.
 

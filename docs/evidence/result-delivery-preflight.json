@@ -1,0 +1,199 @@
+{
+  "rawReportSHA256": "64f4ccf1fc63a5c30a5ba4602d008b1b8e066c604932c1b36968ff909613e27d",
+  "completed": false,
+  "modelRequests": 0,
+  "caseSHA256": "b7b999766b2cd68183261803e41f18a3c1e881389bce1fc2009c2849d904e6aa",
+  "sourceSha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
+  "note": "Aborted before any model question. Preserved diagnostic failure, not replaced by the later complete holdout run.",
+  "catalogPreparationSeconds": 20.440102873020805,
+  "preflight": [
+    {
+      "id": "github.repos.get",
+      "input": {
+        "path": {
+          "owner": "octocat",
+          "repo": "Hello-World"
+        }
+      },
+      "status": "succeeded",
+      "error": null
+    },
+    {
+      "id": "github.repos.get_latest_release",
+      "input": {
+        "path": {
+          "owner": "psf",
+          "repo": "requests"
+        }
+      },
+      "status": "succeeded",
+      "error": null
+    },
+    {
+      "id": "github.repos.list_releases",
+      "input": {
+        "path": {
+          "owner": "psf",
+          "repo": "requests"
+        },
+        "query": {
+          "page": 1,
+          "per_page": 2
+        }
+      },
+      "status": "succeeded",
+      "error": null
+    },
+    {
+      "id": "github.repos.list_forks",
+      "input": {
+        "path": {
+          "owner": "octocat",
+          "repo": "Hello-World"
+        },
+        "query": {
+          "page": 1,
+          "per_page": 2,
+          "sort": "newest"
+        }
+      },
+      "status": "failed",
+      "error": {
+        "type": "urn:a2api:problem:deadline-exceeded",
+        "title": "DEADLINE_EXCEEDED",
+        "status": 504,
+        "detail": "Backend call timed out.",
+        "code": "DEADLINE_EXCEEDED"
+      }
+    },
+    {
+      "id": "github.activity.list_stargazers_for_repo",
+      "input": {
+        "path": {
+          "owner": "octocat",
+          "repo": "Hello-World"
+        },
+        "query": {
+          "page": 1,
+          "per_page": 2
+        }
+      },
+      "status": "failed",
+      "error": {
+        "type": "urn:a2api:problem:resource-not-found",
+        "title": "RESOURCE_NOT_FOUND",
+        "status": 404,
+        "detail": "Backend did not return a successful JSON result.",
+        "code": "RESOURCE_NOT_FOUND"
+      }
+    },
+    {
+      "id": "github.repos.get_combined_status_for_ref",
+      "input": {
+        "path": {
+          "owner": "octocat",
+          "repo": "Hello-World",
+          "ref": "master"
+        }
+      },
+      "status": "succeeded",
+      "error": null
+    },
+    {
+      "id": "github.repos.list_commit_statuses_for_ref",
+      "input": {
+        "path": {
+          "owner": "octocat",
+          "repo": "Hello-World",
+          "ref": "master"
+        },
+        "query": {
+          "page": 1,
+          "per_page": 2
+        }
+      },
+      "status": "succeeded",
+      "error": null
+    }
+  ],
+  "httpRequests": [
+    {
+      "run": "preflight",
+      "path": "/repos/octocat/Hello-World",
+      "sent": true,
+      "upstreamSeconds": 0.43808636302128434,
+      "status": 200,
+      "bodyBytes": 5170,
+      "bodySHA256": "a1d5a295d73b6d9a3fa775187867453acc3d2f4b752e67f499a898193577e881",
+      "rateRemaining": "4872",
+      "seconds": 0.438153246010188
+    },
+    {
+      "run": "preflight",
+      "path": "/repos/psf/requests/releases/latest",
+      "sent": true,
+      "upstreamSeconds": 0.5060586390318349,
+      "status": 200,
+      "bodyBytes": 5301,
+      "bodySHA256": "e75078b3f326a5cc4e1752d16ef387666044f9ae4592fe451f7ab7f6a9a7a29c",
+      "rateRemaining": "4998",
+      "seconds": 0.5061333469930105
+    },
+    {
+      "run": "preflight",
+      "path": "/repos/psf/requests/releases?per_page=2&page=1",
+      "sent": true,
+      "upstreamSeconds": 0.5121557550155558,
+      "status": 200,
+      "bodyBytes": 11022,
+      "bodySHA256": "10e090d841ce5dd5be0b20aac44f1c31b09263d040b5981ce1c31301f146e224",
+      "rateRemaining": "4871",
+      "seconds": 0.5122366230352782
+    },
+    {
+      "run": "preflight",
+      "path": "/repos/octocat/Hello-World/forks?sort=newest&per_page=2&page=1",
+      "sent": true,
+      "upstreamSeconds": 1.5380781020503491,
+      "status": 200,
+      "bodyBytes": 11735,
+      "bodySHA256": "21fc0dc9d17b0ae8769c0f45fc650afc3df022d13c988930fddac3de3eb47b13",
+      "rateRemaining": "4997",
+      "seconds": 1.5381423400249332,
+      "clientDisconnected": true
+    },
+    {
+      "run": "preflight",
+      "path": "/repos/octocat/Hello-World/stargazers?per_page=2&page=1",
+      "sent": true,
+      "upstreamSeconds": 0.34546105295885354,
+      "status": 404,
+      "bodyBytes": 123,
+      "bodySHA256": "9069b0b6c78b80a96780b1808f0304a7c19bcb409bc2cb9fb13398debff96b1d",
+      "rateRemaining": "4870",
+      "seconds": 0.34550305997254327
+    },
+    {
+      "run": "preflight",
+      "path": "/repos/octocat/Hello-World/commits/master/status",
+      "sent": true,
+      "upstreamSeconds": 0.39882912300527096,
+      "status": 200,
+      "bodyBytes": 4495,
+      "bodySHA256": "ccdce4f37b0cd67026128cd119885c26605ba464edb9d08e96110045beed352a",
+      "rateRemaining": "4869",
+      "seconds": 0.39887475600698963
+    },
+    {
+      "run": "preflight",
+      "path": "/repos/octocat/Hello-World/commits/master/statuses?per_page=2&page=1",
+      "sent": true,
+      "upstreamSeconds": 0.40670841798419133,
+      "status": 200,
+      "bodyBytes": 2,
+      "bodySHA256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rateRemaining": "4868",
+      "seconds": 0.406751147005707
+    }
+  ]
+}

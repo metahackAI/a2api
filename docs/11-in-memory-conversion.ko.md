@@ -63,6 +63,8 @@ result = app.invoke(
 
 `select`는 단순 객체 또는 유한한 내부 객체 참조에 적용한다. root 배열·scalar·null·union 등은 `select` 없이 원본 schema로 호출할 수 있다. 임의 JSON Pointer 매핑, 필드명 변경, 복잡한 object composition의 선택은 이번 범위가 아니며 지원하지 않는 선택을 오류로 보고한다. 참조 schema는 필요한 내부 `$defs`만 공개 출력에 포함한다.
 
+`x-*` 같은 annotation이 있는 단순 객체도 선택할 수 있다. annotation을 허용해도 원본 전체 HTTP 응답 검증은 그대로다. root의 조합/조건/의존성·추가 검증 제약이나 `$ref`의 검증 sibling을 제거해 선택을 허용하지 않는다. 필수/선택/null 의미를 보존하며 optional 필드가 응답에 없으면 공개 결과에도 넣지 않는다. 실제 GitHub 명세를 수정하거나 별도 review/build 파일을 만드는 과정은 필요 없다.
+
 ## 입력과 검증
 
 원본의 `path`, `query`, `headers`, `body` 구조와 required/enum/범위를 유지한다. 이 범위의 GET/HEAD request body는 importer/adapter에서 거부한다. path/query를 임의로 합치지 않으며, 선택 인자는 생략하면 전송하지 않는다. JSON Schema default를 자동으로 값에 주입하지 않는다.

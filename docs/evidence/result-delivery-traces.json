@@ -1,0 +1,1865 @@
+{
+  "rawReportSHA256": {
+    "core": "add60b339be1b6a97e480172c57b74576cfd46a49d53b9c11003432b35da637b",
+    "holdout": "02008842c55786b03871045ccc90613c7590f4d5f38a3299e31e7dd0d13efff2"
+  },
+  "note": "Actual retained calls, arguments, errors, and answers. dataPreview is an evidence excerpt, not the benchmark payload. No model rerun or argument repair.",
+  "examples": [
+    {
+      "suite": "core",
+      "id": "0/small/default_commit/a2api",
+      "question": "octocat/Hello-World의 저장소 정보를 먼저 API로 조회해 실제 기본 브랜치를 확인하고, 그 브랜치의 현재 head 커밋 SHA와 추가/삭제 줄 수를 API로 조회해줘. 브랜치나 SHA를 추측하지 마. 최종 JSON 키는 repository, defaultBranch, sha, additions, deletions로 해줘.",
+      "usage": {
+        "prompt_tokens": 22832,
+        "completion_tokens": 1494,
+        "total_tokens": 24326
+      },
+      "modelRequests": 5,
+      "seconds": 30.192,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository info default branch"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.repos.get_branch",
+            "github.repos.list_branches"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github commit sha additions deletions"
+          },
+          "selectedIDs": [
+            "github.repos.get_commit",
+            "github.repos.list_commits",
+            "github.repos.get_branch"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repo octocat Hello-World"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.issues.list_for_repo",
+            "github.repos.get_branch"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_a0d9f243a185fc7119e659e6",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_77fec0402c1d0c7b1c1bb305",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "branch": "master"
+            }
+          },
+          "id": "github.repos.get_branch",
+          "status": "succeeded",
+          "dataPreview": {
+            "name": "master",
+            "commitSha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+          }
+        },
+        {
+          "tool": "a2api_call_2d06b7b2fae1e06be8834a14",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+            }
+          },
+          "id": "github.repos.get_commit",
+          "status": "succeeded",
+          "dataPreview": {
+            "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+            "stats": {
+              "total": 2,
+              "additions": 1,
+              "deletions": 1
+            },
+            "html_url": "https://github.com/octocat/Hello-World/commit/7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"sha\": \"7fd1a60b01f91b314f59955a4e4d4e80d8edf11d\", \"additions\": 1, \"deletions\": 1}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 3,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 1,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "defaultBranch": "master",
+          "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+          "additions": 1,
+          "deletions": 1
+        }
+      }
+    },
+    {
+      "suite": "core",
+      "id": "0/large/repository/a2api",
+      "question": "API로 psf/requests 저장소의 기본 브랜치, 별 개수, 보관 여부를 확인해줘. 최종 JSON 키는 repository, defaultBranch, stars, archived로 해줘.",
+      "usage": {
+        "prompt_tokens": 4274,
+        "completion_tokens": 606,
+        "total_tokens": 4880
+      },
+      "modelRequests": 3,
+      "seconds": 11.305,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository default branch stars archived"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.orgs.get",
+            "github.actions.get_workflow_run"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "psf",
+              "repo": "requests"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "psf/requests",
+            "default_branch": "main",
+            "stargazers_count": 54569,
+            "archived": false
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"psf/requests\", \"defaultBranch\": \"main\", \"stars\": 54569, \"archived\": false}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "psf/requests",
+          "defaultBranch": "main",
+          "stars": 54569,
+          "archived": false
+        }
+      }
+    },
+    {
+      "suite": "core",
+      "id": "0/large/default_commit/a2api",
+      "question": "octocat/Hello-World의 저장소 정보를 먼저 API로 조회해 실제 기본 브랜치를 확인하고, 그 브랜치의 현재 head 커밋 SHA와 추가/삭제 줄 수를 API로 조회해줘. 브랜치나 SHA를 추측하지 마. 최종 JSON 키는 repository, defaultBranch, sha, additions, deletions로 해줘.",
+      "usage": {
+        "prompt_tokens": 14736,
+        "completion_tokens": 1384,
+        "total_tokens": 16120
+      },
+      "modelRequests": 4,
+      "seconds": 26.399,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository default branch info"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.orgs.get",
+            "github.dependabot.repository_access_for_enterprise"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository head commit sha"
+          },
+          "selectedIDs": [
+            "github.checks.get_suite",
+            "github.actions.get_workflow_run",
+            "github.actions.get_workflow_run_attempt"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github commit additions deletions stats"
+          },
+          "selectedIDs": [
+            "github.pulls.get",
+            "github.repos.get_commit",
+            "github.repos.compare_commits"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_53489657756e827e20565e2e",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "heads/master"
+            }
+          },
+          "id": "github.repos.get_commit",
+          "status": "succeeded",
+          "dataPreview": {
+            "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+            "stats": {
+              "total": 2,
+              "additions": 1,
+              "deletions": 1
+            },
+            "html_url": "https://github.com/octocat/Hello-World/commit/7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"sha\": \"7fd1a60b01f91b314f59955a4e4d4e80d8edf11d\", \"additions\": 1, \"deletions\": 1}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "defaultBranch": "master",
+          "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+          "additions": 1,
+          "deletions": 1
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/latest_release/ordinary",
+      "question": "API로 psf/requests의 최신 release를 조회해줘. 최종 JSON 키는 repository, tag, name, htmlUrl로 하고 실제 tag_name/name/html_url 값을 사용해줘.",
+      "usage": {
+        "prompt_tokens": 6057,
+        "completion_tokens": 695,
+        "total_tokens": 6752
+      },
+      "modelRequests": 3,
+      "seconds": 12.928,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github release latest"
+          },
+          "selectedIDs": [
+            "github.repos.get_latest_release",
+            "github.checks.get_suite",
+            "github.repos.get_latest_pages_build"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_4c51e4979242fbba0f4a31ba",
+          "input": {
+            "path": {
+              "owner": "psf",
+              "repo": "requests"
+            }
+          },
+          "id": "github.repos.get_latest_release",
+          "status": "succeeded",
+          "dataPreview": {
+            "html_url": "https://github.com/psf/requests/releases/tag/v2.34.2",
+            "tag_name": "v2.34.2",
+            "name": "v2.34.2"
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"psf/requests\", \"tag\": \"v2.34.2\", \"name\": \"v2.34.2\", \"htmlUrl\": \"https://github.com/psf/requests/releases/tag/v2.34.2\"}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "psf/requests",
+          "tag": "v2.34.2",
+          "name": "v2.34.2",
+          "htmlUrl": "https://github.com/psf/requests/releases/tag/v2.34.2"
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/latest_release/a2api",
+      "question": "API로 psf/requests의 최신 release를 조회해줘. 최종 JSON 키는 repository, tag, name, htmlUrl로 하고 실제 tag_name/name/html_url 값을 사용해줘.",
+      "usage": {
+        "prompt_tokens": 6057,
+        "completion_tokens": 670,
+        "total_tokens": 6727
+      },
+      "modelRequests": 3,
+      "seconds": 12.067,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github latest release"
+          },
+          "selectedIDs": [
+            "github.repos.get_latest_release",
+            "github.checks.get_suite",
+            "github.repos.get_latest_pages_build"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_4c51e4979242fbba0f4a31ba",
+          "input": {
+            "path": {
+              "owner": "psf",
+              "repo": "requests"
+            }
+          },
+          "id": "github.repos.get_latest_release",
+          "status": "succeeded",
+          "dataPreview": {
+            "html_url": "https://github.com/psf/requests/releases/tag/v2.34.2",
+            "tag_name": "v2.34.2",
+            "name": "v2.34.2"
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"psf/requests\", \"tag\": \"v2.34.2\", \"name\": \"v2.34.2\", \"htmlUrl\": \"https://github.com/psf/requests/releases/tag/v2.34.2\"}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "psf/requests",
+          "tag": "v2.34.2",
+          "name": "v2.34.2",
+          "htmlUrl": "https://github.com/psf/requests/releases/tag/v2.34.2"
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/releases_page/a2api",
+      "question": "API로 psf/requests의 release 목록 첫 페이지를 최대 2개만 조회해줘. 최종 JSON 키는 repository, page, perPage, tags(반환된 tag_name 배열)로 해줘.",
+      "usage": {
+        "prompt_tokens": 12958,
+        "completion_tokens": 918,
+        "total_tokens": 13876
+      },
+      "modelRequests": 3,
+      "seconds": 18.1,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github releases list"
+          },
+          "selectedIDs": [
+            "github.repos.list_releases",
+            "github.reactions.list_for_release",
+            "github.repos.list_release_assets"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "psf requests release"
+          },
+          "selectedIDs": [
+            "github.orgs.get_immutable_releases_settings_repositories",
+            "github.orgs.list_pat_grant_request_repositories",
+            "github.migrations.get_status_for_authenticated_user"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "repository releases"
+          },
+          "selectedIDs": [
+            "github.orgs.get_immutable_releases_settings_repositories",
+            "github.repos.check_immutable_releases",
+            "github.orgs.get_immutable_releases_settings"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_0a6e3aed84057eac42218ad4",
+          "input": {
+            "path": {
+              "owner": "psf",
+              "repo": "requests"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.repos.list_releases",
+          "status": "succeeded",
+          "dataCount": 2,
+          "dataPreview": [
+            {
+              "html_url": "https://github.com/psf/requests/releases/tag/v2.34.2",
+              "tag_name": "v2.34.2",
+              "name": "v2.34.2"
+            },
+            {
+              "html_url": "https://github.com/psf/requests/releases/tag/v2.34.1",
+              "tag_name": "v2.34.1",
+              "name": "v2.34.1"
+            }
+          ]
+        }
+      ],
+      "answer": "{\"repository\": \"psf/requests\", \"page\": 1, \"perPage\": 2, \"tags\": [\"v2.34.2\", \"v2.34.1\"]}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "psf/requests",
+          "page": 1,
+          "perPage": 2,
+          "tags": [
+            "v2.34.2",
+            "v2.34.1"
+          ]
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/releases_page/ordinary",
+      "question": "API로 psf/requests의 release 목록 첫 페이지를 최대 2개만 조회해줘. 최종 JSON 키는 repository, page, perPage, tags(반환된 tag_name 배열)로 해줘.",
+      "usage": {
+        "prompt_tokens": 12960,
+        "completion_tokens": 895,
+        "total_tokens": 13855
+      },
+      "modelRequests": 3,
+      "seconds": 16.221,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github releases list"
+          },
+          "selectedIDs": [
+            "github.repos.list_releases",
+            "github.reactions.list_for_release",
+            "github.repos.list_release_assets"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "psf requests release"
+          },
+          "selectedIDs": [
+            "github.orgs.get_immutable_releases_settings_repositories",
+            "github.orgs.list_pat_grant_request_repositories",
+            "github.migrations.get_status_for_authenticated_user"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository releases"
+          },
+          "selectedIDs": [
+            "github.orgs.get_immutable_releases_settings_repositories",
+            "github.repos.check_immutable_releases",
+            "github.orgs.get_immutable_releases_settings"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_0a6e3aed84057eac42218ad4",
+          "input": {
+            "path": {
+              "owner": "psf",
+              "repo": "requests"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.repos.list_releases",
+          "status": "succeeded",
+          "dataCount": 2,
+          "dataPreview": [
+            {
+              "html_url": "https://github.com/psf/requests/releases/tag/v2.34.2",
+              "tag_name": "v2.34.2",
+              "name": "v2.34.2"
+            },
+            {
+              "html_url": "https://github.com/psf/requests/releases/tag/v2.34.1",
+              "tag_name": "v2.34.1",
+              "name": "v2.34.1"
+            }
+          ]
+        }
+      ],
+      "answer": "{\"repository\": \"psf/requests\", \"page\": 1, \"perPage\": 2, \"tags\": [\"v2.34.2\", \"v2.34.1\"]}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "psf/requests",
+          "page": 1,
+          "perPage": 2,
+          "tags": [
+            "v2.34.2",
+            "v2.34.1"
+          ]
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/forks_page/ordinary",
+      "question": "API로 octocat/Hello-World의 fork 목록을 newest 순서로 첫 페이지 최대 2개만 조회해줘. 최종 JSON 키는 repository, page, perPage, sort, forks(반환된 full_name 배열)로 해줘.",
+      "usage": {
+        "prompt_tokens": 9732,
+        "completion_tokens": 823,
+        "total_tokens": 10555
+      },
+      "modelRequests": 3,
+      "seconds": 16.874,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository forks list"
+          },
+          "selectedIDs": [
+            "github.repos.list_forks",
+            "github.security_advisories.list_repository_advisories",
+            "github.security_advisories.list_org_repository_advisories"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_2b8e6ee1065423ca1ff52f17",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2,
+              "sort": "newest"
+            }
+          },
+          "id": "github.repos.list_forks",
+          "status": "succeeded",
+          "dataCount": 2,
+          "dataPreview": [
+            {
+              "full_name": "sobi-mutative-evals/Hello-World-48",
+              "default_branch": "master",
+              "stargazers_count": 0,
+              "archived": false,
+              "html_url": "https://github.com/sobi-mutative-evals/Hello-World-48",
+              "name": "Hello-World-48"
+            },
+            {
+              "full_name": "sobi-mutative-evals/Hello-World-47",
+              "default_branch": "master",
+              "stargazers_count": 0,
+              "archived": false,
+              "html_url": "https://github.com/sobi-mutative-evals/Hello-World-47",
+              "name": "Hello-World-47"
+            }
+          ]
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"page\": 1, \"perPage\": 2, \"sort\": \"newest\", \"forks\": [\"sobi-mutative-evals/Hello-World-48\", \"sobi-mutative-evals/Hello-World-47\"]}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 1,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "page": 1,
+          "perPage": 2,
+          "sort": "newest",
+          "forks": [
+            "sobi-mutative-evals/Hello-World-48",
+            "sobi-mutative-evals/Hello-World-47"
+          ]
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/forks_page/a2api",
+      "question": "API로 octocat/Hello-World의 fork 목록을 newest 순서로 첫 페이지 최대 2개만 조회해줘. 최종 JSON 키는 repository, page, perPage, sort, forks(반환된 full_name 배열)로 해줘.",
+      "usage": {
+        "prompt_tokens": 12949,
+        "completion_tokens": 1126,
+        "total_tokens": 14075
+      },
+      "modelRequests": 4,
+      "seconds": 21.878,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository forks list"
+          },
+          "selectedIDs": [
+            "github.repos.list_forks",
+            "github.security_advisories.list_repository_advisories",
+            "github.security_advisories.list_org_repository_advisories"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_2b8e6ee1065423ca1ff52f17",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2,
+              "sort": "newest"
+            }
+          },
+          "id": "github.repos.list_forks",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:deadline-exceeded",
+            "title": "DEADLINE_EXCEEDED",
+            "status": 504,
+            "detail": "Backend call timed out.",
+            "code": "DEADLINE_EXCEEDED"
+          }
+        },
+        {
+          "tool": "a2api_call_2b8e6ee1065423ca1ff52f17",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2,
+              "sort": "newest"
+            }
+          },
+          "id": "github.repos.list_forks",
+          "status": "succeeded",
+          "dataCount": 2,
+          "dataPreview": [
+            {
+              "full_name": "sobi-mutative-evals/Hello-World-48",
+              "default_branch": "master",
+              "stargazers_count": 0,
+              "archived": false,
+              "html_url": "https://github.com/sobi-mutative-evals/Hello-World-48",
+              "name": "Hello-World-48"
+            },
+            {
+              "full_name": "sobi-mutative-evals/Hello-World-47",
+              "default_branch": "master",
+              "stargazers_count": 0,
+              "archived": false,
+              "html_url": "https://github.com/sobi-mutative-evals/Hello-World-47",
+              "name": "Hello-World-47"
+            }
+          ]
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"page\": 1, \"perPage\": 2, \"sort\": \"newest\", \"forks\": [\"sobi-mutative-evals/Hello-World-48\", \"sobi-mutative-evals/Hello-World-47\"]}",
+      "assessment": {
+        "passed": false,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": false,
+        "failures": [
+          "BUSINESS_ERROR:DEADLINE_EXCEEDED"
+        ],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 1,
+        "duplicateBusinessCalls": 1,
+        "readsAboveMinimum": 1,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "page": 1,
+          "perPage": 2,
+          "sort": "newest",
+          "forks": [
+            "sobi-mutative-evals/Hello-World-48",
+            "sobi-mutative-evals/Hello-World-47"
+          ]
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/stargazers_page/a2api",
+      "question": "API로 octocat/Hello-World의 stargazer 목록 첫 페이지를 최대 2명만 조회해줘. 최종 JSON 키는 repository, page, perPage, logins(반환된 login 배열)로 해줘.",
+      "usage": {
+        "prompt_tokens": 56232,
+        "completion_tokens": 3533,
+        "total_tokens": 59765
+      },
+      "modelRequests": 12,
+      "seconds": 68.173,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github stargazers list"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.repos.list_forks",
+            "github.repos.list_invitations"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazer"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.activity.get_stargazer_count_for_repo",
+            "github.activity.get_stargazer_history_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository stargazers"
+          },
+          "selectedIDs": [
+            "github.activity.get_stargazer_history_for_repo",
+            "github.repos.get",
+            "github.activity.list_stargazers_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "list stargazers for repository"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.codespaces.list_repositories_for_secret_for_authenticated_user",
+            "github.copilot.list_copilot_coding_agent_selected_repositories_for_organization"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 30
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 1
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazers list repository"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.codespaces.list_repositories_for_secret_for_authenticated_user",
+            "github.copilot.list_copilot_coding_agent_selected_repositories_for_organization"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github stargazers"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.activity.get_stargazer_count_for_repo",
+            "github.activity.get_stargazer_history_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazers",
+            "more": true
+          },
+          "selectedIDs": [],
+          "error": {
+            "type": "urn:a2api:problem:search-not-started",
+            "title": "SEARCH_NOT_STARTED",
+            "status": 400,
+            "detail": "Search this query before requesting more.",
+            "code": "SEARCH_NOT_STARTED"
+          }
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazers"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.activity.get_stargazer_count_for_repo",
+            "github.activity.get_stargazer_history_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazers",
+            "more": true
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.code_scanning.get_variant_analysis_repo_task",
+            "github.dependabot.repository_access_for_enterprise"
+          ],
+          "moreAvailable": true,
+          "page": 2,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_abf714219edfa1b7e5a80afe",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.activity.get_stargazer_count_for_repo",
+          "status": "succeeded",
+          "dataPreview": {}
+        }
+      ],
+      "answer": "",
+      "assessment": {
+        "passed": false,
+        "goalReached": false,
+        "factsMatched": false,
+        "firstAttemptClean": false,
+        "failures": [
+          "ANSWER_VALUES_OR_FORMAT",
+          "BUSINESS_ERROR:RESOURCE_NOT_FOUND",
+          "GOAL_NOT_REACHED",
+          "HOST:MODEL_TURN_LIMIT"
+        ],
+        "businessCalls": 5,
+        "failedBusinessAttempts": 3,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 4,
+        "answerFormat": "unparseable",
+        "expectedAnswer": null
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/stargazers_page/ordinary",
+      "question": "API로 octocat/Hello-World의 stargazer 목록 첫 페이지를 최대 2명만 조회해줘. 최종 JSON 키는 repository, page, perPage, logins(반환된 login 배열)로 해줘.",
+      "usage": {
+        "prompt_tokens": 52978,
+        "completion_tokens": 4582,
+        "total_tokens": 57560
+      },
+      "modelRequests": 12,
+      "seconds": 87.443,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github stargazer list"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.repos.list_forks",
+            "github.repos.list_invitations"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository stargazers"
+          },
+          "selectedIDs": [
+            "github.activity.get_stargazer_history_for_repo",
+            "github.repos.get",
+            "github.activity.list_stargazers_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "octocat Hello-World stargazers"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.activity.get_stargazer_count_for_repo",
+            "github.activity.get_stargazer_history_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_call_abf714219edfa1b7e5a80afe",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.activity.get_stargazer_count_for_repo",
+          "status": "succeeded",
+          "dataPreview": {}
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 1
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 30
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "hello-world"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "list stargazers for repo"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.repos.list_invitations",
+            "github.repos.list_for_org"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazers list"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.repos.list_forks",
+            "github.repos.list_invitations"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github stargazers"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.activity.get_stargazer_count_for_repo",
+            "github.activity.get_stargazer_history_for_repo"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_e7db26b853b714bab3227b43",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.activity.list_stargazers_for_repo",
+          "status": "failed",
+          "error": {
+            "type": "urn:a2api:problem:resource-not-found",
+            "title": "RESOURCE_NOT_FOUND",
+            "status": 404,
+            "detail": "Backend did not return a successful JSON result.",
+            "code": "RESOURCE_NOT_FOUND"
+          }
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "stargazers list repository"
+          },
+          "selectedIDs": [
+            "github.activity.list_stargazers_for_repo",
+            "github.codespaces.list_repositories_for_secret_for_authenticated_user",
+            "github.copilot.list_copilot_coding_agent_selected_repositories_for_organization"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        }
+      ],
+      "answer": "",
+      "assessment": {
+        "passed": false,
+        "goalReached": false,
+        "factsMatched": false,
+        "firstAttemptClean": false,
+        "failures": [
+          "ANSWER_VALUES_OR_FORMAT",
+          "BUSINESS_ERROR:RESOURCE_NOT_FOUND",
+          "GOAL_NOT_REACHED",
+          "HOST:MODEL_TURN_LIMIT"
+        ],
+        "businessCalls": 8,
+        "failedBusinessAttempts": 6,
+        "duplicateBusinessCalls": 1,
+        "readsAboveMinimum": 7,
+        "answerFormat": "unparseable",
+        "expectedAnswer": null
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/default_combined_status/ordinary",
+      "question": "octocat/Hello-World의 저장소 정보를 먼저 API로 조회해 실제 기본 브랜치를 확인하고, 그 브랜치의 combined commit status를 API로 조회해줘. 브랜치를 추측하지 마. 최종 JSON 키는 repository, defaultBranch, state, totalCount로 하고 state/total_count의 실제 값을 사용해줘.",
+      "usage": {
+        "prompt_tokens": 14145,
+        "completion_tokens": 1216,
+        "total_tokens": 15361
+      },
+      "modelRequests": 4,
+      "seconds": 22.988,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository default branch"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.orgs.get",
+            "github.dependabot.repository_access_for_enterprise"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github combined commit status"
+          },
+          "selectedIDs": [
+            "github.repos.get_combined_status_for_ref",
+            "github.repos.compare_commits",
+            "github.migrations.get_import_status"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repo info"
+          },
+          "selectedIDs": [
+            "github.code_scanning.get_sarif",
+            "github.orgs.external_properties_for_repos_get_organization_app_installations",
+            "github.repos.get"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_4391759674902dcc4c1d3850",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "master"
+            }
+          },
+          "id": "github.repos.get_combined_status_for_ref",
+          "status": "succeeded",
+          "dataPreview": {
+            "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+            "state": "pending",
+            "total_count": 0
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"state\": \"pending\", \"totalCount\": 0}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "defaultBranch": "master",
+          "state": "pending",
+          "totalCount": 0
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/default_combined_status/a2api",
+      "question": "octocat/Hello-World의 저장소 정보를 먼저 API로 조회해 실제 기본 브랜치를 확인하고, 그 브랜치의 combined commit status를 API로 조회해줘. 브랜치를 추측하지 마. 최종 JSON 키는 repository, defaultBranch, state, totalCount로 하고 state/total_count의 실제 값을 사용해줘.",
+      "usage": {
+        "prompt_tokens": 13674,
+        "completion_tokens": 885,
+        "total_tokens": 14559
+      },
+      "modelRequests": 5,
+      "seconds": 18.2,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository default branch info"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.orgs.get",
+            "github.dependabot.repository_access_for_enterprise"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "combined commit status"
+          },
+          "selectedIDs": [
+            "github.repos.get_combined_status_for_ref",
+            "github.repos.compare_commits",
+            "github.migrations.get_import_status"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_4391759674902dcc4c1d3850",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "master"
+            }
+          },
+          "id": "github.repos.get_combined_status_for_ref",
+          "status": "succeeded",
+          "dataPreview": {
+            "sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
+            "state": "pending",
+            "total_count": 0
+          }
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"state\": \"pending\", \"totalCount\": 0}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "defaultBranch": "master",
+          "state": "pending",
+          "totalCount": 0
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/default_statuses_page/a2api",
+      "question": "octocat/Hello-World의 저장소 정보를 먼저 API로 조회해 실제 기본 브랜치를 확인하고, 그 브랜치의 commit statuses 첫 페이지를 최대 2개만 API로 조회해줘. 브랜치를 추측하지 마. 최종 JSON 키는 repository, defaultBranch, page, perPage, statuses(각 원소는 실제 state/context만 가진 객체)로 해줘. 빈 배열이면 그대로 반환해줘.",
+      "usage": {
+        "prompt_tokens": 12610,
+        "completion_tokens": 1951,
+        "total_tokens": 14561
+      },
+      "modelRequests": 4,
+      "seconds": 35.259,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository info default branch"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.orgs.get",
+            "github.dependabot.repository_access_for_enterprise"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github commit statuses"
+          },
+          "selectedIDs": [
+            "github.repos.list_commit_statuses_for_ref",
+            "github.repos.get_combined_status_for_ref",
+            "github.pulls.get"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repo get default branch"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.repos.get_branch",
+            "github.orgs.get"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_0bfa94adede39a4512fca5dc",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "master"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.repos.list_commit_statuses_for_ref",
+          "status": "succeeded",
+          "dataCount": 0,
+          "dataPreview": []
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"page\": 1, \"perPage\": 2, \"statuses\": []}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "page": 1,
+          "perPage": 2,
+          "defaultBranch": "master",
+          "statuses": []
+        }
+      }
+    },
+    {
+      "suite": "holdout",
+      "id": "0/large/default_statuses_page/ordinary",
+      "question": "octocat/Hello-World의 저장소 정보를 먼저 API로 조회해 실제 기본 브랜치를 확인하고, 그 브랜치의 commit statuses 첫 페이지를 최대 2개만 API로 조회해줘. 브랜치를 추측하지 마. 최종 JSON 키는 repository, defaultBranch, page, perPage, statuses(각 원소는 실제 state/context만 가진 객체)로 해줘. 빈 배열이면 그대로 반환해줘.",
+      "usage": {
+        "prompt_tokens": 12610,
+        "completion_tokens": 1613,
+        "total_tokens": 14223
+      },
+      "modelRequests": 4,
+      "seconds": 27.418,
+      "calls": [
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repository info default branch"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.orgs.get",
+            "github.dependabot.repository_access_for_enterprise"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github commit statuses"
+          },
+          "selectedIDs": [
+            "github.repos.list_commit_statuses_for_ref",
+            "github.repos.get_combined_status_for_ref",
+            "github.pulls.get"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_search",
+          "input": {
+            "query": "github repo get default branch"
+          },
+          "selectedIDs": [
+            "github.repos.get",
+            "github.repos.get_branch",
+            "github.orgs.get"
+          ],
+          "moreAvailable": true,
+          "page": 1,
+          "pageLimitReached": false,
+          "progress": true
+        },
+        {
+          "tool": "a2api_call_f0c8eb7328f75ad1ba3885da",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World"
+            }
+          },
+          "id": "github.repos.get",
+          "status": "succeeded",
+          "dataPreview": {
+            "full_name": "octocat/Hello-World",
+            "default_branch": "master",
+            "stargazers_count": 3874,
+            "archived": false
+          }
+        },
+        {
+          "tool": "a2api_call_0bfa94adede39a4512fca5dc",
+          "input": {
+            "path": {
+              "owner": "octocat",
+              "repo": "Hello-World",
+              "ref": "master"
+            },
+            "query": {
+              "page": 1,
+              "per_page": 2
+            }
+          },
+          "id": "github.repos.list_commit_statuses_for_ref",
+          "status": "succeeded",
+          "dataCount": 0,
+          "dataPreview": []
+        }
+      ],
+      "answer": "{\"repository\": \"octocat/Hello-World\", \"defaultBranch\": \"master\", \"page\": 1, \"perPage\": 2, \"statuses\": []}",
+      "assessment": {
+        "passed": true,
+        "goalReached": true,
+        "factsMatched": true,
+        "firstAttemptClean": true,
+        "failures": [],
+        "businessCalls": 2,
+        "failedBusinessAttempts": 0,
+        "duplicateBusinessCalls": 0,
+        "readsAboveMinimum": 0,
+        "answerFormat": "json",
+        "expectedAnswer": {
+          "repository": "octocat/Hello-World",
+          "page": 1,
+          "perPage": 2,
+          "defaultBranch": "master",
+          "statuses": []
+        }
+      }
+    }
+  ]
+}

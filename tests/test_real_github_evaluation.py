@@ -30,6 +30,10 @@ class RealCatalogTests(unittest.IsolatedAsyncioTestCase):
     async def test_real_operations_bind_to_original_source_and_input(self):
         self.assertEqual(self.info['count'], 8)
         self.assertEqual({x['operationId'] for x in self.info['mapping'].values()}, set(self.catalog.SMALL))
+        self.assertEqual(set(self.app.describe('github.repos.get')['outputSchema']['properties']),
+                         {'full_name', 'default_branch', 'stargazers_count', 'archived'})
+        self.assertEqual(set(self.app.describe('github.repos.get_commit')['outputSchema']['properties']),
+                         {'sha', 'stats', 'html_url'})
         for desc in self.app.descriptors():
             route = self.info['mapping'][desc['id']]
             self.assertEqual(route['method'], 'get')
@@ -89,3 +93,50 @@ class AssessmentTests(unittest.TestCase):
         self.assertFalse(result['passed'])
         self.assertIn('PAGE_OR_COUNT_CONDITION', result['failures'])
         self.assertFalse(self.grade(1, [good], {**answer, 'branches': ['guessed']})['passed'])
+
+
+class HoldoutAssessmentTests(unittest.TestCase):
+    def setUp(self):
+        from unittest.mock import patch
+        import sys
+        with patch.dict(sys.modules, {'assess': module('assess')}):self.scorer = module('holdout')
+        self.cases = {case['id']: case for case in self.scorer.CASES}
+        self.descriptors = {name: {'inputSchema': {'type': 'object'}, 'outputSchema': {}}
+                            for name in ('repo', 'combined', 'statuses', 'forks')}
+        self.mapping = {name: {'operationId': op} for name, op in
+            [('repo', 'repos/get'), ('combined', 'repos/get-combined-status-for-ref'),
+             ('statuses', 'repos/list-commit-statuses-for-ref'), ('forks', 'repos/list-forks')]}
+
+    def call(self, name, data, *, path=None, query=None):
+        args = {'path': {'owner': 'octocat', 'repo': 'Hello-World', **(path or {})}}
+        if query is not None:args['query'] = query
+        return {'binding': {'id': name}, 'input': args, 'output': {'status': 'succeeded', 'data': data}}
+
+    def grade(self, name, calls, answer):
+        import json
+        return self.scorer.assess(self.cases[name], {'calls': calls, 'answer': json.dumps(answer)}, self.descriptors, self.mapping)
+
+    def test_chain_uses_observed_branch_and_checks_exact_final_types(self):
+        repo = self.call('repo', {'full_name': 'octocat/Hello-World', 'default_branch': 'actual'})
+        combined = self.call('combined', {'state': 'pending', 'total_count': 0}, path={'ref': 'heads/actual'})
+        answer = {'repository': 'octocat/Hello-World', 'defaultBranch': 'actual', 'state': 'pending', 'totalCount': 0}
+        self.assertTrue(self.grade('default_combined_status', [repo, combined], answer)['passed'])
+        guessed = self.call('combined', {'state': 'pending', 'total_count': 0}, path={'ref': 'guessed'})
+        self.assertIn('REF_NOT_FROM_PRIOR_RESULT', self.grade('default_combined_status', [repo, guessed], answer)['failures'])
+        self.assertFalse(self.grade('default_combined_status', [combined, repo], answer)['passed'])
+        self.assertFalse(self.grade('default_combined_status', [repo, combined], {**answer, 'totalCount': False})['passed'])
+
+    def test_empty_statuses_are_valid_but_page_and_count_are_not_repaired(self):
+        repo = self.call('repo', {'full_name': 'octocat/Hello-World', 'default_branch': 'actual'})
+        answer = {'repository': 'octocat/Hello-World', 'defaultBranch': 'actual', 'page': 1, 'perPage': 2, 'statuses': []}
+        good = self.call('statuses', [], path={'ref': 'actual'}, query={'per_page': 2})
+        self.assertTrue(self.grade('default_statuses_page', [repo, good], answer)['passed'])
+        wrong = self.call('statuses', [], path={'ref': 'actual'}, query={'per_page': 30})
+        self.assertIn('PAGE_OR_COUNT_CONDITION', self.grade('default_statuses_page', [repo, wrong], answer)['failures'])
+
+    def test_fork_sort_filters_and_returned_names_are_checked(self):
+        answer = {'repository': 'octocat/Hello-World', 'page': 1, 'perPage': 2, 'sort': 'newest', 'forks': ['someone/repo']}
+        good = self.call('forks', [{'full_name': 'someone/repo'}], query={'page': 1, 'per_page': 2, 'sort': 'newest'})
+        self.assertTrue(self.grade('forks_page', [good], answer)['passed'])
+        bad = self.call('forks', [{'full_name': 'someone/repo'}], query={'page': 1, 'per_page': 2, 'sort': 'oldest'})
+        self.assertIn('SORT_CONDITION', self.grade('forks_page', [bad], answer)['failures'])

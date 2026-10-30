@@ -1,23 +1,26 @@
-# a2api-tools/0.2: 필요한 호출 계약만 모델에 제공하기
+# a2api-tools/0.3: 필요한 호출 계약만 모델에 제공하기
 
 기준: [제품 목표](00-product-direction.ko.md), [이번 개발 계획](23-total-call-cost-plan.ko.md). 서버 wire는 기존 [a2api-call/0.1](20-call-protocol.ko.md)을 그대로 사용한다. 이 문서는 호스트의 도구 표현과 호출 규칙을 정의한다.
 
-0.2는 선택적 다음 페이지와 진행 상태를 추가한다. 기존 0.1의 query-only 요청은 계속 유효하다. [검색 1번 구현 범위](29-search-improvement.ko.md)이며 결과 선택/업무 함수의 반환 설명은 이번에 바꾸지 않았다.
+0.2는 선택적 다음 페이지와 진행 상태를 추가했고, 0.3은 선택한 함수의 반환 필드를 짧게 설명한다. 기존 query-only 입력과 검색 결과 형식은 유지한다. [검색 개선](29-search-improvement.ko.md)에 이어 [결과 전달·보류 요청 검증](31-result-delivery-and-holdout-plan.ko.md)을 적용한다.
 
 ## 계약과 모델 도구의 관계
 
-하나의 capability descriptor가 원본이다. 호스트는 선택한 descriptor에서 `summary`, `effects.kind`, **완전한 inputSchema**를 function tool로 만든다. outputSchema는 검증용으로 보관한다. 실행 주소·인증·전체 IR은 모델에 전달하지 않는다.
+하나의 capability descriptor가 원본이다. 호스트는 선택한 descriptor에서 `summary`, `effects.kind`, **완전한 inputSchema**를 function tool로 만든다. outputSchema는 검증용으로 보관하고 field 이름·타입·필수 여부만 짧은 반환 설명에 사용한다. 실행 주소·인증·전체 IR은 모델에 전달하지 않는다.
 
 | 정보 | 보관/전달 위치 |
 |---|---|
 | 정확한 업무 입력 schema | 선택한 모델 도구의 parameters, 원래 invoke 검증 |
 | id/version/catalogVersion | 호스트의 바인딩, 기존 invoke 요청 |
 | 출력 schema | 서버와 호스트의 성공 결과 검증 |
+| 공개 출력 이름·타입·필수 여부 | 선택한 function의 짧은 반환 설명 |
 | 짧은 검색 결과 | 선택된 function 이름/ID, 제외 이유, 추가 후보 존재 여부 |
 | 전체 카탈로그와 검색 metadata | 서버/신뢰한 호스트 |
 | 사용자·tenant·인증 정보 | 기존 trusted context와 배포 연결 |
 
 모델 도구의 이름은 `a2api_call_<24자리 hash>`다. 이름은 호스트 세션의 바인딩 키이며 권한 토큰이 아니다. 모델은 이름을 복사하고 업무 인자만 작성한다. 호스트가 선택된 계약의 식별자·버전을 붙여 기존 invoke를 호출한다. 정상/실패 envelope는 바꾸지 않는다.
+
+반환 설명 예시는 `Returns object fields: "default_branch":string (required), "archived":boolean (required).`다. 공개 schema의 최대 6개 필드를 읽고 나머지는 개수로 표시한다. 배열은 item 필드, 명시적 nullable은 `string|null`, 선택 필드는 optional로 표시한다. 로컬 참조만 제한적으로 따라가며 해석하지 못하는 조합/순환 schema는 JSON으로 표시한다. 실제 값·examples·description·업무 관계는 넣지 않고 긴 필드 이름은 자르지 않고 생략한다. 별도 descriptor 필드나 MCP 도구를 추가하지 않는다. 이 설명도 전송/예산에 포함되므로 항상 토큰이 감소하는 것은 아니다.
 
 ## 정보 전달 규칙
 

@@ -2,7 +2,7 @@
 
 갱신일: 2026-10-30 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
 
-현재 최신 요청인 [28 문서](28-cost-improvement-plan.ko.md)의 **1번 검색 개선만 완료**했다. [범위](29-search-improvement.ko.md)대로 정확 ID·입출력 field 순위·조건부 다음 페이지를 구현하고, 같은 실제 GitHub 8개/633개와 Muse 24질문을 재검증했다. [새 결과](30-search-improvement-results.ko.md)와 [최초 실패 기록](27-real-github-evaluation-results.ko.md)을 함께 보존한다. 2번 전달 정보·3번 별도 LLM holdout 확장은 진행하지 않았으며 자동 착수하지 않는다.
+현재 최신 요청인 [28 문서](28-cost-improvement-plan.ko.md)의 **2번 결과 전달 구현과 3번 고정 평가 실행을 완료**했다. [31 문서](31-result-delivery-and-holdout-plan.ko.md)대로 select·짧은 반환 설명을 같은 대조군에 적용했다. [32 문서](32-result-delivery-and-holdout-results.ko.md)에 기존 24질문 통과와 별도 12질문 중 서비스/접근 실패 3건, 모든 실패 비용을 기록했다. [최초 실패](27-real-github-evaluation-results.ko.md)와 [검색만 개선한 결과](30-search-improvement-results.ko.md)도 보존한다. 전체 목표를 달성했다고 과장하거나 새 운영/권한/재시도 기능을 자동 착수하지 않는다.
 
 이전 [전체 호출 비용 계획](23-total-call-cost-plan.ko.md)의 호스트 바인딩과 제한된 합성 카탈로그 비교는 완료 이력이다. 아래 완료된 작업도 이력으로 보존한다. 운영 플랫폼이나 추가 importer 개발을 완료 조건에 넣지 않는다.
 

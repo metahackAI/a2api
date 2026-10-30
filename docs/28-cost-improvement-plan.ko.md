@@ -1,6 +1,6 @@
 # 실제 카탈로그 결과에 따른 전체 비용 개선 계획
 
-2026-10-30 · 상태: **1번 구현·재검증 완료, 2·3번 미착수**. 이 계획은 [최초 결과](27-real-github-evaluation-results.ko.md), [원 평가 범위](26-real-github-evaluation-plan.ko.md)를 근거로 작성했다. 이후 사용자가 1번만 요청해 [범위 기록](29-search-improvement.ko.md) 후 구현하고 [같은 Muse 요청으로 재검증](30-search-improvement-results.ko.md)했다. 아래 최초 관찰과 남은 계획은 보존하며, 2·3번은 다음 지시 전까지 진행하지 않는다.
+2026-10-30 · 상태: **1·2번 구현 완료, 3번 평가 실행 완료(holdout 3건 엄격 완료 미달)**. [최초 결과](27-real-github-evaluation-results.ko.md), [원 평가 범위](26-real-github-evaluation-plan.ko.md)를 근거로 작성했다. [검색 개선 결과](30-search-improvement-results.ko.md) 이후 사용자가 2·3번을 요청해 [범위 고정](31-result-delivery-and-holdout-plan.ko.md) 후 수행했다. [새 결과](32-result-delivery-and-holdout-results.ko.md)에 기존 24질문 통과와 별도 9/12 엄격 완료, 서비스/접근 오류를 포함한 비용을 기록했다. 아래 최초 관찰·계획은 이력으로 보존하며 새 범위를 자동 추가하지 않는다.
 
 ## 목표와 우선순위
 
@@ -41,7 +41,9 @@
 
 ## 2. 호출에 필요한 결과 의미와 데이터만 전달하기
 
-예정 변경: `src/a2api/conversion.py`의 기존 select 처리, `tool_session.py`의 function 설명 생성, 같은 설명·projection을 쓰는 평가 대조군, 관련 테스트·사용 문서.
+**구현·기존 요청 검증 완료.** annotation이 있는 단순 객체의 select와 짧은 반환 설명을 적용했다. 원본/공개 검증은 유지했고 전체 회귀 298개·기존 Muse 24질문·실제 stdio가 통과했다. 같은 검색/전달을 쓰는 두 모드는 이번 총 토큰이 같았으며, 소규모 a2api는 토큰이 소폭 증가했다. [실측](32-result-delivery-and-holdout-results.ko.md)에 한계를 함께 기록했다.
+
+변경 범위: `src/a2api/conversion.py`의 기존 select 처리, `tool_session.py`/`tool_description.py`의 function 설명 생성, 같은 설명·projection을 쓰는 평가 대조군, 관련 테스트·사용 문서.
 
 - 먼저 원본 JSON Schema 제약과 무해한 annotation을 구별해 `repos/get`의 기존 top-level select가 동작하게 한다. schema 조합/조건 같은 제약은 plain object처럼 취급하지 않는다. 입력·원본 HTTP 응답 검증을 그대로 실행한 뒤 공개 필드를 선택한다.
 - 평가 앱에서 저장소의 full_name/default_branch/stargazers_count/archived, 커밋의 sha/stats/html_url을 선택한다. 양쪽 비교군에 같은 설정을 적용한다. 서버가 전체 JSON을 계속 반환하므로 원 API 네트워크 바이트가 줄었다고 주장하지 않는다.
@@ -53,7 +55,9 @@
 
 ## 3. 같은 요청과 보류한 요청으로 정확성·전체 비용 재검증
 
-예정 변경: 기존 `examples/real-github-evaluation`과 관련 테스트·evidence·결과 문서만 갱신한다. 평가 서비스나 CI를 추가하지 않는다.
+**실행·보고 완료, 모든 요청의 엄격 완료 조건은 미달.** 기존 24질문과 별도 고정 12질문을 실행했다. 이미 검색 개발에 사용한 오프라인 기능을 holdout으로 재사용하지 않아, release/fork/stargazer/status 6요청을 고정했다. 첫 사전 실패와 두 번째 전체 실행을 보존했고 모델 질문 재실행·교체·채점 완화는 하지 않았다. fork timeout 후 복구 1건과 접근 제한으로 404를 받은 stargazer 2건이 미통과다. 세부 진단·공식 권한 변경 근거·비용은 [32 문서](32-result-delivery-and-holdout-results.ko.md)에 있다.
+
+변경 범위: 기존 `examples/real-github-evaluation`과 관련 테스트·evidence·결과 문서만 갱신한다. 평가 서비스나 CI를 추가하지 않는다.
 
 1. 이번 24질문·같은 모델 설정·동일한 순서 교대 규칙을 재사용한다. small의 현재 6/6(각 모드)을 유지하고 large도 각 모드 6/6을 완료 목표로 한다. 이것이 전 세계 API의 성공률 100%라는 뜻은 아니다.
 2. 1번 작업 뒤 같은 평가로 성공 회복과 검색 비용을 확인한다. 그 실행을 보존한 뒤 2번 작업의 전달량·전체 비용 효과를 확인한다. 같은 실패를 지우기 위한 임의 재실행은 하지 않는다.

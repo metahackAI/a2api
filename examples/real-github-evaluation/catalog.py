@@ -13,10 +13,9 @@ SOURCE_DIR = ROOT / 'examples/github-openapi'
 CONTEXT = ExecutionContext('github-public-evaluation', 'public', frozenset())
 SMALL = ('repos/get', 'repos/get-commit', 'repos/list-commits', 'repos/get-branch',
          'repos/list-branches', 'repos/get-latest-release', 'issues/list-for-repo', 'pulls/list')
-# Keep full source output: repos/get carries x-github-breaking-changes and the
-# current converter deliberately refuses select on that annotated object.
-# Do not edit the source or relax conversion merely to improve this benchmark.
-SELECT = {}
+# Explicit public fields; complete upstream responses are still validated first.
+SELECT = {'repos/get': ['full_name', 'default_branch', 'stargazers_count', 'archived'],
+          'repos/get-commit': ['sha', 'stats', 'html_url']}
 
 
 def load_source():

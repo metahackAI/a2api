@@ -136,6 +136,42 @@ class ConversionTests(unittest.TestCase):
         self.assertEqual(self.invoke(app)['data'], {'orderId': 'ORD-1001'})
         self.assertEqual(app.describe('legacy.getorder')['outputSchema']['required'], ['orderId'])
 
+    def test_extension_annotations_allow_select_without_weakening_raw_or_public_schema(self):
+        order = self.document['components']['schemas']['Order']
+        order['x-source-notes'] = {'meaning': 'annotation only'}
+        order['properties']['note'] = {'type': ['string', 'null']}
+        response = self.document['paths']['/orders/{orderId}']['get']['responses']['200']['content']['application/json']['schema']
+        response['x-source-ref-note'] = True
+        app = self.app(options={'getOrder': {'effect': 'read', 'select': ['orderId', 'note']}})
+        schema = app.describe('legacy.getorder')['outputSchema']
+        self.assertEqual(self.invoke(app)['data'], {'orderId': 'ORD-1001'})
+        validator = Draft202012Validator(schema)
+        self.assertTrue(validator.is_valid({'orderId': 'ORD-1001', 'note': None}))
+        self.assertFalse(validator.is_valid({'orderId': 'ORD-1001', 'note': 7}))
+        self.assertFalse(validator.is_valid({'note': None}))
+        def invalid(_path, payload):
+            return 200, {**payload, 'ownerId': 7}
+        result = self.invoke(self.app(options={'getOrder': {'effect': 'read', 'select': ['orderId']}}, transform=invalid))
+        self.assertEqual(result['error']['code'], 'SCHEMA_MISMATCH')
+        self.assertNotIn('data', result)
+
+    def test_select_still_rejects_object_constraints_and_reference_validation_siblings(self):
+        import copy
+        for constraint, code in (({'minProperties': 1}, 'UNSUPPORTED_SELECTION'),
+                                 ({'allOf': [{'type': 'object'}]}, 'UNSUPPORTED_SELECTION'),
+                                 ({'if': {'required': ['note']}, 'then': {'required': ['ownerId']}}, 'CONVERT_OPERATION_UNSUPPORTED'),
+                                 ({'dependentRequired': {'note': ['ownerId']}}, 'UNSUPPORTED_SELECTION')):
+            document = copy.deepcopy(self.document)
+            document['components']['schemas']['Order'].update(constraint)
+            self.assert_error(code, lambda: convert(OpenAPIImporter(document),
+                operations={'getOrder': {'effect': 'read', 'select': ['orderId']}},
+                deployment=HTTPDeployment('http://127.0.0.1:1')))
+        document = copy.deepcopy(self.document)
+        document['paths']['/orders/{orderId}']['get']['responses']['200']['content']['application/json']['schema']['maxProperties'] = 20
+        self.assert_error('UNSUPPORTED_SELECTION', lambda: convert(OpenAPIImporter(document),
+            operations={'getOrder': {'effect': 'read', 'select': ['orderId']}},
+            deployment=HTTPDeployment('http://127.0.0.1:1')))
+
     def test_selected_nested_references_keep_needed_definitions_and_constraints(self):
         schemas = self.document['components']['schemas']
         schemas['Order']['properties']['shipmentIds']['items'] = {'$ref': '#/components/schemas/ShipmentId'}

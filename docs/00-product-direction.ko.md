@@ -16,7 +16,7 @@ P0-2의 현재 사용법은 [Python 함수·신규 API 등록](12-python-functio
 
 2026-10-30에 확정한 후속 개발은 [전체 호출 비용 계획](23-total-call-cost-plan.ko.md)을 따른다. 같은 계약의 필요한 입력 schema만 호스트가 모델 도구로 제공하고 식별자·계약 버전은 호스트가 관리한다. 기능을 이미 아는 요청에는 모델의 discover/describe를 강제하지 않는다. 모르는 기능은 호스트가 기존 discover/describe를 처리해 다음 모델 요청에 선택한 도구를 제공한다. 기존 3도구 wire는 보존한다.
 
-실제 GitHub GET 8개/633개 [최초 검증](27-real-github-evaluation-results.ko.md)에서는 큰 카탈로그의 탐색이 실패했다. 이후 [개선 계획](28-cost-improvement-plan.ko.md)의 **1번 검색 개선만 구현**했고, [같은 실제 요청의 재검증](30-search-improvement-results.ko.md)에서는 두 방식 합계 24질문을 모두 완료했다. 이는 제한된 workload의 결과이며 제품 목표 전체의 달성과 구별한다. 2번 전달 정보·3번 별도 LLM holdout 확장은 미착수다.
+실제 GitHub GET 8개/633개 [최초 검증](27-real-github-evaluation-results.ko.md)의 대규모 탐색 실패와 [검색 개선 후 회복](30-search-improvement-results.ko.md)을 보존한다. 이후 [개선 계획](28-cost-improvement-plan.ko.md)의 **2번 결과 전달과 3번 고정 평가**도 수행했다. [새 결과](32-result-delivery-and-holdout-results.ko.md)는 기존 24질문의 정확도 유지/토큰 감소와 별도 12질문의 서비스·접근 실패 3건을 구분한다. 이는 제한된 workload의 결과이며 제품 목표 전체의 달성이나 일반 검색+function보다의 보편적 우위를 의미하지 않는다.
 
 사용자가 처음 해야 할 일은 사용할 API를 선택하고 연결하는 것이다. import 산출물·검토 파일·빌드 폴더·변경 기록·재승인 절차를 모두 운영하는 것이 기본 사용법이 되어서는 안 된다.
 

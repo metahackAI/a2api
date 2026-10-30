@@ -15,8 +15,8 @@ from .importers import OpenAPIImporter
 from .importers.source import SourceImporter, SourceRecord
 from .ir import ExecutionContext, Operation, freeze, thaw
 from .openapi_schema import check_draft_schema, schema_nodes
-from .pointers import tokens
-from .review_projection import ANNOTATIONS, dereference
+from .pointers import resolve, tokens
+from .review_projection import ANNOTATIONS
 from .reviewed_adapter import HTTPDeployment
 from .schema import validate_value
 from .protocol import PROTOCOL_PROFILE
@@ -53,9 +53,18 @@ def _output_schema(wire: Operation, selected: tuple[str, ...] | None) -> dict:
     root = thaw(wire.output_schema)
     node = root['properties']['result']
     if selected is not None:
-        node = dereference(root, node)
+        seen = set()
+        while isinstance(node, dict) and '$ref' in node:
+            ref = node['$ref']
+            annotations = ANNOTATIONS | {key for key in node if key.startswith('x-')}
+            if (not isinstance(ref, str) or not ref.startswith('#/$defs/') or ref in seen
+                    or set(node) - annotations - {'$ref'}):
+                raise A2APIError('UNSUPPORTED_SELECTION', 'select requires finite local references without validation siblings.')
+            seen.add(ref)
+            node = resolve(root, ref[1:])
         allowed = {'type', 'properties', 'required', 'additionalProperties'} | ANNOTATIONS
-        if node.get('type') != 'object' or set(node) - allowed:
+        if (not isinstance(node, dict) or node.get('type') != 'object'
+                or set(node) - allowed - {key for key in node if key.startswith('x-')}):
             raise A2APIError('UNSUPPORTED_SELECTION', 'select requires a plain object response or a plain local object reference.')
         if any(name not in node.get('properties', {}) for name in selected):
             raise A2APIError('INVALID_SELECTION', 'select names must be declared top-level response fields.')
