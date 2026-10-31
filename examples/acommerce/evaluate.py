@@ -140,7 +140,8 @@ class A2APIExecutor:
     async def call(self, name, arguments, call_id=None):
         binding = None if name == SEARCH_NAME else self.session.binding(name)
         payload = await self.session.call(name, arguments, request_id=call_id if binding else None)
-        text = clip(self.session.render(payload))
+        # a2api bounds the result structurally (largest arrays first) instead of cutting the JSON text.
+        text = self.session.render(payload, max_chars=RESULT_CHARS)
         if binding is None:
             return text, None
         return text, (self.names.get(binding['id'], binding['id']), payload.get('status') == 'succeeded')

@@ -149,8 +149,67 @@ def _restore(arguments: dict, layout: dict, required_groups: tuple) -> dict:
     return result
 
 
-def render_result(payload: dict) -> str:
-    """Compact model-facing text for a call()/search result; the envelope stays available to hosts."""
+def _dumps(value):
+    return json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+
+
+def _arrays(value, path=''):
+    """(serialized size, path, list) for every array with more than one item."""
+    if isinstance(value, list):
+        if len(value) > 1:
+            yield len(_dumps(value)), path, value
+        for index, item in enumerate(value):
+            yield from _arrays(item, f'{path}[{index}]')
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _arrays(item, f'{path}.{key}' if path else key)
+
+
+def _strings(value):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(item, str):
+                yield len(item), value, key
+            else:
+                yield from _strings(item)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            if isinstance(item, str):
+                yield len(item), value, index
+            else:
+                yield from _strings(item)
+
+
+def _fit(view, max_chars):
+    """Shrink a result view to max_chars without cutting JSON: shorten the largest arrays first
+    (keeping their first items) and then the longest strings, and say what was left out."""
+    view = json.loads(_dumps(view))
+    omitted = {}
+    while len(_dumps(view)) > max_chars:
+        arrays = sorted(_arrays(view.get('data', view)), key=lambda row: -row[0])
+        if arrays and arrays[0][2] and len(arrays[0][2]) > 1:
+            _, path, items = arrays[0]
+            total = omitted.get(path, {}).get('of', len(items))
+            del items[max(1, len(items) // 2):]
+            omitted[path] = {'path': path, 'shown': len(items), 'of': total}
+            view['omitted'] = list(omitted.values())
+            continue
+        strings = sorted(_strings(view.get('data', view)), key=lambda row: -row[0])
+        if strings and strings[0][0] > 80:
+            length, owner, key = strings[0]
+            owner[key] = owner[key][:max(40, length // 2)] + '…'
+            continue
+        return _dumps(view)[:max_chars]  # nothing left to shorten structurally
+    return _dumps(view)
+
+
+def render_result(payload: dict, *, max_chars: int | None = None) -> str:
+    """Compact model-facing text for a call()/search result; the envelope stays available to hosts.
+
+    max_chars bounds the text the way a host bounds tool results. Instead of cutting the JSON (which
+    drops whatever comes last, such as rule checks after a long list of changes), the largest arrays
+    keep their first items and `omitted` lists how many were left out.
+    """
     if not isinstance(payload, dict):
         raise TypeError('render_result expects a call() or search result.')
     if 'selected' in payload:
@@ -178,7 +237,12 @@ def render_result(payload: dict) -> str:
         if payload.get('repeated'):
             view['hint'] = (f"This exact call already failed {payload['repeated']} time(s); repeating it will fail again. "
                             'Change the arguments as the error says, or tell the user what is wrong.')
-    return json.dumps(view, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+    text = _dumps(view)
+    if max_chars is not None and len(text) > max_chars:
+        if type(max_chars) is not int or max_chars < 200:
+            raise ValueError('max_chars must be an integer of at least 200.')
+        text = _fit(view, max_chars)
+    return text
 
 
 @dataclass(frozen=True)

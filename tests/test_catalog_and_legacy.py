@@ -211,6 +211,22 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual((one.get('repeated'), two.get('repeated'), three.get('repeated')), (None, 1, None))
         self.assertIn('already have this data', note)
 
+    def test_bounded_results_keep_trailing_fields(self):
+        from a2api.tool_session import render_result
+        payload = {'status': 'succeeded', 'data': {
+            'preview_id': 'pv_1', 'changes': [{'id': f'prd_{n}', 'from': 30.0, 'to': 22.5, 'note': 'x' * 40} for n in range(60)],
+            'checks': [{'rule': 'max_discount', 'passed': False, 'detail': '25% is over the 20% limit for everyone'}],
+            'needs_approval': True}}
+        plain = render_result(payload)
+        self.assertGreater(len(plain), 2000)
+        text = render_result(payload, max_chars=2000)
+        self.assertLessEqual(len(text), 2000)
+        view = json.loads(text)
+        self.assertEqual(view['data']['checks'][0]['rule'], 'max_discount')
+        self.assertTrue(view['data']['needs_approval'])
+        self.assertEqual(view['omitted'], [{'path': 'changes', 'shown': len(view['data']['changes']), 'of': 60}])
+        self.assertEqual(render_result(payload, max_chars=100000), plain)
+
     def test_backend_error_messages_only_through_host_extraction(self):
         hidden, _ = self.app()
         error = hidden.invoke('legacy.refund', {'body': {'clmNo': 'missing'}}, context=CALLER)['error']

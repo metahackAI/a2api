@@ -1,0 +1,345 @@
+{
+ "report": "artifacts/acommerce/runs/acom-own-design-2.md",
+ "metrics": {
+  "acom": {
+   "runs": 12,
+   "passed": 6,
+   "tokensPerRun": {
+    "n": 12,
+    "mean": 16623,
+    "median": 10031,
+    "p90": 41933,
+    "min": 5349,
+    "max": 52766
+   },
+   "secondsPerRun": {
+    "n": 12,
+    "mean": 21.5,
+    "median": 11.9,
+    "p90": 61.2,
+    "min": 6.6,
+    "max": 78.4
+   },
+   "modelCallsPerRun": {
+    "n": 12,
+    "mean": 4.25,
+    "median": 3.0,
+    "p90": 7.7,
+    "min": 2,
+    "max": 13
+   },
+   "toolCallsPerRun": {
+    "n": 12,
+    "mean": 5.75,
+    "median": 3.0,
+    "p90": 10.6,
+    "min": 1,
+    "max": 28
+   },
+   "failedToolCalls": "8/69"
+  },
+  "facade": {
+   "runs": 12,
+   "passed": 0,
+   "tokensPerRun": {
+    "n": 12,
+    "mean": 8253,
+    "median": 8126,
+    "p90": 10460,
+    "min": 3140,
+    "max": 19347
+   },
+   "secondsPerRun": {
+    "n": 12,
+    "mean": 15.7,
+    "median": 13.2,
+    "p90": 28.2,
+    "min": 5.8,
+    "max": 39.9
+   },
+   "modelCallsPerRun": {
+    "n": 12,
+    "mean": 4.83,
+    "median": 4.0,
+    "p90": 5.9,
+    "min": 3,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 12,
+    "mean": 2.67,
+    "median": 3.0,
+    "p90": 4.0,
+    "min": 1,
+    "max": 6
+   },
+   "failedToolCalls": "25/32"
+  }
+ },
+ "runs": [
+  {
+   "task": "b1-vip-weekend-sale",
+   "mode": "acom",
+   "done": false,
+   "toolCalls": 11,
+   "failedToolCalls": 4,
+   "modelCalls": 8,
+   "tokens": 44697,
+   "seconds": 78.4,
+   "missing": "tool set_sale_prices; tool create_coupon; tool schedule_banner; change set; fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+  },
+  {
+   "task": "mk-whats-running-this-weekend",
+   "mode": "acom",
+   "done": false,
+   "toolCalls": 1,
+   "failedToolCalls": 0,
+   "modelCalls": 3,
+   "tokens": 6875,
+   "seconds": 7.8,
+   "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8 not shown)"
+  },
+  {
+   "task": "mk-hero-free-next-weekend",
+   "mode": "acom",
+   "done": true,
+   "toolCalls": 3,
+   "failedToolCalls": 0,
+   "modelCalls": 4,
+   "tokens": 8894,
+   "seconds": 11.6,
+   "missing": ""
+  },
+  {
+   "task": "md-low-stock-before-weekend",
+   "mode": "acom",
+   "done": false,
+   "toolCalls": 7,
+   "failedToolCalls": 0,
+   "modelCalls": 3,
+   "tokens": 16531,
+   "seconds": 13.8,
+   "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (7 not shown)"
+  },
+  {
+   "task": "md-overcoat-runs-small",
+   "mode": "acom",
+   "done": true,
+   "toolCalls": 2,
+   "failedToolCalls": 0,
+   "modelCalls": 5,
+   "tokens": 17058,
+   "seconds": 10.6,
+   "missing": ""
+  },
+  {
+   "task": "md-end-of-season-markdown",
+   "mode": "acom",
+   "done": true,
+   "toolCalls": 5,
+   "failedToolCalls": 0,
+   "modelCalls": 2,
+   "tokens": 8416,
+   "seconds": 21.6,
+   "missing": ""
+  },
+  {
+   "task": "b2-returns-over-200",
+   "mode": "acom",
+   "done": false,
+   "toolCalls": 28,
+   "failedToolCalls": 3,
+   "modelCalls": 13,
+   "tokens": 52766,
+   "seconds": 65.6,
+   "missing": "tool send_customer_message; change set; fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (2463, 20366, 20409 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+  },
+  {
+   "task": "ops-wismo-tracking-stuck",
+   "mode": "acom",
+   "done": true,
+   "toolCalls": 3,
+   "failedToolCalls": 1,
+   "modelCalls": 3,
+   "tokens": 12526,
+   "seconds": 12.3,
+   "missing": ""
+  },
+  {
+   "task": "ops-frequent-returner",
+   "mode": "acom",
+   "done": true,
+   "toolCalls": 4,
+   "failedToolCalls": 0,
+   "modelCalls": 3,
+   "tokens": 10939,
+   "seconds": 14.7,
+   "missing": ""
+  },
+  {
+   "task": "mgr-what-needs-me-today",
+   "mode": "acom",
+   "done": false,
+   "toolCalls": 1,
+   "failedToolCalls": 0,
+   "modelCalls": 2,
+   "tokens": 6305,
+   "seconds": 6.6,
+   "missing": "fact \"two finished this morning: below-cost prices raised to the f\" (23, 59 not shown)"
+  },
+  {
+   "task": "mgr-what-changed-this-morning",
+   "mode": "acom",
+   "done": true,
+   "toolCalls": 2,
+   "failedToolCalls": 0,
+   "modelCalls": 3,
+   "tokens": 9123,
+   "seconds": 7.8,
+   "missing": ""
+  },
+  {
+   "task": "b3-why-sales-dropped",
+   "mode": "acom",
+   "done": false,
+   "toolCalls": 2,
+   "failedToolCalls": 0,
+   "modelCalls": 2,
+   "tokens": 5349,
+   "seconds": 7.6,
+   "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (20 not shown)"
+  },
+  {
+   "task": "b1-vip-weekend-sale",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 2,
+   "failedToolCalls": 2,
+   "modelCalls": 5,
+   "tokens": 10537,
+   "seconds": 29.2,
+   "missing": "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7, 4 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+  },
+  {
+   "task": "mk-whats-running-this-weekend",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 4,
+   "failedToolCalls": 3,
+   "modelCalls": 4,
+   "tokens": 6581,
+   "seconds": 13.8,
+   "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8, 15, 15, 80, 10 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+  },
+  {
+   "task": "mk-hero-free-next-weekend",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 1,
+   "failedToolCalls": 0,
+   "modelCalls": 3,
+   "tokens": 3220,
+   "seconds": 5.8,
+   "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+  },
+  {
+   "task": "md-low-stock-before-weekend",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 3,
+   "failedToolCalls": 2,
+   "modelCalls": 5,
+   "tokens": 9765,
+   "seconds": 14.7,
+   "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (4, 7 not shown); fact \"Linen shirt is the one with a reorder task: it sells out in \" (4 not shown)"
+  },
+  {
+   "task": "md-overcoat-runs-small",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 3,
+   "failedToolCalls": 3,
+   "modelCalls": 5,
+   "tokens": 8926,
+   "seconds": 12.0,
+   "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"29 say true to size, 12 say a bit snug, none say it runs lar\" (29, 12 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+  },
+  {
+   "task": "md-end-of-season-markdown",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 1,
+   "failedToolCalls": 1,
+   "modelCalls": 4,
+   "tokens": 6809,
+   "seconds": 19.1,
+   "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20 not shown)"
+  },
+  {
+   "task": "b2-returns-over-200",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 6,
+   "failedToolCalls": 4,
+   "modelCalls": 12,
+   "tokens": 19347,
+   "seconds": 39.9,
+   "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (12, 9, 2463, 2, 20366, 20409, 1, 20290 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+  },
+  {
+   "task": "ops-wismo-tracking-stuck",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 3,
+   "failedToolCalls": 3,
+   "modelCalls": 4,
+   "tokens": 8265,
+   "seconds": 12.6,
+   "missing": "fact \"UPS 1ZNW271840001, the last scan is picked_up on Mon Nov 2\" (1znw271840001, 2 not shown); fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+  },
+  {
+   "task": "ops-frequent-returner",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 3,
+   "failedToolCalls": 3,
+   "modelCalls": 3,
+   "tokens": 6193,
+   "seconds": 9.6,
+   "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20431, 20311, 20324, 20298 not shown)"
+  },
+  {
+   "task": "mgr-what-needs-me-today",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 4,
+   "failedToolCalls": 3,
+   "modelCalls": 4,
+   "tokens": 8199,
+   "seconds": 17.6,
+   "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039, 10, 0 not shown)"
+  },
+  {
+   "task": "mgr-what-changed-this-morning",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 1,
+   "failedToolCalls": 1,
+   "modelCalls": 6,
+   "tokens": 8052,
+   "seconds": 8.5,
+   "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 4, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+  },
+  {
+   "task": "b3-why-sales-dropped",
+   "mode": "facade",
+   "done": false,
+   "toolCalls": 1,
+   "failedToolCalls": 0,
+   "modelCalls": 3,
+   "tokens": 3140,
+   "seconds": 5.8,
+   "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (22900, 4660, 20, 247 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+  }
+ ]
+}
