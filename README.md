@@ -18,17 +18,19 @@
 
 ```bash
 pip install a2api                    # 핵심: convert / Application / ToolSession / 프로토콜 schema
-pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer
+pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer(FastAPI는 추가 의존성 없음)
 ```
 
-**기존(레거시) API를 전환하는 단계별 방법은 [레거시 API 전환 가이드](docs/36-legacy-conversion-guide.ko.md)에 있다** — OpenAPI와 코드가 모두 있을 때, 코드만 있을 때(Spring·Go·Rust·Python·그 밖의 언어), 실행 예제는 [`examples/legacy-conversion`](examples/legacy-conversion/README.md). 다음 개선 계획은 [37 문서](docs/37-next-improvement-plan.ko.md).
+**기존(레거시) API를 전환하는 단계별 방법은 [레거시 API 전환 가이드](docs/36-legacy-conversion-guide.ko.md)에 있다**(영어: [docs/en](docs/en/README.md)) — OpenAPI와 코드가 모두 있을 때, 코드만 있을 때(Spring·Go net/http·Gin·Rust Axum·Python FastAPI·그 밖의 언어), 실행 중인 서비스의 도구 목록과 레거시 약어·코드값(vocabulary). 실행 예제는 [`examples/legacy-conversion`](examples/legacy-conversion/README.md), 실제 공개 프로젝트 변환은 [`examples/realworld`](examples/realworld/README.md). 1.1 개선과 실측(a-commerce·RealWorld)은 [38](docs/38-improvement-execution-plan.ko.md)·[39](docs/39-improvement-results.ko.md) 문서.
 
 | 구현 언어 | a2api 연결 방법 | 문서 |
 |---|---|---|
 | Python | `@capability(effect="read"/"write")`로 동기·`async` 함수 등록 → `Application` | [12](docs/12-python-functions.ko.md) |
 | Java/Spring MVC | `SpringSourceImporter` → `convert(..., deployment=HTTPDeployment(...))` | [18](docs/18-source-importers.ko.md) |
-| Go net/http | `GoSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md) |
-| Rust Axum | `RustSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md) |
+| Go net/http·Gin | `GoSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md), [36](docs/36-legacy-conversion-guide.ko.md) |
+| Rust Axum | `RustSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md), [36](docs/36-legacy-conversion-guide.ko.md) |
+| Python FastAPI(코드) | `FastAPISourceImporter` → `convert` | [36](docs/36-legacy-conversion-guide.ko.md) |
+| 실행 중인 도구 목록(`GET /tools` + 이름 호출) | `ToolCatalogImporter` → `convert(..., vocabulary=...)` | [36](docs/36-legacy-conversion-guide.ko.md) 5-1절 |
 | OpenAPI가 있는 모든 HTTP API | `OpenAPIImporter` → `convert` | [11](docs/11-in-memory-conversion.ko.md) |
 
 - **호출 프로토콜 `a2api-call/1.0`**: discover/describe/invoke와 6필드 descriptor, 구조화 오류([20](docs/20-call-protocol.ko.md)). MCP 도구는 규모와 무관하게 세 개다.

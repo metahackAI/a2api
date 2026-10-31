@@ -1,5 +1,7 @@
 # 소스에서 바로 호출하기: Java/Spring·Go·Rust
 
+> **1.1 (2026-11-01)**: 지원 범위가 넓어졌다 — Spring의 타입 없는 `ResponseEntity` 추론·Jackson 설정·advice 규칙, Go Gin, Rust merge/nest/`:param`/context extractor/generic 기본값, Python FastAPI(`FastAPISourceImporter`, `ast`), `untyped_output='open'`, 같은 ID handler의 개별 보고. 현재 지원 표와 실제 공개 프로젝트 결과는 [36 문서](36-legacy-conversion-guide.ko.md) 3·9절이 기준이다. 아래는 1.0 당시의 상세 규칙이다.
+
 OpenAPI 파일 없이 명시적인 HTTP route와 DTO를 AST에서 읽어 기존 `convert`에 연결한다. 파싱 때 언어 런타임·소스 코드·빌드 스크립트를 실행하지 않는다. Java/Spring MVC, Go net/http ServeMux, Rust Axum/Serde의 아래 지원 범위를 구현했으며, 해당 언어의 모든 프레임워크나 임의 동적 코드를 처리하는 것은 아니다.
 
 ## 설치와 첫 호출
