@@ -64,6 +64,6 @@
 | A | 완료 | 네이티브 실행(PostgreSQL 18+pgvector, Rust 1.99.1 release build). 자체 평가 design: acom 6/12(공개 결과와 같은 범위), facade 0/12 |
 | B | 완료 | `ToolCatalogImporter`, 호스트 요청 값, `vocabulary`, 원 서버 오류 문장. 우리 하네스에 a-commerce 채점 규칙(run_eval.rs)을 옮김. 첫 design 실행 뒤 하네스가 쓰기 작업 앞에서만 데모 상점을 초기화해 facade 쓰기가 다음 읽기 작업에 남는 문제를 발견해 매 실행 초기화로 고쳤다(a-commerce 자체 평가도 같은 방식이라 facade 결과에 같은 영향이 있을 수 있다) |
 | C | 완료 | 채택: 목록 순서 고정, 검색 `added`/새 함수 없음 안내, 반복 실패·조회 안내, body string의 정수 ID, 쓰기 멱등성 헤더. 기각: 사전 선택 재현율 변형 전부(39 문서 5절) |
-| D | 진행 | a-commerce held_out(L1–L4, A1, A2) |
-| E | 진행 | 계획 변경: 공개 RealWorld 구현 4개(Spring·Gin·Axum·FastAPI)는 실행 환경 정책상 빌드·실행하지 않고 코드만 읽었다. 호출은 명세를 따르는 자체 서버(구현별 차이 재현)로 했다. Go Gin·FastAPI importer와 Spring·Rust 실제 코드 대응을 이 단계에서 구현 |
-| F | 진행 | CI·영어 문서 완료. 1.1 배포 준비는 결과 문서 뒤 |
+| D | 완료 | a-commerce held_out(L1–L4, A1, A2) 각 2회. 자체 평가는 provider 장애로 두 번 중단돼 실행 로그로 집계. 판정 뒤 찾은 검색 밀어내기 결함을 고치고 사후 확인(판정 아님)을 따로 기록 |
+| E | 완료 | RealWorld dev·holdout(6방식), 4언어 벤치마크 dev 회귀, GitHub 변환 범위. 계획 변경: 공개 RealWorld 구현 4개(Spring·Gin·Axum·FastAPI)는 실행 환경 정책상 빌드·실행하지 않고 코드만 읽었다. 호출은 명세를 따르는 자체 서버(구현별 차이 재현)로 했다. Go Gin·FastAPI importer와 Spring·Rust 실제 코드 대응을 이 단계에서 구현 |
+| F | 완료(업로드 제외) | 멱등성 헤더, CI, 영어 문서, 결과 문서(39), 버전 1.1.0. `scripts/release.sh` 실행과 업로드는 사용자가 한다(이 환경에서 release 스크립트 실행이 거부됨) |

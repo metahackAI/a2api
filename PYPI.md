@@ -110,4 +110,15 @@ The repository contains a benchmark that implements the same API in Python, Spri
 
 Context stays flat as the API grows and latency drops 27–43% for the large API. Accuracy was near the ceiling for all approaches, and for small and medium APIs a2api was slower than one-function-per-operation. Details, failures and limits are in the [evaluation document](https://github.com/metahackAI/a2api/blob/main/docs/34-completion-results.ko.md). Synthetic API, one model — not a guarantee for every API or model.
 
+### 1.1: real code and legacy APIs
+
+- **Conversion from real code**: four public RealWorld (Conduit) implementations — Spring Boot, Go Gin, Rust Axum, Python FastAPI — convert 19/19 operations from source alone (1.0: 0, 0, import aborted, no importer), and every converted operation passes real calls against a specification-conformant server. The 945 benchmark operations 1.0 already read convert identically.
+- **A large real API** (a-commerce, 253 tools, held-out tasks, same harness and model): handing over the whole catalog exceeded the 64k context in 32/32 runs; a2api ran with a 3.9k-token first request.
+- **A legacy screen API** (abbreviated fields, code values): a2api with a vocabulary solved 5/32 vs 4/32, used 53% fewer tokens (30.9k vs 66.0k median), was 31% faster and cut failed business calls from 70% to 5%.
+- **Benchmark regression** (four languages, dev): 240/240 passed; a2api tokens −94% (large), −79% (medium), −18% (small).
+- **Small APIs** (19 operations, RealWorld held-out): same accuracy (8/8 in all six setups), but a2api was 21–35% slower because the model reasoned longer.
+- A purpose-built agent (a-commerce's own) still solved more held-out tasks (7/32) than a generic loop with a2api (3/32): a2api is the tool layer, not the agent.
+
+Details: [1.1 results (Korean)](https://github.com/metahackAI/a2api/blob/main/docs/39-improvement-results.ko.md).
+
 Licensed under MIT.
