@@ -172,7 +172,8 @@ class Application:
                     for identifier, definition in self._calls.items()}
         return {identifier: definition.search_terms for identifier, definition in self._calls.items()}
 
-    def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:
+    def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext, request_id: str | None = None) -> dict:
+        """request_id is accepted for the common invoke shape; registered functions do not receive it."""
         try:
             definition = self._get(capability_id)
             if not isinstance(context, ExecutionContext):

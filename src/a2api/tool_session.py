@@ -57,6 +57,8 @@ _RESULT_HINTS = {
     'SCHEMA_MISMATCH': 'The service returned an unexpected result. Report the failure.',
 }
 _DEFAULT_COMPLETENESS = {'complete': True, 'scope': 'single_api_response'}
+NO_NEW_MATCHES = ('No new functions: every match is already callable. If they cannot answer, '
+                  'tell the user what is missing instead of searching again.')
 
 
 def tool_bytes(tools: list[dict]) -> int:
@@ -152,7 +154,10 @@ def render_result(payload: dict) -> str:
     if not isinstance(payload, dict):
         raise TypeError('render_result expects a call() or search result.')
     if 'selected' in payload:
-        view = {key: value for key, value in payload.items() if value not in ([], None)}
+        view = {key: value for key, value in payload.items() if value not in ([], None) and key != 'added'}
+        if payload.get('selected') and 'added' in payload and not payload['added']:
+            # The model already has every match: say so, or it rephrases the same search again and again.
+            view['note'] = NO_NEW_MATCHES
     elif payload.get('status') == 'succeeded':
         view = {'status': 'succeeded', 'data': payload.get('data')}
         if payload.get('httpStatus') not in (None, 200):
@@ -356,10 +361,12 @@ class ToolSession:
                 # Do not silently choose a version or claim a partially searched ID is unique.
                 raise A2APIError('AMBIGUOUS_SELECTION' if entries else 'NOT_FOUND',
                                  'Prime requires one uniquely discoverable capability ID; use select for task search.')
-        selected, omitted, evicted = [], [], []
+        selected, omitted, evicted, added = [], [], [], []
         protected = set()
         for item in entries:
             name = self._name(item)
+            if name not in self._active:
+                added.append(name)
             if name in self._active:
                 bound = self._active[name]
                 self._stats['reused'] += 1
@@ -384,7 +391,8 @@ class ToolSession:
             protected.add(name)
             selected.append({'name': name, 'id': item['id']})
         page = self._pages.commit(prepared, found)
-        return {'selected': selected, 'omitted': omitted, 'evicted': evicted, **page}
+        added = [name for name in added if name in self._active]
+        return {'selected': selected, 'added': added, 'omitted': omitted, 'evicted': evicted, **page}
 
     async def select(self, query: str, *, more=False):
         """A host search: discover + descriptions without an intervening model turn."""
@@ -445,8 +453,13 @@ class ToolSession:
             preselected = await self._select(query, limit=preselect) if query else None
             return {'strategy': 'search', 'functions': len(self._active), 'preselected': preselected}
 
-    async def call(self, name: str, arguments: dict):
-        """Return search results or the original validated invoke envelope; no retry."""
+    async def call(self, name: str, arguments: dict, *, request_id: str | None = None):
+        """Return search results or the original validated invoke envelope; no retry.
+
+        request_id (for example the model's tool-call id) names one intended call; a host that
+        delivers the same call twice passes the same id, which the backend can deduplicate when the
+        deployment sets idempotency_header.
+        """
         async with self._lock:
             try:
                 try:
@@ -473,7 +486,8 @@ class ToolSession:
                     validate_value(bound.descriptor['inputSchema'], arguments, code='INVALID_INPUT', status=400)
                 self._active.move_to_end(name)
                 result = await self._request('invoke', {'id': bound.descriptor['id'],
-                    'version': bound.descriptor['version'], 'catalogVersion': self._catalog, 'input': arguments})
+                    'version': bound.descriptor['version'], 'catalogVersion': self._catalog, 'input': arguments,
+                    **({'requestId': request_id} if request_id is not None else {})})
                 if result.get('status') == 'succeeded':
                     validate_value(bound.descriptor['outputSchema'], result.get('data'),
                                    code='SCHEMA_MISMATCH', status=502)

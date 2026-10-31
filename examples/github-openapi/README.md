@@ -24,8 +24,8 @@ python examples/github-openapi/agent_demo.py
 
 공식 [github/rest-api-description](https://github.com/github/rest-api-description)의 bundled OpenAPI 3.0.3 명세를 사용한다. 827 paths, 1,254 operations, 압축 전 13,897,231 bytes다. revision과 SHA-256은 [source.json](source.json), upstream MIT 라이선스는 [LICENSE.upstream.md](LICENSE.upstream.md)에 있다. gzip 안의 JSON은 원본 그대로다.
 
-- [import-report.json](import-report.json): 기본 GET의 처리·진단. IR 633개, 미선택 메서드 599개, GET 미지원 22개.
-- [import-report-all-methods.json](import-report-all-methods.json): 전체 지원 메서드의 처리·진단. IR 1,228개, 미지원 26개. 모두 비활성 초안이다.
+- [import-report.json](import-report.json): 기본 GET의 처리·진단. IR 634개, 미선택 메서드 599개, GET 미지원 21개(선택 nullable 매개변수를 생략으로 보내 1.1에서 1개 추가 변환).
+- [import-report-all-methods.json](import-report-all-methods.json): 전체 지원 메서드의 처리·진단. IR 1,230개, 미지원 24개. 모두 비활성 초안이다.
 - [github.meta.get.json](github.meta.get.json), [HTTP binding](github.meta.get.http.json): 작은 생성 예시. 비활성 초안이다.
 - [benchmark.json](benchmark.json): 전체 로드·변환·계약 검증·파일 생성의 단일 측정 기록.
 - [benchmark-all-methods.json](benchmark-all-methods.json): 전체 지원 메서드를 선택한 측정 기록.

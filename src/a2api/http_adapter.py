@@ -39,6 +39,41 @@ _UPSTREAM_DETAIL = {
 }
 
 
+def _error_detail(route, response, limit):
+    """The host's own extraction from a failed response body; bounded, single line, never raw."""
+    if route.error_detail is None:
+        return None
+    try:
+        raw = response.read(min(limit, 65536) + 1)
+        payload = json.loads(raw.decode("utf-8")) if raw and len(raw) <= 65536 else None
+    except (ValueError, UnicodeError, OSError, http.client.HTTPException):
+        payload = None
+    try:
+        text = route.error_detail(response.status, payload)
+    except Exception:
+        return None
+    if not isinstance(text, str) or not text.strip():
+        return None
+    return " ".join(text.split())[:500]
+
+
+def _host_values(route, context, business_query):
+    """Query/body values the host adds for this call (change sets, preview flags, tool sets)."""
+    if route.request_values is None:
+        return {}, {}
+    try:
+        values = route.request_values(context) or {}
+        query, body = dict(values.get('query') or {}), dict(values.get('body') or {})
+        if set(values) - {'query', 'body'} or any(not isinstance(key, str) or not key for key in [*query, *body]):
+            raise ValueError()
+        json.dumps(body, allow_nan=False)
+    except Exception:
+        raise A2APIError("HOST_VALUES_UNAVAILABLE", "Host could not supply request values.", status=503) from None
+    if set(query) & business_query:
+        raise A2APIError("HOST_VALUE_CONFLICT", "Host query values cannot replace business parameters.", status=500)
+    return query, body
+
+
 def json_media_type(value: str) -> bool:
     return isinstance(value, str) and (value == "application/json" or
             re.fullmatch(r"application/[a-z0-9!#$&^_.+-]+\+json", value) is not None)
@@ -129,6 +164,15 @@ class HTTPRoute:
     response_status_field: str | None = None
     header_parameters: Mapping[str, HTTPHeaderParameter] = field(default_factory=dict)
     credential_provider: Callable[[ExecutionContext], Mapping[str, str]] | None = field(default=None, repr=False, compare=False)
+    # Wrap the business body as {body_envelope: body}, as RPC-style tool endpoints expect.
+    body_envelope: str | None = None
+    # Host-owned request values (never model input): context -> {"query": {...}, "body": {...}}.
+    request_values: Callable[[ExecutionContext], Mapping] | None = field(default=None, repr=False, compare=False)
+    # Host opt-in: (status, parsed JSON or None) -> a short safe message from a failed response.
+    error_detail: Callable[[int, object], str | None] | None = field(default=None, repr=False, compare=False)
+    # Host opt-in: send the caller's requestId in this header on writes, so the backend can drop a
+    # repeated delivery (for example "Idempotency-Key"). Calls are still never retried here.
+    idempotency_header: str | None = None
 
     def __post_init__(self) -> None:
         parsed = urlsplit(self.base_url)
@@ -146,6 +190,10 @@ class HTTPRoute:
         if names != set(self.path_parameters) or re.search(r"[{}]", re.sub(r"\{[A-Za-z][A-Za-z0-9_]*\}", "", self.path)):
             raise contract_error("HTTP path placeholders do not match their parameter bindings")
         _header_values(self.headers)
+        if self.idempotency_header is not None:
+            if not isinstance(self.idempotency_header, str) or not self.idempotency_header:
+                raise contract_error("Idempotency header must be a header name")
+            _header_values({self.idempotency_header: "x"})
         if not isinstance(self.method, str) or self.method not in HTTP_METHODS:
             raise contract_error("Unsupported HTTP method; use an uppercase supported method")
         for pointer in self.path_parameters.values():
@@ -182,6 +230,13 @@ class HTTPRoute:
             raise contract_error("Static and caller header bindings cannot overlap")
         if self.credential_provider is not None and not callable(self.credential_provider):
             raise contract_error("HTTP credential provider must be callable")
+        if self.body_envelope is not None and (not isinstance(self.body_envelope, str) or not self.body_envelope
+                                               or self.method in {"GET", "HEAD"}):
+            raise contract_error("A body envelope needs a nonempty name and a method with a body")
+        if self.request_values is not None and not callable(self.request_values):
+            raise contract_error("Host request values must be callable")
+        if self.error_detail is not None and not callable(self.error_detail):
+            raise contract_error("Host error detail must be callable")
         object.__setattr__(self, "path_parameters", MappingProxyType(dict(self.path_parameters)))
         object.__setattr__(self, "headers", MappingProxyType(dict(self.headers)))
         object.__setattr__(self, "query_parameters", MappingProxyType(dict(self.query_parameters)))
@@ -205,7 +260,7 @@ class HTTPAdapter:
         return route is not None and route.method == operation.http_method
 
     def call(self, operation: Operation, arguments: dict, context: ExecutionContext,
-             budget: Budget, timeout_ms: int) -> object:
+             budget: Budget, timeout_ms: int, *, request_id: str | None = None) -> object:
         route = self._routes.get((operation.service_ref, operation.operation_ref))
         if route is None:
             raise A2APIError("BINDING_NOT_FOUND", "No deployed HTTP binding exists.", status=503)
@@ -235,6 +290,8 @@ class HTTPAdapter:
                     query.append(quote_plus(name) + "=" + ",".join(quote_plus(item) for item in values))
             else:
                 query.append(urlencode({name: _query_scalar(value)}))
+        host_query, host_body = _host_values(route, context, {name for name in route.query_parameters})
+        query.extend(urlencode({name: _query_scalar(value)}) for name, value in host_query.items())
         if query:
             path += "?" + "&".join(query)
         headers = _header_values(route.headers)
@@ -245,17 +302,32 @@ class HTTPAdapter:
                     headers.update(_header_values({name: _query_scalar(value)}))
                 except A2APIError:
                     raise A2APIError("INVALID_INPUT", "An HTTP header argument is invalid.", status=422) from None
+        if route.idempotency_header and request_id is not None and route.method not in {"GET", "HEAD"}:
+            try:
+                headers.update(_header_values({route.idempotency_header: request_id}))
+            except A2APIError:
+                raise A2APIError("INVALID_REQUEST", "requestId cannot be sent as an HTTP header.", status=400) from None
         body = None
-        if route.request_body_pointer is not None:
-            present, value = _argument(arguments, route.request_body_pointer, route.request_body_required)
-            if present:
-                try:
-                    body = json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode("utf-8")
-                except (TypeError, ValueError, UnicodeError, RecursionError):
-                    raise A2APIError("INVALID_INPUT", "HTTP body must contain finite UTF-8 JSON values.", status=422) from None
-                if len(body) > self.max_request_bytes:
-                    raise A2APIError("REQUEST_TOO_LARGE", "HTTP body exceeds the request limit.", status=422)
-                headers["Content-Type"] = route.request_media_type
+        present, value = (_argument(arguments, route.request_body_pointer, route.request_body_required)
+                          if route.request_body_pointer is not None else (False, None))
+        if route.body_envelope is not None:
+            present, value = True, {route.body_envelope: value if present else {}}
+        if host_body:
+            if present and not isinstance(value, dict):
+                raise A2APIError("HOST_VALUE_CONFLICT", "Host body values need a JSON object body.", status=500)
+            value = dict(value) if present else {}
+            if set(value) & set(host_body):
+                raise A2APIError("HOST_VALUE_CONFLICT", "Host body values cannot replace business fields.", status=500)
+            value.update(host_body)
+            present = True
+        if present:
+            try:
+                body = json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode("utf-8")
+            except (TypeError, ValueError, UnicodeError, RecursionError):
+                raise A2APIError("INVALID_INPUT", "HTTP body must contain finite UTF-8 JSON values.", status=422) from None
+            if len(body) > self.max_request_bytes:
+                raise A2APIError("REQUEST_TOO_LARGE", "HTTP body exceeds the request limit.", status=422)
+            headers["Content-Type"] = route.request_media_type
         if route.credential_provider is not None:
             try:
                 credentials = _header_values(route.credential_provider(context))
@@ -298,9 +370,10 @@ class HTTPAdapter:
                     409: ("UPSTREAM_CONFLICT", 409), 422: ("UPSTREAM_VALIDATION_FAILED", 422),
                     503: ("UPSTREAM_UNAVAILABLE", 503),
                 }.get(response.status, ("UPSTREAM_ERROR", 502))
-                # Status-derived wording only; the backend body is never forwarded.
-                raise A2APIError(code, _UPSTREAM_DETAIL.get(response.status, "Backend did not return a successful JSON result.")
-                                 + f" (HTTP {response.status})", status=status)
+                # Status-derived wording; the backend body is forwarded only through the host's error_detail.
+                detail = _UPSTREAM_DETAIL.get(response.status, "Backend did not return a successful JSON result.") + f" (HTTP {response.status})"
+                extra = _error_detail(route, response, self.max_response_bytes)
+                raise A2APIError(code, detail + (" " + extra if extra else ""), status=status)
             mime = response.getheader("Content-Type", "").split(";")[0].strip().lower()
             if codec.media_type is not None and not (mime == codec.media_type or codec.media_type == "application/json" and json_media_type(mime)):
                 raise A2APIError("INVALID_RESPONSE", "Backend response has an undeclared JSON media type.", status=502)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import importlib
 import json
 import os
@@ -97,7 +97,8 @@ class SourceRecord:
             request_body_pointer=binding.get('body'), request_body_required=binding.get('bodyRequired', False),
             responses={int(key): HTTPResponse(value) for key, value in binding['responses'].items()},
             response_status_field='httpStatus', credential_provider=credential_provider,
-            header_parameters={key: HTTPHeaderParameter(**value) for key, value in binding.get('headers', {}).items()})
+            header_parameters={key: HTTPHeaderParameter(**value) for key, value in binding.get('headers', {}).items()},
+            body_envelope=binding.get('bodyEnvelope'))
 
 
 def record(namespace, opid, path, method, inputs, output, location, *, title=None, statuses=(200,),
@@ -151,27 +152,29 @@ class SourceImporter:
 
     language = ''
     extension = ''
+    skip_suffixes = ()  # test sources register routes that the service does not serve
 
-    def __init__(self, directory, *, namespace='source'):
+    def __init__(self, directory, *, namespace='source', untyped_output='reject'):
+        """untyped_output='open' imports a handler whose response type cannot be read from the code
+        with an open output schema (any JSON) and a SOURCE_WARNING, instead of marking it unsupported.
+        Inputs are never guessed."""
         if not re.fullmatch(r'[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*', namespace):
             raise A2APIError('INVALID_SOURCE', 'Use a lowercase dotted namespace.')
-        try:
-            from tree_sitter import Language, Parser
-            grammar = importlib.import_module('tree_sitter_' + self.language)
-        except ImportError:
-            raise A2APIError('DEPENDENCY_MISSING', 'Source import requires: pip install "a2api[source]"') from None
+        if untyped_output not in ('reject', 'open'):
+            raise A2APIError('INVALID_SOURCE', "untyped_output is 'reject' or 'open'.")
+        self.untyped_output, self.root, self._pending = untyped_output, Path(directory), []
+        parse = self._parser()
         root = Path(directory)
         if not root.is_dir():
             raise A2APIError('INVALID_SOURCE', 'Select an existing source directory.')
         self.namespace, self.units, self.diagnostics = namespace, [], []
-        parser = Parser(Language(grammar.language()))
         total, count = 0, 0
         for base, directories, files in os.walk(root, followlinks=False):
             directories[:] = sorted(d for d in directories if not d.startswith('.') and d not in
                                     ('target', 'node_modules', 'vendor', 'artifacts', 'build', 'dist'))
             for filename in sorted(files):
                 path = Path(base) / filename
-                if path.suffix != self.extension or path.is_symlink():
+                if path.suffix != self.extension or path.is_symlink() or filename.endswith(self.skip_suffixes):
                     continue
                 count += 1
                 if path.stat().st_size > 1024 * 1024 or count > 4096:
@@ -184,20 +187,53 @@ class SourceImporter:
                     raw.decode('utf-8')
                 except UnicodeDecodeError:
                     raise A2APIError('INVALID_SOURCE', 'Source files must be UTF-8.') from None
-                tree = parser.parse(raw)
                 location = str(path.relative_to(root))
-                if tree.root_node.has_error:
+                unit = parse(raw)
+                if unit is None:
                     self.diagnostics.append({'code': 'SOURCE_PARSE_ERROR', 'location': location})
                     continue
-                self.units.append((location, tree.root_node))
-        self._records = list(self._extract())
-        ids = [item.operation_id for item in self._records]
-        if len(ids) != len(set(ids)) or len({item.id for item in self._records}) != len(ids):
-            raise A2APIError('DUPLICATE_SOURCE_OPERATION', 'Ambiguous handler IDs; select a smaller source directory.')
+                self.units.append((location, unit))
+        self._records, seen_opids, seen_ids = [], set(), set()
+        for item in self._extract():
+            warnings, self._pending = tuple(self._pending), []
+            if item.operation is not None and warnings:
+                item = replace(item, diagnostics=item.diagnostics + warnings)
+            if item.operation_id in seen_opids or item.id in seen_ids:
+                # Two handlers resolve to one ID: neither is guessed; the later one is reported.
+                unique = f'{item.operation_id}_{len(self._records)}'
+                item = self.unsupported(unique, item.path, item.method, item.location,
+                                        'Another handler has the same operation ID; select it by a narrower directory or rename it.')
+            seen_opids.add(item.operation_id)
+            seen_ids.add(item.id)
+            self._records.append(item)
+
+    def _parser(self):
+        """bytes -> syntax tree root, or None when the file does not parse. Never executes code."""
+        try:
+            from tree_sitter import Language, Parser
+            grammar = importlib.import_module('tree_sitter_' + self.language)
+        except ImportError:
+            raise A2APIError('DEPENDENCY_MISSING', 'Source import requires: pip install "a2api[source]"') from None
+        parser = Parser(Language(grammar.language()))
+
+        def parse(raw):
+            tree = parser.parse(raw)
+            return None if tree.root_node.has_error else tree.root_node
+        return parse
 
     @classmethod
-    def from_directory(cls, directory, *, namespace='source'):
-        return cls(directory, namespace=namespace)
+    def from_directory(cls, directory, *, namespace='source', untyped_output='reject'):
+        return cls(directory, namespace=namespace, untyped_output=untyped_output)
+
+    def open_output(self, reason):
+        """The response type is not readable from the code: an open schema when the host opted in."""
+        if self.untyped_output != 'open':
+            raise Unsupported(reason + " (untyped_output='open' imports it with an open output schema).")
+        self.warn('OUTPUT_UNTYPED', reason)
+        return {}
+
+    def warn(self, code, detail):
+        self._pending.append({'code': code, 'detail': detail})
 
     def iter_operations(self, operation_ids=None):
         ids = {item.operation_id for item in self._records}

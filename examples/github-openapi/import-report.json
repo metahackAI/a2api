@@ -2,6 +2,8 @@
   "source": "api.github.com.json.gz",
   "sourceSha256": "b81f098026e98084a83f0a33db43502213919f68449b028543c373757766a758",
   "openapi": "3.0.3",
+  "sourceSnapshot": "source.snapshot.json",
+  "dependencyIndex": "dependencies.json",
   "requestedMethods": [
     "GET"
   ],
@@ -10,9 +12,9 @@
     "sourceOperations": 1254,
     "operations": 1254,
     "statuses": {
-      "imported": 633,
+      "imported": 634,
       "skipped": 599,
-      "unsupported": 22
+      "unsupported": 21
     },
     "methods": {
       "delete": 191,
@@ -27,7 +29,8 @@
       "METHOD_NOT_SELECTED": 599,
       "NO_SUPPORTED_SUCCESS": 15,
       "NULLABLE_WITHOUT_TYPE": 111,
-      "UNSUPPORTED_PARAMETER_SCHEMA": 4,
+      "NULL_PARAMETER_OMITTED": 1,
+      "UNSUPPORTED_PARAMETER_SCHEMA": 3,
       "UNSUPPORTED_RESPONSE": 2
     }
   },
@@ -9612,16 +9615,16 @@
       "path": "/repos/{owner}/{repo}/deployments",
       "method": "get",
       "operationId": "repos/list-deployments",
-      "status": "unsupported",
-      "capabilityId": null,
+      "status": "imported",
+      "capabilityId": "github.repos.list_deployments",
       "diagnostics": [
         {
-          "code": "UNSUPPORTED_PARAMETER_SCHEMA",
-          "message": "Nullable parameter serialization is not defined by this profile.",
-          "location": "/paths/~1repos~1{owner}~1{repo}~1deployments/get/parameters/5/schema",
-          "severity": "error"
+          "code": "NULL_PARAMETER_OMITTED",
+          "location": "/paths/~1repos~1{owner}~1{repo}~1deployments/get/parameters/5",
+          "detail": "null is sent by leaving this optional parameter out."
         }
-      ]
+      ],
+      "contract": "contracts/github.repos.list_deployments.json"
     },
     {
       "path": "/repos/{owner}/{repo}/deployments",

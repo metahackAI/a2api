@@ -136,16 +136,18 @@ class SourceImporterTests(unittest.TestCase):
         self.assertEqual(list(source.iter_operations()), [])
         self.assertEqual(source.diagnostics[0]['code'], 'SOURCE_PARSE_ERROR')
         with self.assertRaises(A2APIError):list(source.iter_operations({'missing'}))
-        with self.assertRaises(A2APIError) as caught:
-            self.source(SpringSourceImporter, '@RestController class Api { @GetMapping("/x") public int get(){return 1;} @GetMapping("/y") public int get(int id){return 2;} }', 'java')
-        self.assertEqual(caught.exception.code, 'DUPLICATE_SOURCE_OPERATION')
+        # Two handlers with one operation ID: the first keeps it, the later one is reported, nothing aborts.
+        first, second = self.source(SpringSourceImporter, '@RestController class Api { @GetMapping("/x") public int get(){return 1;} @GetMapping("/y") public int get(@RequestParam int id){return 2;} }', 'java').iter_operations()
+        self.assertEqual((first.status, first.path, second.status), ('imported', '/x', 'unsupported'))
+        self.assertIn('same operation ID', second.diagnostics[0]['detail'])
 
     def test_context_changing_or_indirect_routes_are_not_advertised_as_complete(self):
         for cls, extension, code in [
-            (SpringSourceImporter, 'java', '@ControllerAdvice class Advice {} @RestController class Api { @GetMapping("/x") public int get(){return 1;} }'),
+            (SpringSourceImporter, 'java', '@ControllerAdvice class Advice implements ResponseBodyAdvice<Object> {} @RestController class Api { @GetMapping("/x") public int get(){return 1;} }'),
+            (SpringSourceImporter, 'java', '@ControllerAdvice class Advice { @InitBinder void bind(WebDataBinder b){} } @RestController class Api { @GetMapping("/x") public int get(){return 1;} }'),
             (SpringSourceImporter, 'java', '@RestController class Api { @GetMapping(value="/x",params="version=2") public int get(){return 1;} }'),
             (GoSourceImporter, 'go', 'package main\ntype Item struct{ Name string }\nfunc get(w http.ResponseWriter,r *http.Request){var body Item; decoder:=json.NewDecoder(r.Body);decoder.Decode(&body);json.NewEncoder(w).Encode(body)}\nfunc main(){http.HandleFunc("POST /x",get)}'),
-            (RustSourceImporter, 'rs', 'struct Item{id:String} async fn get_item()->Json<Item>{todo!()} fn main(){Router::new().nest("/prefix",Router::new().route("/x",get(get_item)));}')]:
+            (RustSourceImporter, 'rs', 'struct Item{id:String} async fn get_item()->Json<Item>{todo!()} fn main(){Router::new().nest(PREFIX,Router::new().route("/x",get(get_item)));}')]:
             with self.subTest(language=cls.__name__):
                 source = self.source(cls, code, extension)
                 self.assertTrue(list(source.iter_operations()))
@@ -157,6 +159,72 @@ class SourceImporterTests(unittest.TestCase):
             'package main\ntype Item struct { Binary []byte }\nfunc get(w http.ResponseWriter,r *http.Request){json.NewEncoder(w).Encode(Item{})}\nfunc main(){http.HandleFunc("GET /x",get)}']:
             record = next(self.source(GoSourceImporter, code, 'go').iter_operations())
             self.assertEqual(record.status, 'unsupported')
+
+    def test_rust_nest_merge_colon_params_generic_defaults_and_context_extractors(self):
+        source = self.source(RustSourceImporter, '''
+          struct AuthUser { id: i64 }
+          impl FromRequest for AuthUser { type Rejection = Error; }
+          struct Stamp(OffsetDateTime);
+          impl Serialize for Stamp { fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error> { s.collect_str(&self.0) } }
+          #[serde(rename_all = "camelCase")]
+          struct Article { tag_list: Vec<String>, created_at: Stamp }
+          struct Body<T = Article> { article: T }
+          struct NewArticle { title: String }
+          async fn create(user: AuthUser, ctx: Extension<Ctx>, Json(req): Json<Body<NewArticle>>) -> Result<Json<Body>> { todo!() }
+          async fn remove(user: AuthUser, Path((slug, id)): Path<(String, i64)>) -> Result<()> { todo!() }
+          fn articles() -> Router { Router::new().route("/articles", post(create)).route("/articles/:slug/c/:id", delete(remove)) }
+          fn api() -> Router { Router::new().nest("/api", articles()).merge(other()) }''', 'rs')
+        create, remove = sorted(source.iter_operations(), key=lambda r: r.path)
+        self.assertEqual((create.status, create.path, remove.path), ('imported', '/api/articles', '/api/articles/{slug}/c/{id}'))
+        inputs = thaw(create.operation.input_schema)
+        self.assertEqual(inputs['properties']['body']['properties']['article']['required'], ['title'])
+        self.assertEqual(set(inputs['properties']), {'body'})
+        output = thaw(create.operation.output_schema)['properties']['result']
+        self.assertEqual(output['properties']['article']['properties']['createdAt'], {'type': 'string'})
+        self.assertEqual(create.diagnostics[0]['code'], 'CONTEXT_EXTRACTOR')
+        self.assertEqual(thaw(remove.operation.output_schema)['properties']['result'], {'type': 'null'})
+
+    def test_untyped_output_is_rejected_unless_the_host_opts_in(self):
+        code = '@RestController class Api { @GetMapping("/x") public ResponseEntity get(){ return ResponseEntity.ok(service.load()); } }'
+        strict = next(self.source(SpringSourceImporter, code, 'java').iter_operations())
+        self.assertEqual(strict.status, 'unsupported')
+        self.assertIn("untyped_output='open'", strict.diagnostics[0]['detail'])
+        with tempfile.TemporaryDirectory() as folder:
+            Path(folder, 'Api.java').write_text(code)
+            open_ = next(SpringSourceImporter(folder, namespace='sample', untyped_output='open').iter_operations())
+        self.assertEqual(open_.status, 'imported')
+        self.assertEqual(thaw(open_.operation.output_schema)['properties']['result'], {})
+        self.assertEqual(open_.diagnostics[0]['code'], 'OUTPUT_UNTYPED')
+
+    def test_spring_follows_raw_response_entities_and_jackson_root_wrapping(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder, 'src/main/java'); root.mkdir(parents=True)
+            Path(folder, 'src/main/resources').mkdir(parents=True)
+            Path(folder, 'src/main/resources/application.properties').write_text('spring.jackson.deserialization.UNWRAP_ROOT_VALUE=true\n')
+            Path(root, 'Api.java').write_text('''
+              @Getter @JsonRootName("article") class NewArticle { @NotBlank private String title; }
+              @Data class ArticleData { private String slug; @JsonProperty("author") private Profile profileData;
+                  public String getCursor() { return slug; } }
+              @Data class Profile { private String username; }
+              interface Queries { Optional<ArticleData> findBySlug(String slug); }
+              @RestController @RequestMapping(path = "/articles") class Api {
+                private Queries queries;
+                @PostMapping public ResponseEntity create(@Valid @RequestBody NewArticle param) {
+                  return ResponseEntity.status(201).body(wrap(queries.findBySlug("x").get())); }
+                @GetMapping(path = "{slug}") public ResponseEntity<?> get(@PathVariable("slug") String slug) {
+                  return queries.findBySlug(slug).map(data -> ResponseEntity.ok(wrap(data))).orElseThrow(NotFound::new); }
+                private Map<String, Object> wrap(ArticleData data) { return new HashMap<String, Object>() {{ put("article", data); }}; }
+              }''')
+            create, read = SpringSourceImporter(root, namespace='sample').iter_operations()
+        self.assertEqual((create.status, read.status, read.path), ('imported', 'imported', '/articles/{slug}'))
+        body = thaw(create.operation.input_schema)['properties']['body']
+        self.assertEqual(body['required'], ['article'])
+        self.assertEqual(body['properties']['article']['required'], ['title'])
+        output = thaw(read.operation.output_schema)
+        self.assertEqual(output['properties']['httpStatus']['enum'], [200])
+        self.assertEqual(thaw(create.operation.output_schema)['properties']['httpStatus']['enum'], [201])
+        article = output['properties']['result']['properties']['article']
+        self.assertEqual(set(article['properties']), {'slug', 'author', 'cursor'})
 
     def test_java_nested_validation_only_cascades_with_valid(self):
         source = self.source(SpringSourceImporter, '''

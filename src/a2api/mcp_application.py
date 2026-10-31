@@ -85,7 +85,9 @@ class DirectApplications:
         app, _ = self._get(identifier, version)
         if catalog_version != self.version:
             raise A2APIError('CONTRACT_DRIFT', 'Catalog changed; discover and describe again.', status=409)
-        result = app.invoke(identifier, input, context=context)
+        # Older application objects take no request_id; pass it only when the caller sent one.
+        result = (app.invoke(identifier, input, context=context) if request_id is None
+                  else app.invoke(identifier, input, context=context, request_id=request_id))
         if request_id is not None:
             result = {**result, 'requestId': request_id}
         return result

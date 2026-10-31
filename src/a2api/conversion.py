@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import json
 from types import MappingProxyType
 from typing import Mapping
@@ -13,6 +13,7 @@ from .execution import Budget
 from .http_adapter import HTTPAdapter
 from .importers import OpenAPIImporter
 from .importers.source import SourceImporter, SourceRecord
+from .importers.catalog import ToolCatalogImporter
 from .ir import ExecutionContext, Operation, freeze, thaw
 from .openapi_schema import check_draft_schema, schema_nodes
 from .pointers import resolve, tokens
@@ -153,6 +154,101 @@ def _output_schema(wire: Operation, selected: tuple[str, ...] | None) -> dict:
     return _bundle(node, root)
 
 
+class Vocabulary:
+    """Legacy field names and codes shown to callers as readable names and words, and back.
+
+    rename: {legacy_field: readable_name}; codes: {legacy_field: {code: word}}; describe:
+    {legacy_field: description} for fields whose meaning only the code knows (dynamic codes,
+    formats). Applied to every object key of the input/output with that legacy name. Inputs are
+    mapped back before the original input validation and the HTTP call; outputs are mapped after
+    raw validation and field selection. Unknown codes pass through unchanged.
+    """
+
+    def __init__(self, rename=None, codes=None, describe=None):
+        rename, codes = dict(rename or {}), {key: dict(value) for key, value in (codes or {}).items()}
+        describe = dict(describe or {})
+        if any(not isinstance(k, str) or not isinstance(v, str) or not v.strip() for k, v in describe.items()):
+            raise A2APIError('INVALID_CONVERSION', 'describe maps legacy field names to descriptions.')
+        names = list(rename.values())
+        if (any(not isinstance(k, str) or not k or not isinstance(v, str) or not v for k, v in rename.items())
+                or len(set(names)) != len(names) or set(names) & (set(rename) - set(names))):
+            raise A2APIError('INVALID_CONVERSION', 'rename maps distinct legacy names to distinct readable names.')
+        for field_name, table in codes.items():
+            words = list(table.values())
+            if (not isinstance(field_name, str) or not table or len(set(words)) != len(words)
+                    or any(not isinstance(code, (str, int)) or not isinstance(word, str) or not word for code, word in table.items())):
+                raise A2APIError('INVALID_CONVERSION', 'codes maps each legacy field to distinct words.')
+        self.rename, self.codes, self.describe = rename, codes, describe
+        self.back = {new: old for old, new in rename.items()}
+        self.words = {field_name: {word: code for code, word in table.items()} for field_name, table in codes.items()}
+
+    def __bool__(self):
+        return bool(self.rename or self.codes or self.describe)
+
+    def schema(self, node):
+        """Public schema: renamed properties, code enums shown as words."""
+        if isinstance(node, list):
+            return [self.schema(item) for item in node]
+        if not isinstance(node, dict):
+            return node
+        out = {}
+        for key, value in node.items():
+            if key in ('properties', 'patternProperties', '$defs', 'dependentSchemas') and isinstance(value, dict):
+                mapped = {}
+                for name, child in value.items():
+                    child = self.schema(child)
+                    if key == 'properties' and name in self.codes:
+                        child = self._worded(child, self.codes[name])
+                    if key == 'properties' and name in self.describe and isinstance(child, dict):
+                        child = {**child, 'description': self.describe[name]}
+                    mapped[self.rename.get(name, name) if key == 'properties' else name] = child
+                out[key] = mapped
+            elif key in ('required', 'dependentRequired') and isinstance(value, list):
+                out[key] = [self.rename.get(name, name) for name in value]
+            else:
+                out[key] = self.schema(value)
+        return out
+
+    @staticmethod
+    def _worded(node, table):
+        if not isinstance(node, dict):
+            return node
+        node = dict(node)
+        if isinstance(node.get('enum'), list):
+            node['enum'] = [table.get(code, code) for code in node['enum']]
+        elif node.get('type') in ('string', 'integer') or 'type' not in node:
+            node['enum'] = list(table.values())
+            node['type'] = 'string'
+        for nested in ('anyOf', 'oneOf'):
+            if isinstance(node.get(nested), list):
+                node[nested] = [Vocabulary._worded(item, table) for item in node[nested]]
+        if isinstance(node.get('items'), dict):
+            node['items'] = Vocabulary._worded(node['items'], table)
+        return node
+
+    def to_legacy(self, value, field_name=None):
+        if isinstance(value, dict):
+            out = {}
+            for key, child in value.items():
+                original = self.back.get(key, key)
+                out[original] = self.to_legacy(child, original)
+            return out
+        if isinstance(value, list):
+            return [self.to_legacy(item, field_name) for item in value]
+        if field_name in self.words and isinstance(value, str):
+            return self.words[field_name].get(value, value)
+        return value
+
+    def from_legacy(self, value, field_name=None):
+        if isinstance(value, dict):
+            return {self.rename.get(key, key): self.from_legacy(child, key) for key, child in value.items()}
+        if isinstance(value, list):
+            return [self.from_legacy(item, field_name) for item in value]
+        if field_name in self.codes and isinstance(value, (str, int)) and not isinstance(value, bool):
+            return self.codes[field_name].get(value, self.codes[field_name].get(str(value), value))
+        return value
+
+
 @dataclass(frozen=True)
 class _Call:
     descriptor_json: str
@@ -162,6 +258,7 @@ class _Call:
     search_terms: tuple[str, ...] = ()
     keywords: tuple[str, ...] = ()
     aliases: tuple[str, ...] = ()
+    vocabulary: object = None
 
 
 @dataclass(frozen=True)
@@ -196,10 +293,16 @@ class ConvertedAPI:
                     for identifier, call in self._calls.items()}
         return {identifier: call.search_terms for identifier, call in self._calls.items()}
 
-    def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext) -> dict:
-        """Return a compact success/error envelope; never automatically retry."""
+    def invoke(self, capability_id: str, input: dict, *, context: ExecutionContext, request_id: str | None = None) -> dict:
+        """Return a compact success/error envelope; never automatically retry.
+
+        request_id identifies one intended call; with HTTPDeployment(idempotency_header=...) it is
+        sent to the backend on writes so a repeated delivery can be recognized there.
+        """
         try:
             call = self._get(capability_id)
+            if request_id is not None and (not isinstance(request_id, str) or not 1 <= len(request_id) <= 128):
+                raise A2APIError('INVALID_REQUEST', 'requestId must be a nonempty string of at most 128 characters.')
             if not isinstance(context, ExecutionContext):
                 raise A2APIError('UNAUTHENTICATED', 'A trusted host ExecutionContext is required.', status=401)
             if not isinstance(input, dict):
@@ -208,10 +311,17 @@ class ConvertedAPI:
                 arguments = json.loads(json.dumps(input, ensure_ascii=False, allow_nan=False).encode('utf-8'))
             except (ValueError, TypeError, UnicodeError, RecursionError):
                 raise A2APIError('INVALID_INPUT', 'Business input must contain finite UTF-8 JSON values.', status=422) from None
-            raw = self._adapter.call(call.wire, arguments, context, Budget(self._deadline_ms, 1), self._timeout_ms)
+            if call.vocabulary:
+                # Check the public (readable) input first, so issues name what the caller sent.
+                validate_value(json.loads(call.descriptor_json)['inputSchema'], arguments, code='INVALID_INPUT', status=422)
+                arguments = call.vocabulary.to_legacy(arguments)
+            raw = self._adapter.call(call.wire, arguments, context, Budget(self._deadline_ms, 1), self._timeout_ms,
+                                     request_id=request_id)
             data = raw['result']
             if call.selected is not None:
                 data = _project(data, _select_tree(call.selected))
+            if call.vocabulary:
+                data = call.vocabulary.from_legacy(data)
             validate_value(call.output_schema, data, code='SCHEMA_MISMATCH', status=502)
             result = {'status': 'succeeded', 'data': data,
                       'completeness': {'complete': True, 'scope': 'single_api_response'}}
@@ -226,13 +336,19 @@ class ConvertedAPI:
                     'completeness': {'complete': False}}
 
 
-def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeployment) -> ConvertedAPI:
-    """Bind selected source/OpenAPI operations without activating imported drafts.
+def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeployment,
+            vocabulary: Vocabulary | Mapping | None = None) -> ConvertedAPI:
+    """Bind selected source/OpenAPI/catalog operations without activating imported drafts.
 
     operations maps IDs to effect, optional select, summary and search keywords.
     Omit select to expose the original JSON response. It never implies authorization.
+    vocabulary ({'rename': {...}, 'codes': {...}, 'describe': {...}}) shows legacy names and codes as readable ones.
     """
-    if not isinstance(source, (OpenAPIImporter, SourceImporter)) or not isinstance(deployment, HTTPDeployment):
+    if vocabulary is not None and not isinstance(vocabulary, Vocabulary):
+        if not isinstance(vocabulary, Mapping) or set(vocabulary) - {'rename', 'codes', 'describe'}:
+            raise A2APIError('INVALID_CONVERSION', 'vocabulary takes rename, codes and describe.')
+        vocabulary = Vocabulary(vocabulary.get('rename'), vocabulary.get('codes'), vocabulary.get('describe'))
+    if not isinstance(source, (OpenAPIImporter, SourceImporter, ToolCatalogImporter)) or not isinstance(deployment, HTTPDeployment):
         raise A2APIError('INVALID_CONVERSION', 'convert requires a supported importer and an explicit HTTPDeployment.')
     if not isinstance(operations, Mapping) or not operations:
         raise A2APIError('INVALID_SELECTION', 'Select one or more operation IDs with explicit effect settings.')
@@ -261,6 +377,8 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
             raise A2APIError('INVALID_CONVERSION', 'GET/HEAD require read; PUT/PATCH/DELETE require write. POST needs an explicit read/write effect.')
         public_output = _output_schema(wire, selected)
         public_input = thaw(wire.input_schema)
+        if vocabulary:
+            public_output, public_input = vocabulary.schema(public_output), vocabulary.schema(public_input)
         check_draft_schema(public_input)
         source_summary = record.title if isinstance(record, SourceRecord) else record.capability.title
         source_terms = (source_summary,)
@@ -276,9 +394,17 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
                       'inputSchema': public_input, 'outputSchema': public_output}
         route = record.http_route(deployment.base_url, path_prefix=deployment.path_prefix,
                                   headers=dict(deployment.headers), credential_provider=deployment.credential_provider)
+        if deployment.request_values is not None:
+            call_info = MappingProxyType({'operationId': record.operation_id, 'method': wire.http_method,
+                                          'path': record.path, 'effect': effect})
+            route = replace(route, request_values=lambda context, f=deployment.request_values, c=call_info: f(context, c))
+        if deployment.error_detail is not None:
+            route = replace(route, error_detail=deployment.error_detail)
+        if deployment.idempotency_header is not None and effect == 'write':
+            route = replace(route, idempotency_header=deployment.idempotency_header)
         routes[(wire.service_ref, wire.operation_ref)] = route
         calls[descriptor['id']] = _Call(json.dumps(descriptor, ensure_ascii=False, allow_nan=False), wire,
                                        freeze(public_output), selected, tuple(dict.fromkeys((*keywords, *source_terms))),
-                                       keywords, (record.operation_id,))
+                                       keywords, (record.operation_id,), vocabulary or None)
     return ConvertedAPI(MappingProxyType(calls), HTTPAdapter(routes, max_response_bytes=deployment.max_response_bytes),
                         deployment.timeout_ms, deployment.deadline_ms)
