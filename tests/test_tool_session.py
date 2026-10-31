@@ -97,6 +97,10 @@ class ToolSessionTests(unittest.IsolatedAsyncioTestCase):
         budget = tool_bytes(probe.tools())
         host = ToolSession(app, CONTEXT, max_tool_bytes=budget, search_limit=1)
         first = (await host.select('sample.echo_0000'))['selected'][0]['name']
+        # Before the model has received the list, another search cannot push the first one out.
+        unseen = await host.select('sample.echo_0001')
+        self.assertEqual((unseen['evicted'], unseen['omitted'][0]['reason']), ([], 'SCHEMA_BUDGET'))
+        self.assertEqual([tool['function']['name'] for tool in host.tools()][-1], first)
         second = await host.select('sample.echo_0001')
         self.assertEqual(second['evicted'], [first])
         self.assertLessEqual(tool_bytes(host.tools()), budget)

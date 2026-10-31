@@ -321,6 +321,9 @@ class ToolSession:
         self._failed = {}  # (name, arguments) -> times this exact call failed in the session
         self._reads = {}  # (name, arguments) -> times this exact read succeeded since the last write
         self._used, self._tick = {}, 0  # recency for eviction; the tool list order never changes
+        # Functions selected since the model last received the list: another search must not push
+        # them out before the model has seen them (parallel searches otherwise evict each other).
+        self._unseen = set()
 
     @classmethod
     async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none'):
@@ -351,6 +354,7 @@ class ToolSession:
         """Fresh model view. include_search=None omits search only after auto() chose 'all'."""
         if include_search is None:
             include_search = self._strategy != 'all'
+        self._unseen.clear()  # the model receives these definitions now
         return deepcopy([*([SEARCH_TOOL] if include_search else []),
                          *(bound.tool for bound in self._active.values())])
 
@@ -383,6 +387,7 @@ class ToolSession:
 
     def _clear(self):
         self._active.clear()
+        self._unseen.clear()
         self._names.clear()
         self._catalog = None
         self._pages.clear()
@@ -462,7 +467,7 @@ class ToolSession:
             self._used[name] = self._tick
             removed = []
             while tool_bytes([SEARCH_TOOL, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
-                candidates = [key for key in retained if key != name and key not in protected]
+                candidates = [key for key in retained if key != name and key not in protected and key not in self._unseen]
                 victim = min(candidates, key=lambda key: self._used.get(key, 0)) if candidates else None
                 if victim is None:
                     break
@@ -471,6 +476,8 @@ class ToolSession:
             if tool_bytes([SEARCH_TOOL, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
                 omitted.append({'id': item['id'], 'reason': 'SCHEMA_BUDGET'})
                 continue
+            if name not in self._active:
+                self._unseen.add(name)
             self._active = retained
             self._stats['evicted'] += len(removed)
             evicted.extend(removed)
