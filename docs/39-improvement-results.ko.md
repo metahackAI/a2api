@@ -41,7 +41,11 @@
 
 **실제 호출 검증(모델 없음)**: 각 구현이 코드에 선언한 차이(생성 상태 코드, 빈 bio의 `""`/`null`, 삭제 응답)를 재현하는 명세 준수 서버(`examples/realworld/conduit.py`)에서 변환한 모든 operation을 호출했다. 처음 실행에서 Spring 18/19, Go 3/19, Rust 13/19, FastAPI 15/19였고, 원인은 (a) 서버 flavor가 구현의 실제 상태 코드·null 처리를 아직 따르지 않은 것(예: Spring `createArticle`은 `ResponseEntity.ok`라 200, Rust·Go·FastAPI의 bio는 null이 아닌 문자열)과 (b) Go 수정 form의 required(위 규칙)였다. 둘을 고친 뒤 OpenAPI·Spring·Go·Rust·FastAPI **5개 경로 모두 19/19**가 입력·원본 응답·공개 응답 검증을 통과했다(`evaluate.py verify`).
 
-### 2.2 그 밖의 변환 범위
+### 2.2 기존에 처리하던 코드의 회귀
+
+4언어 벤치마크의 생성 소스(Spring·Go·Rust × small/medium/large, 945 operation)를 1.0(`a2c7201`)과 1.1 importer로 각각 변환해 비교했다: 상태·ID·경로·메서드·입력 schema·출력 schema **차이 0건**. `examples/benchmark/verify.py`(4개 구현의 HTTP 동등성 131요청 불일치 0, 언어별 a2api 직접 호출·MCP)도 통과했다.
+
+### 2.3 그 밖의 변환 범위
 
 - GitHub REST 전체 메서드 1,254개: 1,228 → **1,230** 변환(선택 nullable query 2개). 남은 24개는 redirect만 있는 operation 15개, 비JSON 응답 3개, 비JSON 본문 2개 등이다.
 - a-commerce: `GET /v1/tools`의 A-Commerce 도구 253개와 레거시 화면 facade 19개를 모두 `ToolCatalogImporter`로 가져왔다(미지원 0).
