@@ -132,7 +132,7 @@
 
 ### 3.4 held_out 판정(각 2회, 16작업 × 2 = 32실행)
 
-held_out 작업은 이 실행 전까지 열어 보지 않았다. 코드는 commit `cae1238`(3.3까지의 개선 포함). 원자료 `ours-heldout-1.jsonl`, 지표 [evidence](evidence/acommerce-ours-heldout.json). 실행 중 provider가 잠시 500을 반환해 A2의 2건이 `MODEL_HTTP_500`으로 끝났고 실패로 셌다(재시도 없음). a-commerce 자체 에이전트(L1·L2)의 held_out은 같은 장애 순간에 자체 평가기가 "모델 무응답"으로 중단해(17실행, 보고서 없음, 로그 `acom-own-heldout-1-aborted-model-outage.log` 보존) 다시 실행했다(3.5).
+held_out 작업은 이 실행 전까지 열어 보지 않았다. 코드는 commit `38d156e`(3.3까지의 개선 포함, 그 뒤 코드 변경 없음). 원자료 `ours-heldout-1.jsonl`, 지표 [evidence](evidence/acommerce-ours-heldout.json). 실행 중 provider가 잠시 500을 반환해 A2의 2건이 `MODEL_HTTP_500`으로 끝났고 실패로 셌다(재시도 없음). a-commerce 자체 에이전트(L1·L2)의 held_out은 같은 장애 순간에 자체 평가기가 "모델 무응답"으로 중단해(17실행, 보고서 없음, 로그 `acom-own-heldout-1-aborted-model-outage.log` 보존) 다시 실행했다(3.5).
 
 | 방식 | 통과 | 오류 제외 통과율 | 오류 | 작업당 토큰 중앙값 (평균, p90) | prompt / completion (평균) | 첫 요청 prompt (중앙값) | 최대 prompt (중앙값) | 첫 요청 도구 정의 |
 |---|---|---|---|---|---|---|---|---|
