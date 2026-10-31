@@ -1,0 +1,842 @@
+{
+ "runs": [
+  "artifacts/benchmark/runs/dev-1.1-1.jsonl"
+ ],
+ "groupedBy": "scale,mode",
+ "metrics": {
+  "large / a2api": {
+   "runs": 40,
+   "passed": 40,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 5572,
+     "median": 4200,
+     "p90": 9135,
+     "min": 1697,
+     "max": 16999
+    },
+    "prompt": {
+     "n": 40,
+     "mean": 4970,
+     "median": 3671,
+     "p90": 8286,
+     "min": 1546,
+     "max": 15735
+    },
+    "completion": {
+     "n": 40,
+     "mean": 601,
+     "median": 479,
+     "p90": 1160,
+     "min": 150,
+     "max": 1776
+    },
+    "firstPrompt": {
+     "n": 40,
+     "mean": 1705,
+     "median": 1686,
+     "p90": 1815,
+     "min": 1546,
+     "max": 1950
+    },
+    "largestPrompt": {
+     "n": 40,
+     "mean": 2059,
+     "median": 1902,
+     "p90": 2603,
+     "min": 1546,
+     "max": 3305
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 10.5,
+     "median": 8.4,
+     "p90": 20.0,
+     "min": 2.8,
+     "max": 30.6
+    },
+    "model": {
+     "n": 40,
+     "mean": 10.4,
+     "median": 8.4,
+     "p90": 19.9,
+     "min": 2.7,
+     "max": 30.5
+    },
+    "tools": {
+     "n": 40,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.1
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 99,
+    "mean": 4.2,
+    "median": 3.38,
+    "p90": 7.59,
+    "min": 1.43,
+    "max": 14.94
+   },
+   "msPerCompletionToken": 17.3,
+   "modelCallsPerRun": {
+    "n": 40,
+    "mean": 2.48,
+    "median": 2.0,
+    "p90": 4.2,
+    "min": 1,
+    "max": 6
+   },
+   "toolCallsPerRun": {
+    "n": 40,
+    "mean": 1.48,
+    "median": 1.0,
+    "p90": 3.2,
+    "min": 0,
+    "max": 5
+   },
+   "searchCallsPerRun": {
+    "n": 40,
+    "mean": 0.1,
+    "median": 0.0,
+    "p90": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "businessCalls": {
+    "total": 55,
+    "failed": 4,
+    "failedRate": 0.073
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 40,
+     "mean": 3865,
+     "median": 3776,
+     "p90": 4242,
+     "min": 3491,
+     "max": 4695
+    },
+    "largest": {
+     "n": 40,
+     "mean": 4072,
+     "median": 3808,
+     "p90": 4772,
+     "min": 3491,
+     "max": 6190
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 59,
+    "mean": 328,
+    "median": 218,
+    "p90": 688,
+    "min": 87,
+    "max": 1133
+   }
+  },
+  "large / spec-tools": {
+   "runs": 40,
+   "passed": 40,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 88110,
+     "median": 74802,
+     "p90": 150330,
+     "min": 37149,
+     "max": 150827
+    },
+    "prompt": {
+     "n": 40,
+     "mean": 87605,
+     "median": 74357,
+     "p90": 149515,
+     "min": 37041,
+     "max": 149744
+    },
+    "completion": {
+     "n": 40,
+     "mean": 505,
+     "median": 445,
+     "p90": 836,
+     "min": 108,
+     "max": 1083
+    },
+    "firstPrompt": {
+     "n": 40,
+     "mean": 37082,
+     "median": 37085,
+     "p90": 37097,
+     "min": 37041,
+     "max": 37099
+    },
+    "largestPrompt": {
+     "n": 40,
+     "mean": 37408,
+     "median": 37271,
+     "p90": 37777,
+     "min": 37041,
+     "max": 37847
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 9.3,
+     "median": 8.4,
+     "p90": 14.8,
+     "min": 2.0,
+     "max": 19.4
+    },
+    "model": {
+     "n": 40,
+     "mean": 9.3,
+     "median": 8.3,
+     "p90": 14.8,
+     "min": 2.0,
+     "max": 19.3
+    },
+    "tools": {
+     "n": 40,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.1
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 94,
+    "mean": 3.94,
+    "median": 3.53,
+    "p90": 5.92,
+    "min": 1.72,
+    "max": 10.74
+   },
+   "msPerCompletionToken": 18.3,
+   "modelCallsPerRun": {
+    "n": 40,
+    "mean": 2.35,
+    "median": 2.0,
+    "p90": 4.0,
+    "min": 1,
+    "max": 4
+   },
+   "toolCallsPerRun": {
+    "n": 40,
+    "mean": 1.35,
+    "median": 1.0,
+    "p90": 3.0,
+    "min": 0,
+    "max": 3
+   },
+   "searchCallsPerRun": {
+    "n": 40,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 54,
+    "failed": 4,
+    "failedRate": 0.074
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 40,
+     "mean": 118388,
+     "median": 118388,
+     "p90": 118388,
+     "min": 118388,
+     "max": 118388
+    },
+    "largest": {
+     "n": 40,
+     "mean": 118388,
+     "median": 118388,
+     "p90": 118388,
+     "min": 118388,
+     "max": 118388
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 54,
+    "mean": 529,
+    "median": 328,
+    "p90": 973,
+    "min": 26,
+    "max": 2182
+   }
+  },
+  "medium / a2api": {
+   "runs": 40,
+   "passed": 40,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 5440,
+     "median": 4053,
+     "p90": 9626,
+     "min": 1726,
+     "max": 16947
+    },
+    "prompt": {
+     "n": 40,
+     "mean": 4906,
+     "median": 3671,
+     "p90": 8780,
+     "min": 1546,
+     "max": 15735
+    },
+    "completion": {
+     "n": 40,
+     "mean": 534,
+     "median": 460,
+     "p90": 998,
+     "min": 150,
+     "max": 1420
+    },
+    "firstPrompt": {
+     "n": 40,
+     "mean": 1705,
+     "median": 1678,
+     "p90": 1815,
+     "min": 1546,
+     "max": 1977
+    },
+    "largestPrompt": {
+     "n": 40,
+     "mean": 2048,
+     "median": 1902,
+     "p90": 2398,
+     "min": 1546,
+     "max": 3305
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 9.6,
+     "median": 8.3,
+     "p90": 17.2,
+     "min": 3.1,
+     "max": 25.0
+    },
+    "model": {
+     "n": 40,
+     "mean": 9.4,
+     "median": 8.1,
+     "p90": 17.0,
+     "min": 2.8,
+     "max": 24.8
+    },
+    "tools": {
+     "n": 40,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 98,
+    "mean": 3.82,
+    "median": 3.38,
+    "p90": 6.71,
+    "min": 1.43,
+    "max": 9.62
+   },
+   "msPerCompletionToken": 17.5,
+   "modelCallsPerRun": {
+    "n": 40,
+    "mean": 2.45,
+    "median": 2.0,
+    "p90": 4.2,
+    "min": 1,
+    "max": 6
+   },
+   "toolCallsPerRun": {
+    "n": 40,
+    "mean": 1.45,
+    "median": 1.0,
+    "p90": 3.2,
+    "min": 0,
+    "max": 5
+   },
+   "searchCallsPerRun": {
+    "n": 40,
+    "mean": 0.1,
+    "median": 0.0,
+    "p90": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "businessCalls": {
+    "total": 54,
+    "failed": 4,
+    "failedRate": 0.074
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 40,
+     "mean": 3855,
+     "median": 3772,
+     "p90": 4246,
+     "min": 3426,
+     "max": 4751
+    },
+    "largest": {
+     "n": 40,
+     "mean": 4062,
+     "median": 3808,
+     "p90": 4823,
+     "min": 3426,
+     "max": 6190
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 58,
+    "mean": 318,
+    "median": 212,
+    "p90": 688,
+    "min": 88,
+    "max": 1133
+   }
+  },
+  "medium / spec-tools": {
+   "runs": 40,
+   "passed": 40,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 23501,
+     "median": 19425,
+     "p90": 39180,
+     "min": 9378,
+     "max": 39353
+    },
+    "prompt": {
+     "n": 40,
+     "mean": 22974,
+     "median": 18910,
+     "p90": 38275,
+     "min": 9231,
+     "max": 38504
+    },
+    "completion": {
+     "n": 40,
+     "mean": 527,
+     "median": 486,
+     "p90": 911,
+     "min": 147,
+     "max": 1066
+    },
+    "firstPrompt": {
+     "n": 40,
+     "mean": 9272,
+     "median": 9275,
+     "p90": 9287,
+     "min": 9231,
+     "max": 9289
+    },
+    "largestPrompt": {
+     "n": 40,
+     "mean": 9610,
+     "median": 9595,
+     "p90": 9967,
+     "min": 9231,
+     "max": 10037
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 9.2,
+     "median": 8.4,
+     "p90": 15.6,
+     "min": 2.6,
+     "max": 18.0
+    },
+    "model": {
+     "n": 40,
+     "mean": 9.1,
+     "median": 8.4,
+     "p90": 15.6,
+     "min": 2.6,
+     "max": 18.0
+    },
+    "tools": {
+     "n": 40,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.1
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 97,
+    "mean": 3.77,
+    "median": 3.48,
+    "p90": 6.03,
+    "min": 1.74,
+    "max": 7.86
+   },
+   "msPerCompletionToken": 17.4,
+   "modelCallsPerRun": {
+    "n": 40,
+    "mean": 2.42,
+    "median": 2.0,
+    "p90": 4.0,
+    "min": 1,
+    "max": 4
+   },
+   "toolCallsPerRun": {
+    "n": 40,
+    "mean": 1.43,
+    "median": 1.0,
+    "p90": 3.0,
+    "min": 0,
+    "max": 3
+   },
+   "searchCallsPerRun": {
+    "n": 40,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 57,
+    "failed": 4,
+    "failedRate": 0.07
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 40,
+     "mean": 28396,
+     "median": 28396,
+     "p90": 28396,
+     "min": 28396,
+     "max": 28396
+    },
+    "largest": {
+     "n": 40,
+     "mean": 28396,
+     "median": 28396,
+     "p90": 28396,
+     "min": 28396,
+     "max": 28396
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 57,
+    "mean": 517,
+    "median": 328,
+    "p90": 973,
+    "min": 26,
+    "max": 2182
+   }
+  },
+  "small / a2api": {
+   "runs": 40,
+   "passed": 40,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 7560,
+     "median": 6544,
+     "p90": 11505,
+     "min": 2816,
+     "max": 14518
+    },
+    "prompt": {
+     "n": 40,
+     "mean": 7050,
+     "median": 6126,
+     "p90": 10379,
+     "min": 2686,
+     "max": 13598
+    },
+    "completion": {
+     "n": 40,
+     "mean": 510,
+     "median": 422,
+     "p90": 923,
+     "min": 114,
+     "max": 1145
+    },
+    "firstPrompt": {
+     "n": 40,
+     "mean": 2906,
+     "median": 2882,
+     "p90": 3114,
+     "min": 2686,
+     "max": 3127
+    },
+    "largestPrompt": {
+     "n": 40,
+     "mean": 3165,
+     "median": 3129,
+     "p90": 3475,
+     "min": 2686,
+     "max": 3708
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 8.9,
+     "median": 7.4,
+     "p90": 15.9,
+     "min": 2.0,
+     "max": 19.4
+    },
+    "model": {
+     "n": 40,
+     "mean": 8.8,
+     "median": 7.3,
+     "p90": 15.8,
+     "min": 2.0,
+     "max": 19.3
+    },
+    "tools": {
+     "n": 40,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 92,
+    "mean": 3.84,
+    "median": 3.25,
+    "p90": 6.45,
+    "min": 1.85,
+    "max": 9.3
+   },
+   "msPerCompletionToken": 17.3,
+   "modelCallsPerRun": {
+    "n": 40,
+    "mean": 2.3,
+    "median": 2.0,
+    "p90": 3.1,
+    "min": 1,
+    "max": 4
+   },
+   "toolCallsPerRun": {
+    "n": 40,
+    "mean": 1.3,
+    "median": 1.0,
+    "p90": 2.1,
+    "min": 0,
+    "max": 3
+   },
+   "searchCallsPerRun": {
+    "n": 40,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 52,
+    "failed": 4,
+    "failedRate": 0.077
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 40,
+     "mean": 7755,
+     "median": 7704,
+     "p90": 8340,
+     "min": 7270,
+     "max": 8340
+    },
+    "largest": {
+     "n": 40,
+     "mean": 7755,
+     "median": 7704,
+     "p90": 8340,
+     "min": 7270,
+     "max": 8340
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 52,
+    "mean": 331,
+    "median": 212,
+    "p90": 688,
+    "min": 170,
+    "max": 1133
+   }
+  },
+  "small / spec-tools": {
+   "runs": 40,
+   "passed": 40,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 9242,
+     "median": 8000,
+     "p90": 16245,
+     "min": 3693,
+     "max": 16797
+    },
+    "prompt": {
+     "n": 40,
+     "mean": 8681,
+     "median": 7273,
+     "p90": 15347,
+     "min": 3499,
+     "max": 15591
+    },
+    "completion": {
+     "n": 40,
+     "mean": 561,
+     "median": 515,
+     "p90": 898,
+     "min": 194,
+     "max": 1206
+    },
+    "firstPrompt": {
+     "n": 40,
+     "mean": 3540,
+     "median": 3543,
+     "p90": 3555,
+     "min": 3499,
+     "max": 3557
+    },
+    "largestPrompt": {
+     "n": 40,
+     "mean": 3862,
+     "median": 3729,
+     "p90": 4239,
+     "min": 3499,
+     "max": 4305
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 40,
+     "mean": 9.5,
+     "median": 8.7,
+     "p90": 15.4,
+     "min": 3.3,
+     "max": 20.7
+    },
+    "model": {
+     "n": 40,
+     "mean": 9.5,
+     "median": 8.7,
+     "p90": 15.4,
+     "min": 3.3,
+     "max": 20.7
+    },
+    "tools": {
+     "n": 40,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.1
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 93,
+    "mean": 4.1,
+    "median": 4.09,
+    "p90": 6.04,
+    "min": 1.74,
+    "max": 9.3
+   },
+   "msPerCompletionToken": 17.0,
+   "modelCallsPerRun": {
+    "n": 40,
+    "mean": 2.33,
+    "median": 2.0,
+    "p90": 4.0,
+    "min": 1,
+    "max": 4
+   },
+   "toolCallsPerRun": {
+    "n": 40,
+    "mean": 1.32,
+    "median": 1.0,
+    "p90": 3.0,
+    "min": 0,
+    "max": 3
+   },
+   "searchCallsPerRun": {
+    "n": 40,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 53,
+    "failed": 4,
+    "failedRate": 0.075
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 40,
+     "mean": 9910,
+     "median": 9910,
+     "p90": 9910,
+     "min": 9910,
+     "max": 9910
+    },
+    "largest": {
+     "n": 40,
+     "mean": 9910,
+     "median": 9910,
+     "p90": 9910,
+     "min": 9910,
+     "max": 9910
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 53,
+    "mean": 533,
+    "median": 328,
+    "p90": 973,
+    "min": 26,
+    "max": 2182
+   }
+  }
+ }
+}
