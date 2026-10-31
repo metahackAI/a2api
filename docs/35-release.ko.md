@@ -55,3 +55,4 @@ wheel에는 `src/a2api` 패키지와 `schemas/*.json`, `sample/*.json`만 들어
 | 버전 | 날짜 | 기준 commit | 확인 |
 |---|---|---|---|
 | 1.0.0 | 2026-10-31 | `1f1d061`(main, `a2api-1.0` 병합) | `scripts/release.sh --upload`: 전체 테스트 320개, twine check, 새 venv wheel 설치 후 업로드. 이후 PyPI에서 새 venv로 `pip install a2api==1.0.0` 설치·호출 확인 — https://pypi.org/project/a2api/1.0.0/ |
+| 1.1.0 | 준비(2026-11-01) | `a2api-1.1` 브랜치 | 버전과 문서만 올렸다. 업로드하지 않았다. 배포 전 `scripts/release.sh`(전체 테스트·build·twine check·새 venv 설치)를 실행한 뒤 `--upload`한다. CI(`.github/workflows/ci.yml`)가 3.11–3.14 테스트와 wheel 검사를 한다. 변경 내용: [39 문서](39-improvement-results.ko.md) |
