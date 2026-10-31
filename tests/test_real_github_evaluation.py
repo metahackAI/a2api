@@ -43,8 +43,8 @@ class RealCatalogTests(unittest.IsolatedAsyncioTestCase):
         selected = ToolSession(self.app, self.catalog.CONTEXT, naming='hash', flatten=False, hints='typed', search_limit=3)
         for query in ('github.repos.get', 'get commit', 'list branches'):
             left, right = await baseline.select(query), await selected.select(query)
-            # The frozen baseline predates `added` (newly callable names); selection must otherwise match.
-            self.assertEqual(left, {key: value for key, value in right.items() if key != 'added'})
+            # The frozen baseline predates `added`/`new` (newly callable / never offered); selection must otherwise match.
+            self.assertEqual(left, {key: value for key, value in right.items() if key not in ('added', 'new')})
             # Same functions and schemas; the order may differ (ToolSession keeps a stable list order).
             by_name = lambda tools: sorted(tools, key=lambda tool: tool['function']['name'])
             self.assertEqual(by_name(baseline.tools()), by_name(selected.tools()))

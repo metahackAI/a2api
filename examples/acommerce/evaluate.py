@@ -115,12 +115,13 @@ class RawCatalog:
 
 
 class A2APIExecutor:
-    def __init__(self, mode, app, names, host):
+    def __init__(self, mode, app, names, host, search_streak=None):
         self.mode, self.app, self.names, self.host = mode, app, names, host
-        self.session = None
+        self.search_streak, self.session = search_streak, None
 
     async def setup(self, request):
-        self.session = ToolSession(self.app, ExecutionContext('adm_sj', 'store_northwind', frozenset()))
+        self.session = ToolSession(self.app, ExecutionContext('adm_sj', 'store_northwind', frozenset()),
+                                   max_search_streak=self.search_streak)
         result = await self.session.auto(request)
         return {'strategy': result['strategy'], 'functions': len(self.session.tools()), 'hostCalls': self.session.stats}
 
@@ -272,6 +273,7 @@ async def evaluate(options):
     git = lambda *a: subprocess.run(['git', *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
     header = {'type': 'header', 'startedAt': datetime.now(timezone.utc).isoformat(), 'model': options.model,
               'set': options.set, 'modes': modes, 'tasks': [t['id'] for t in tasks], 'limits': LIMITS,
+              'searchStreak': options.search_streak,
               'resultChars': RESULT_CHARS, 'gitCommit': git('rev-parse', 'HEAD'), 'catalog': {k: len(v) for k, v in manifests.items()},
               'acommerceCommit': subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=REPO, capture_output=True, text=True).stdout.strip()}
     with options.output.open('a') as sink:
@@ -290,7 +292,7 @@ async def evaluate(options):
                     items = manifests['facade' if facade else 'acom']
                     if mode.startswith('a2api'):
                         app, names = a2api_app(items, host, facade=facade)
-                        executor = A2APIExecutor(mode, app, names, host)
+                        executor = A2APIExecutor(mode, app, names, host, options.search_streak)
                     else:
                         executor = RawCatalog(mode, items, host, facade)
                     run = await run_turns(executor, task, options)
@@ -320,6 +322,7 @@ def main():
     parser.add_argument('--modes', default='facade-all,acom-all,a2api-acom,a2api-facade')
     parser.add_argument('--only', default='')
     parser.add_argument('--repeat', type=int, default=1)
+    parser.add_argument('--search-streak', type=int, default=None, help='ToolSession max_search_streak for a2api modes')
     parser.add_argument('--output', type=Path, required=True)
     asyncio.run(evaluate(parser.parse_args()))
 

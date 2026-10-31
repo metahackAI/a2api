@@ -9,6 +9,7 @@ import unittest
 from a2api import ExecutionContext, HTTPDeployment, ToolSession, convert
 from a2api.errors import A2APIError
 from a2api.importers import ToolCatalogImporter
+from a2api.tool_session import tool_bytes
 
 CALLER = ExecutionContext('alice', 'tenant-a', frozenset())
 CATALOG = {'items': [
@@ -210,6 +211,41 @@ class CatalogTests(unittest.TestCase):
         one, two, three, note = asyncio.run(reads())
         self.assertEqual((one.get('repeated'), two.get('repeated'), three.get('repeated')), (None, 1, None))
         self.assertIn('already have this data', note)
+
+    def test_search_streak_cap_and_offered_before(self):
+        app, _ = self.app()
+
+        async def budget():
+            sizes = []
+            for query in ('refund', 'claim grid list'):
+                probe = ToolSession(app, CALLER, search_limit=1)
+                await probe.select(query)
+                sizes.append(tool_bytes(probe.tools()))
+            return max(sizes)  # the search tool and one function, not two
+
+        limit = asyncio.run(budget())
+
+        async def run():
+            session = ToolSession(app, CALLER, max_tool_bytes=limit, search_limit=1, max_search_streak=3)
+            first = await session.call('a2api_search', {'query': 'refund'})
+            session.tools()
+            other = await session.call('a2api_search', {'query': 'claim grid list'})
+            session.tools()
+            back = await session.call('a2api_search', {'query': 'refund'})   # evicted and offered again
+            capped = await session.call('a2api_search', {'query': 'anything'})
+            await session.call('legacy_search_claims', {})
+            again = await session.call('a2api_search', {'query': 'claims'})
+            return first, other, back, capped, again, session.render(back), session.render(capped)
+        first, other, back, capped, again, back_text, capped_text = asyncio.run(run())
+        self.assertEqual(first['new'], ['legacy_refund'])
+        self.assertEqual(other['evicted'], ['legacy_refund'])
+        self.assertEqual((back['added'], back['new']), (['legacy_refund'], []))
+        self.assertIn('No new functions', back_text)
+        self.assertEqual(capped['error']['code'], 'SEARCH_LIMIT')
+        self.assertIn('Use the functions you have', capped_text)
+        self.assertIn('selected', again)  # a function call resets the streak
+        with self.assertRaises(ValueError):
+            ToolSession(app, CALLER, max_search_streak=0)
 
     def test_bounded_results_keep_trailing_fields(self):
         from a2api.tool_session import render_result

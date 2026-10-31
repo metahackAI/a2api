@@ -55,9 +55,10 @@ _RESULT_HINTS = {
     'OUTCOME_UNKNOWN': 'The change may or may not have been applied. Do not retry; verify with a read if available.',
     'NOT_SELECTED': 'Call only functions currently provided; search if a function is missing.',
     'SCHEMA_MISMATCH': 'The service returned an unexpected result. Report the failure.',
+    'SEARCH_LIMIT': 'Searching again will not find more. Use the functions you have, or tell the user what is missing.',
 }
 _DEFAULT_COMPLETENESS = {'complete': True, 'scope': 'single_api_response'}
-NO_NEW_MATCHES = ('No new functions: every match is already callable. If they cannot answer, '
+NO_NEW_MATCHES = ('No new functions: every match was already offered in this conversation. If they cannot answer, '
                   'tell the user what is missing instead of searching again.')
 
 
@@ -213,8 +214,8 @@ def render_result(payload: dict, *, max_chars: int | None = None) -> str:
     if not isinstance(payload, dict):
         raise TypeError('render_result expects a call() or search result.')
     if 'selected' in payload:
-        view = {key: value for key, value in payload.items() if value not in ([], None) and key != 'added'}
-        if payload.get('selected') and 'added' in payload and not payload['added']:
+        view = {key: value for key, value in payload.items() if value not in ([], None) and key not in ('added', 'new')}
+        if payload.get('selected') and not payload.get('new', payload.get('added', [None])):
             # The model already has every match: say so, or it rephrases the same search again and again.
             view['note'] = NO_NEW_MATCHES
     elif payload.get('status') == 'succeeded':
@@ -288,7 +289,7 @@ class ToolSession:
     profile = TOOL_PROFILE
 
     def __init__(self, apps, context: ExecutionContext, *, max_tool_bytes=16000, search_limit=5,
-                 naming='readable', flatten=True, hints='none'):
+                 naming='readable', flatten=True, hints='none', max_search_streak=None):
         if not isinstance(context, ExecutionContext):
             raise TypeError('A trusted ExecutionContext is required.')
         runtime = DirectApplications(apps)
@@ -296,15 +297,21 @@ class ToolSession:
         async def request(method, arguments):
             return await asyncio.to_thread(dispatch, runtime, method, arguments, context)
 
-        self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints)
+        self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak)
 
-    def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='none'):
+    def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='none', max_search_streak=None):
         if type(budget) is not int or budget < tool_bytes([SEARCH_TOOL]):
             raise ValueError('max_tool_bytes must fit the complete search tool.')
         if type(limit) is not int or not 1 <= limit <= 20:
             raise ValueError('search_limit must be an integer from 1 to 20.')
         if naming not in ('readable', 'hash') or not isinstance(flatten, bool) or hints not in ('none', 'shape', 'typed'):
             raise ValueError('naming must be readable or hash, flatten a boolean, hints none, shape or typed.')
+        if max_search_streak is not None and (type(max_search_streak) is not int or not 1 <= max_search_streak <= 50):
+            raise ValueError('max_search_streak must be None or an integer from 1 to 50.')
+        # Searches in a row without calling a function; the host may cap them (a search loop otherwise
+        # runs until the model's call limit when the catalog has no function for the request).
+        self.max_search_streak, self._streak = max_search_streak, 0
+        self._offered = set()  # every function offered in this session, also those evicted since
         self._request_impl = request
         self.max_tool_bytes = budget
         self.search_limit = limit
@@ -326,7 +333,8 @@ class ToolSession:
         self._unseen = set()
 
     @classmethod
-    async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none'):
+    async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none',
+                       max_search_streak=None):
         """Use an already connected, trusted MCP client; no connection is owned."""
         listing = await client.list_tools()
         expected = {'a2api.discover', 'a2api.describe', 'a2api.invoke'}
@@ -338,7 +346,7 @@ class ToolSession:
             return result.structured_content
 
         session = cls.__new__(cls)
-        session._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints)
+        session._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak)
         return session
 
     @property
@@ -485,7 +493,9 @@ class ToolSession:
             selected.append({'name': name, 'id': item['id']})
         page = self._pages.commit(prepared, found)
         added = [name for name in added if name in self._active]
-        return {'selected': selected, 'added': added, 'omitted': omitted, 'evicted': evicted, **page}
+        new = [item['name'] for item in selected if item['name'] not in self._offered]
+        self._offered.update(item['name'] for item in selected)
+        return {'selected': selected, 'added': added, 'new': new, 'omitted': omitted, 'evicted': evicted, **page}
 
     async def select(self, query: str, *, more=False):
         """A host search: discover + descriptions without an intervening model turn."""
@@ -554,9 +564,14 @@ class ToolSession:
         deployment sets idempotency_header. A failed call whose exact name and arguments already
         failed in this session carries `repeated` (earlier failures), shown to the model as a hint.
         """
-        result = await self._call(name, arguments, request_id)
         if name == SEARCH_NAME:
-            return result
+            if self.max_search_streak is not None and self._streak >= self.max_search_streak:
+                return {'error': A2APIError('SEARCH_LIMIT', f'{self._streak} searches in a row found no function to call '
+                                            'for this request.', status=429).problem()}
+            self._streak += 1
+            return await self._call(name, arguments, request_id)
+        self._streak = 0
+        result = await self._call(name, arguments, request_id)
         try:
             key = (name, json.dumps(arguments, sort_keys=True, allow_nan=False))
         except (TypeError, ValueError, RecursionError):
