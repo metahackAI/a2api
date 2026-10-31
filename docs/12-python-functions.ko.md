@@ -102,3 +102,16 @@ app = Application([echo])
 기존 함수 wrapper와 신규 API 예제, 자동 schema 생성과 명시적 schema, 중첩/상속/선택 필드, 기본값, context 비노출과 위조 거부, 입력 검증 전 본문 실행 방지, 반환값 검증과 비공개 오류 처리를 확인한다. 같은 업무의 실제 HTTP/OpenAPI 호출과 Python 호출의 descriptor 필드·결과·오류 형식도 비교한다. LLM 성능·전체 소스 자동 변환·P0-3 구현을 검증한 결과로 해석하지 않는다.
 
 ResourceWarning도 오류로 처리한 전체 회귀 테스트 216개가 통과했다. P0-2 테스트는 기본 의존성의 Python 3.14에서도 실행했고, 소스 폴더 밖에 추출한 wheel에서도 TypedDict schema 생성·context 제외·정상/오류 호출을 확인했다.
+
+## 쓰기·비동기 함수(2026-10-31, [33 문서](33-completion-plan.ko.md) 1단계)
+
+`@capability(id=..., effect="write")`로 생성·변경·삭제 함수를 등록할 수 있다. descriptor의 `effects.kind`가 `write`가 되고, 쓰기 함수가 하나라도 있는 앱을 MCP에 연결하면 invoke annotation이 보수적으로 바뀐다. effect는 개발자의 선언이며 권한·승인을 대신하지 않는다. 같은 입력 검증 → 함수 실행 → 반환 검증 순서를 사용하고, 실패한 쓰기를 자동 재시도하지 않는다. 업무 오류는 `A2APIError('RESOURCE_NOT_FOUND', ..., status=404)`처럼 직접 올리면 같은 오류 envelope로 전달된다. 그 밖의 예외는 내용을 숨긴 `HANDLER_ERROR`이며, 실패가 부작용이 없었다는 증명은 아니다.
+
+`async def` 함수도 등록한다. 장식한 함수는 그대로 await할 수 있고, `app.invoke`는 비동기 함수를 완료까지 실행한다(이벤트 루프 안에서 호출되면 별도 스레드의 루프에서 실행). 동기 함수가 우연히 coroutine을 반환하면 실행하지 않고 `SCHEMA_MISMATCH`로 거부한다. generator/async generator는 계속 지원하지 않는다.
+
+```python
+@capability(id="tickets.create", effect="write")
+async def create_ticket(customerId: str, subject: str, *, context: ExecutionContext) -> Ticket:
+    """고객의 새 지원 티켓을 만들고 실제 ID를 반환한다."""
+    return await tickets.create(customerId, subject, actor=context.actor)
+```

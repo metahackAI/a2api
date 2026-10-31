@@ -27,6 +27,17 @@ def serde(node):
     return attrs
 
 
+def _calls_with_ancestors(root):
+    """Yield (call_expression, ancestors) in source order without Node.parent."""
+    pending = [(root, ())]
+    while pending:
+        current, ancestors = pending.pop()
+        if current.type == 'call_expression':
+            yield current, ancestors
+        lineage = ancestors + (current,)
+        pending.extend((child, lineage) for child in reversed(current.named_children))
+
+
 def camel(name):
     first, *rest = name.split('_')
     return first + ''.join(part[:1].upper() + part[1:] for part in rest)
@@ -43,19 +54,20 @@ class RustSourceImporter(SourceImporter):
             for node in walk(unit, 'function_item'):
                 self.functions.setdefault(text(named(node, 'name')), []).append((path, node))
         for path, unit in self.units:
-            for call in walk(unit, 'call_expression'):
+            for call, ancestors in _calls_with_ancestors(unit):
                 function = named(call, 'function')
                 if function.type != 'field_expression' or text(named(function, 'field')) != 'route':continue
                 route = ''
                 location = f'{path}:{call.start_point.row + 1}'
                 try:
-                    ancestor = call.parent
-                    while ancestor and ancestor.type != 'function_item':
+                    # Ancestors come from a top-down walk: Node.parent is unreliable on deep route chains.
+                    for ancestor in reversed(ancestors):
+                        if ancestor.type == 'function_item':
+                            break
                         if ancestor.type == 'call_expression':
                             owner = named(ancestor, 'function')
                             if owner and owner.type == 'field_expression' and text(named(owner, 'field')) in ('nest', 'nest_service', 'merge'):
                                 raise Unsupported('Nested/merged routers need explicit resolved route prefixes.')
-                        ancestor = ancestor.parent
                     if 'Router::new()' not in text(named(function, 'value')):
                         raise Unsupported('Use a literal Router::new().route chain.')
                     args = named(call, 'arguments').named_children
@@ -158,6 +170,12 @@ class RustSourceImporter(SourceImporter):
                 if has_body:raise Unsupported('Only one JSON extractor is supported.')
                 groups['body'] = self.schema(inner, direction='input');required.append('body');has_body = True
         returned = text(named(handler, 'return_type'))
+        wrapped = re.fullmatch(r'Result<(.+)>', returned)
+        if wrapped:
+            # Result<(StatusCode, Json<T>), StatusCode>: errors are status-only; Ok carries the declared status.
+            arms = split_types(wrapped[1])
+            if len(arms) == 2 and arms[0].startswith('(StatusCode,') and arms[1] == 'StatusCode':
+                returned = arms[0]
         body = named(handler, 'body')
         tail = body.named_children[-1] if body.named_children else body
         codes = ({STATUS[text(node).split('::')[-1]] for node in walk(tail, 'scoped_identifier')

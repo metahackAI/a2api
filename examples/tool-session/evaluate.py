@@ -109,7 +109,7 @@ async def connect(mode, domain, origin, count):
             listed = await client.list_tools()
             host = None
             if mode == 'selected':
-                host = await ToolSession.from_mcp(client)
+                host = await ToolSession.from_mcp(client, naming='hash', flatten=False, hints='typed', search_limit=3)  # a2api-tools/0.3 view of the recorded runs
                 if count == 2:
                     await host.prime(['legacy.getorder', 'legacy.getshipment'] if domain == 'orders'
                                      else ['github.repository.get', 'github.issues.list'])

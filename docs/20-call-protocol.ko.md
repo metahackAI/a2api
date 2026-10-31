@@ -1,10 +1,12 @@
-# a2api-call/0.1 경량 호출 명세
+# a2api-call/1.0 경량 호출 명세
+
+> **1.0 확정(2026-10-31, [33 문서](33-completion-plan.ko.md))**: 요청·응답 wire는 0.1과 같다. 바뀐 점은 `INVALID_INPUT` issues의 선택적 교정 정보(`missing`·`unexpected`·`allowed`·`expected`)와, HTTP binding의 backend 400/503을 각각 `UPSTREAM_VALIDATION_FAILED`(422)/`UPSTREAM_UNAVAILABLE`(503)로 구분한 오류 코드다. 0.1 클라이언트는 그대로 동작한다. 아래 본문에서 `0.1`로 표기한 곳은 같은 wire를 가리킨다.
 
 2026-10-30 기준 구현 명세다. [제품 방향](00-product-direction.ko.md)을 따르며 전체 IR·검토/배포 초안인 [02 문서](02-protocol-draft.ko.md)와 구분한다. 지원 범위의 API를 선택해 메모리에서 연결하고 세 메서드로 호출한다. 새로운 사용자 산출물·registry·승인 단계는 요구하지 않는다.
 
 ## 범위와 기준 스키마
 
-프로필 이름은 `a2api-call/0.1`이다. capability의 `version` 및 카탈로그의 `catalogVersion`과 구별한다. 이 프로필 이름을 요청에 새 필드로 추가하지 않는다. JSON을 사용하며 모델/클라이언트가 전송할 값은 유한한 UTF-8 JSON 값이어야 한다.
+프로필 이름은 `a2api-call/1.0`이다(0.1과 wire 동일). capability의 `version` 및 카탈로그의 `catalogVersion`과 구별한다. 이 프로필 이름을 요청에 새 필드로 추가하지 않는다. JSON을 사용하며 모델/클라이언트가 전송할 값은 유한한 UTF-8 JSON 값이어야 한다.
 
 기계 판독 기준은 패키지에 포함된 [call.schema.json](../src/a2api/schemas/call.schema.json)이다. `$defs`의 `descriptor`, `problem`, `discover_request/response`, `describe_request/response`, `invoke_request/response`를 선택해 검증한다. 루트는 구성 요소 모음이며 루트 자체로 모든 메시지를 검증하지 않는다. 외부 schema 다운로드는 필요하지 않다.
 
@@ -85,6 +87,8 @@ catalogVersion은 현재 노출 정의와 검색 상태를 식별하는 불투�
 ```json
 {"status":"failed","error":{"type":"urn:a2api:problem:resource-not-found","title":"RESOURCE_NOT_FOUND","status":404,"detail":"Backend did not return a successful JSON result.","code":"RESOURCE_NOT_FOUND"},"completeness":{"complete":false}}
 ```
+
+`INVALID_INPUT`의 issues 항목은 `path`·`rule`에 더해 **선언된 schema에서 유도한 교정 정보**를 선택적으로 포함한다: `missing`(누락 필드 이름), `unexpected`·`allowed`(허용되지 않은 필드와 허용 이름), `expected`(허용 enum, 기대 타입, 범위·길이 값). 호출자가 보낸 입력과 공개 schema만 사용하며 backend 응답이나 비공개 데이터는 넣지 않는다. 응답 검증 실패(`SCHEMA_MISMATCH`)에는 path/rule만 둔다.
 
 dispatch/카탈로그 선택 등에서 발생한 사전 오류는 `{"error":{...}}` 형태이며 status/completeness가 없다. 양쪽 모두 problem의 type/title/status/detail/code를 필수로 사용하고 issues 배열은 선택이다. error.status는 논리적 HTTP 상태 표현이며 MCP 전송 성공 여부와 구별한다. preflight 모양이 모든 binding에서 부작용 미발생을 증명하는 것은 아니다. transport/응답 검사 단계와 실제 실행 여부를 함께 판단한다.
 

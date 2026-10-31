@@ -16,10 +16,23 @@ from .schema import validate_value
 
 @dataclass(frozen=True)
 class HTTPDeployment:
+    """Host-owned origin, credentials and per-call limits. Calls are never retried."""
+
     base_url: str
     path_prefix: str = ''
     headers: Mapping[str, str] = field(default_factory=dict, repr=False)
     credential_provider: Callable[[ExecutionContext], Mapping[str, str]] | None = field(default=None, repr=False)
+    timeout_ms: int = 1500
+    deadline_ms: int = 5000
+    max_response_bytes: int = 1_048_576
+
+    def __post_init__(self) -> None:
+        for name, upper in (('timeout_ms', 600_000), ('deadline_ms', 600_000), ('max_response_bytes', 64 * 1_048_576)):
+            value = getattr(self, name)
+            if type(value) is not int or not 1 <= value <= upper:
+                raise A2APIError('INVALID_DEPLOYMENT', name + ' must be a positive integer within the supported limit.')
+        if self.timeout_ms > self.deadline_ms:
+            raise A2APIError('INVALID_DEPLOYMENT', 'timeout_ms must not exceed deadline_ms.')
 
 
 @dataclass(frozen=True)

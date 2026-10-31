@@ -1,19 +1,42 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "a2api"
-version = "0.1.0"
-description = "Lightweight capability protocol, explicit conversion and HTTP calls for agents"
-readme = "README.md"
+version = "1.0.0"
+description = "Convert APIs and functions into a compact call protocol that LLMs can search, describe and invoke at any API size"
+readme = {file = "PYPI.md", content-type = "text/markdown"}
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "haesookim"}]
 requires-python = ">=3.11"
 dependencies = ["jsonschema>=4.19,<5"]
+keywords = ["llm", "agents", "function-calling", "mcp", "openapi", "api", "tool-use"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/metahackAI/a2api"
+Repository = "https://github.com/metahackAI/a2api"
+Documentation = "https://github.com/metahackAI/a2api/tree/main/docs"
+Issues = "https://github.com/metahackAI/a2api/issues"
 
 [project.optional-dependencies]
 mcp = ["mcp>=2.3,<3"]
 openapi = ["PyYAML>=6.0.2,<7"]
-source = ["tree-sitter>=0.25,<0.27", "tree-sitter-java>=0.23,<0.24", "tree-sitter-go>=0.25,<0.26", "tree-sitter-rust>=0.24,<0.25"]
+source = ["tree-sitter>=0.25,<0.26", "tree-sitter-java>=0.23,<0.24", "tree-sitter-go>=0.25,<0.26", "tree-sitter-rust>=0.24,<0.25"]
 
 [project.scripts]
 a2api = "a2api.__main__:main"

@@ -62,7 +62,7 @@ async def stdio_smoke(origin, state):
         env={**os.environ, 'PYTHONPATH': str(ROOT / 'src')})
     async with Client(params, read_timeout_seconds=60) as client:
         before = (await client.list_tools()).model_dump(mode='json', by_alias=True)
-        host = await ToolSession.from_mcp(client)
+        host = await ToolSession.from_mcp(client, naming='hash', flatten=False, hints='typed', search_limit=3)  # a2api-tools/0.3 view of the recorded runs
         first = await host.select('repository')
         second = await host.select('repository', more=True)
         async def named(identifier):
@@ -145,7 +145,7 @@ async def evaluate(args):
         # frozen questions. Keep strict call/scoring validation and run them all.
         if not ready and args.suite != 'holdout':
             raise RuntimeError('LIVE_SCHEMA_PREFLIGHT_FAILED')
-        probe = ToolSession(apps['large'], CONTEXT)
+        probe = ToolSession(apps['large'], CONTEXT, naming='hash', flatten=False, hints='typed', search_limit=3)
         try:
             await probe.prime(['github.repos.get'])
             report['knownIDProbe'] = {'passed': True}
@@ -162,7 +162,7 @@ async def evaluate(args):
                         run_id = f'{trial}/{scale}/{case["id"]}/{mode}'
                         state['active'] = run_id
                         tick = time.monotonic()
-                        host = (BaselineSession(app, CONTEXT) if mode == 'ordinary' else ToolSession(app, CONTEXT))
+                        host = (BaselineSession(app, CONTEXT) if mode == 'ordinary' else ToolSession(app, CONTEXT, naming='hash', flatten=False, hints='typed', search_limit=3))
                         startup = time.monotonic() - tick
                         wire = instrument_wire(host) if mode == 'a2api' else []
                         measured = []

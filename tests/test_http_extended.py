@@ -243,7 +243,7 @@ class ExtendedHTTPTests(unittest.TestCase):
     def test_error_responses_are_sanitized_and_not_retried(self):
         self.response_body = b'{"secret":"private-backend-details"}'
         route = HTTPRoute(self.origin, '/items', method='POST')
-        for status, code in ((401, 'PERMISSION_DENIED'), (409, 'UPSTREAM_CONFLICT'), (422, 'UPSTREAM_VALIDATION_FAILED'), (429, 'RATE_LIMITED'), (302, 'UPSTREAM_ERROR')):
+        for status, code in ((401, 'PERMISSION_DENIED'), (409, 'UPSTREAM_CONFLICT'), (422, 'UPSTREAM_VALIDATION_FAILED'), (429, 'RATE_LIMITED'), (302, 'UPSTREAM_ERROR'), (400, 'UPSTREAM_VALIDATION_FAILED'), (503, 'UPSTREAM_UNAVAILABLE')):
             self.response_status = status
             before = len(self.requests)
             with self.assertRaises(A2APIError) as caught:

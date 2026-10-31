@@ -1,6 +1,8 @@
 # a2api 개발 계획: 전환 모듈을 먼저 끝내기
 
-갱신일: 2026-10-30 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
+갱신일: 2026-10-31 · 기준: [제품 방향과 전환·호출 설계](00-product-direction.ko.md)
+
+> **현재 범위(2026-10-31)**: 사용자가 확정한 [1.0 완성 계획](33-completion-plan.ko.md)이 이후 개발 순서와 완료 조건이다. Python·Spring·Go·Rust 구현 API를 소/중/대규모와 단순/복잡 작업에서 일반 API 명세 전달과 비교하고, 프로토콜 1.0·MIT·PyPI 배포 환경을 마무리한다. 결과는 [34 문서](34-completion-results.ko.md), 배포 절차는 [35 문서](35-release.ko.md). 아래 내용은 이전 단계의 이력이다.
 
 현재 최신 요청인 [28 문서](28-cost-improvement-plan.ko.md)의 **2번 결과 전달 구현과 3번 고정 평가 실행을 완료**했다. [31 문서](31-result-delivery-and-holdout-plan.ko.md)대로 select·짧은 반환 설명을 같은 대조군에 적용했다. [32 문서](32-result-delivery-and-holdout-results.ko.md)에 기존 24질문 통과와 별도 12질문 중 서비스/접근 실패 3건, 모든 실패 비용을 기록했다. [최초 실패](27-real-github-evaluation-results.ko.md)와 [검색만 개선한 결과](30-search-improvement-results.ko.md)도 보존한다. 전체 목표를 달성했다고 과장하거나 새 운영/권한/재시도 기능을 자동 착수하지 않는다.
 

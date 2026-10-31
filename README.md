@@ -2,6 +2,42 @@
 
 **API 규모와 관계없이 LLM이 필요한 기능을 찾고 정확한 인자로 호출하는 전체 비용을 줄이기 위한 프로토콜과 라이브러리**. 기존 API·함수를 같은 계약으로 전환하며 효과는 정확성과 실제 전체 호출 비용으로 평가한다.
 
+## a2api 1.0 (2026-10-31)
+
+[완성 계획](docs/33-completion-plan.ko.md)에 따라 **Python·Java/Spring·Go·Rust로 구현된 API를 a2api로 연결해, 일반적인 API 명세를 모델에 전달하는 방식과 정확도·컨텍스트·속도·안정성을 비교**하도록 마무리했다. 측정 결과와 한계는 [완성 평가 결과](docs/34-completion-results.ko.md)에 있다.
+
+고정 holdout(4언어 × small/medium/large 19/55/235 operation × 10작업 × 2반복, 720 run, `nvidia/Muse-Glimmer-30B-NVFP4`) 요약:
+
+| | a2api | 명세 → 전체 function | 명세 → prompt |
+|---|---:|---:|---:|
+| 통과 | 239/240(provider 500 1건) | 237/240 | 240/240 |
+| 작업당 토큰 중앙값 small / medium / large | 4.9k / 4.8k / 5.0k | 8.1k / 19.6k / 75.2k | 12.6k / 28.2k / 103.3k |
+| 작업 시간 중앙값 small / medium / large | 10.7 / 10.6 / 10.7초 | 9.4 / 9.8 / 14.8초 | 10.2 / 11.3 / 18.8초 |
+
+컨텍스트는 규모와 거의 무관하게 유지됐고, 지연은 명세가 큰 대규모에서 27–43% 줄었다. 정확도는 세 방식 모두 상한에 가까웠고, 소·중규모에서는 a2api가 명세 function 방식보다 느렸다. 원인 분석과 이후 개선은 34 문서에 있다.
+
+```bash
+pip install a2api                    # 핵심: convert / Application / ToolSession / 프로토콜 schema
+pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer
+```
+
+**기존(레거시) API를 전환하는 단계별 방법은 [레거시 API 전환 가이드](docs/36-legacy-conversion-guide.ko.md)에 있다** — OpenAPI와 코드가 모두 있을 때, 코드만 있을 때(Spring·Go·Rust·Python·그 밖의 언어), 실행 예제는 [`examples/legacy-conversion`](examples/legacy-conversion/README.md). 다음 개선 계획은 [37 문서](docs/37-next-improvement-plan.ko.md).
+
+| 구현 언어 | a2api 연결 방법 | 문서 |
+|---|---|---|
+| Python | `@capability(effect="read"/"write")`로 동기·`async` 함수 등록 → `Application` | [12](docs/12-python-functions.ko.md) |
+| Java/Spring MVC | `SpringSourceImporter` → `convert(..., deployment=HTTPDeployment(...))` | [18](docs/18-source-importers.ko.md) |
+| Go net/http | `GoSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md) |
+| Rust Axum | `RustSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md) |
+| OpenAPI가 있는 모든 HTTP API | `OpenAPIImporter` → `convert` | [11](docs/11-in-memory-conversion.ko.md) |
+
+- **호출 프로토콜 `a2api-call/1.0`**: discover/describe/invoke와 6필드 descriptor, 구조화 오류([20](docs/20-call-protocol.ko.md)). MCP 도구는 규모와 무관하게 세 개다.
+- **모델 호스트 표현 `a2api-tools/1.0`**: `ToolSession.auto(질문)`이 작은 카탈로그는 모든 함수를, 큰 카탈로그는 질문으로 미리 찾은 후보와 검색 도구를 준다. 읽기 쉬운 함수 이름, 평탄한 HTTP 인자, compact 결과와 실패 안내를 제공한다([24](docs/24-selected-tools.ko.md)).
+- **공개 필드 선택**: `select`에 `items[].id`, `owner.login` 같은 경로를 지정해 내부 필드를 모델에 보내지 않는다. 원본 응답을 먼저 검증한다([11](docs/11-in-memory-conversion.ko.md)).
+- **실행 제한**: `HTTPDeployment(timeout_ms=..., deadline_ms=..., max_response_bytes=...)`. 자동 재시도는 없다.
+- **벤치마크**: 같은 API를 4개 언어 × 소/중/대규모(19/55/235 operation)로 생성해 `spec-tools`(명세의 모든 operation을 function으로), `spec-prompt`(명세 전체를 prompt로)와 a2api를 실제 모델로 비교한다([examples/benchmark](examples/benchmark/README.md)).
+- **배포**: MIT 라이선스, PyPI 배포 절차는 [35 문서](docs/35-release.ko.md).
+
 ## 현재 개발 기준
 
 목표 사용 흐름은 **OpenAPI/등록한 코드 → 변환 → 바로 호출**이다. 전체 실행 계약과 LLM용 호출 설명을 구분하고, 검토·빌드·변경·재승인을 첫 호출의 필수 절차로 만들지 않는다.

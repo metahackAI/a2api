@@ -70,11 +70,32 @@ def check_schema(schema: dict, semantic_types: dict) -> None:
         raise contract_error("Object/array keywords require the corresponding single type")
 
 
+_EXPECTED_RULES = {"type", "enum", "const", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum",
+                   "minLength", "maxLength", "pattern", "format", "minItems", "maxItems", "multipleOf"}
+
+
+def _input_hint(error) -> dict:
+    """Schema-derived correction hints for caller input; never echoes backend data."""
+    rule, expected, instance = error.validator, error.validator_value, error.instance
+    if rule == "required" and isinstance(instance, dict) and isinstance(expected, list):
+        return {"missing": [name for name in expected if name not in instance][:20]}
+    if rule == "additionalProperties" and isinstance(instance, dict) and isinstance(error.schema, dict):
+        allowed = list(error.schema.get("properties", {}))
+        return {"unexpected": [name for name in instance if name not in allowed][:20], "allowed": allowed[:30]}
+    if rule == "enum" and isinstance(expected, list):
+        return {"expected": expected[:30]}
+    if rule in _EXPECTED_RULES:
+        return {"expected": expected}
+    return {}
+
+
 def validate_value(schema: Mapping, value: object, *, code: str, status: int) -> None:
     errors = list(Draft202012Validator(thaw(schema), format_checker=FORMATS).iter_errors(value))
     if errors:
         # ValidationError.message may contain private data; return paths/rules only.
-        issues = [{"path": "/" + "/".join(str(x) for x in e.absolute_path), "rule": e.validator}
+        # Caller input may also receive hints taken from the declared schema itself.
+        issues = [{"path": "/" + "/".join(str(x) for x in e.absolute_path), "rule": e.validator,
+                   **(_input_hint(e) if code == "INVALID_INPUT" else {})}
                   for e in errors[:10]]
         raise A2APIError(code, "Value does not conform to the declared schema.", status=status, issues=issues)
 
