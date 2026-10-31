@@ -11,6 +11,8 @@ pip install "a2api[openapi]"      # YAML OpenAPI documents
 pip install "a2api[source]"       # Spring / Go / Rust source importers
 ```
 
+Guides (Korean): [converting legacy APIs](https://github.com/metahackAI/a2api/blob/main/docs/36-legacy-conversion-guide.ko.md) — with OpenAPI and code, or code only (Spring, Go, Rust, Python, other languages) · [call protocol](https://github.com/metahackAI/a2api/blob/main/docs/20-call-protocol.ko.md) · [model host tools](https://github.com/metahackAI/a2api/blob/main/docs/24-selected-tools.ko.md) · [evaluation](https://github.com/metahackAI/a2api/blob/main/docs/34-completion-results.ko.md)
+
 ## Python functions
 
 ```python
@@ -93,6 +95,6 @@ The repository contains a benchmark that implements the same API in Python, Spri
 | Median tokens per task (small / medium / large) | 4.9k / 4.8k / 5.0k | 8.1k / 19.6k / 75.2k | 12.6k / 28.2k / 103.3k |
 | Median seconds per task (small / medium / large) | 10.7 / 10.6 / 10.7 | 9.4 / 9.8 / 14.8 | 10.2 / 11.3 / 18.8 |
 
-Context stays flat as the API grows and latency drops 27–43% for the large API. Accuracy was near the ceiling for all approaches, and for small and medium APIs a2api was slower than one-function-per-operation. Details, failures and limits: `docs/34-completion-results.ko.md` in the source repository. Synthetic API, one model — not a guarantee for every API or model.
+Context stays flat as the API grows and latency drops 27–43% for the large API. Accuracy was near the ceiling for all approaches, and for small and medium APIs a2api was slower than one-function-per-operation. Details, failures and limits are in the [evaluation document](https://github.com/metahackAI/a2api/blob/main/docs/34-completion-results.ko.md). Synthetic API, one model — not a guarantee for every API or model.
 
 Licensed under MIT.

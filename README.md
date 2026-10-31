@@ -21,6 +21,8 @@ pip install a2api                    # 핵심: convert / Application / ToolSessi
 pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer
 ```
 
+**기존(레거시) API를 전환하는 단계별 방법은 [레거시 API 전환 가이드](docs/36-legacy-conversion-guide.ko.md)에 있다** — OpenAPI와 코드가 모두 있을 때, 코드만 있을 때(Spring·Go·Rust·Python·그 밖의 언어), 실행 예제는 [`examples/legacy-conversion`](examples/legacy-conversion/README.md). 다음 개선 계획은 [37 문서](docs/37-next-improvement-plan.ko.md).
+
 | 구현 언어 | a2api 연결 방법 | 문서 |
 |---|---|---|
 | Python | `@capability(effect="read"/"write")`로 동기·`async` 함수 등록 → `Application` | [12](docs/12-python-functions.ko.md) |
