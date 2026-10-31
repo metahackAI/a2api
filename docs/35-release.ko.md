@@ -49,3 +49,9 @@ pip install a2api                     # 다른 환경에서 확인
 ## 포함 범위
 
 wheel에는 `src/a2api` 패키지와 `schemas/*.json`, `sample/*.json`만 들어간다. `examples/`의 벤치마크·생성기, 문서, 평가 원문(`artifacts/`)은 저장소에만 있다. 선택 의존성 `source`는 tree-sitter 0.25 계열로 고정한다(0.26.0의 충돌 때문, [33 문서](33-completion-plan.ko.md) 변경 기록).
+
+## 배포 기록
+
+| 버전 | 날짜 | 기준 commit | 확인 |
+|---|---|---|---|
+| 1.0.0 | 2026-10-31 | `1f1d061`(main, `a2api-1.0` 병합) | `scripts/release.sh --upload`: 전체 테스트 320개, twine check, 새 venv wheel 설치 후 업로드. 이후 PyPI에서 새 venv로 `pip install a2api==1.0.0` 설치·호출 확인 — https://pypi.org/project/a2api/1.0.0/ |
