@@ -272,7 +272,7 @@ a-commerce design 작업의 필수 도구가 첫 모델 요청 전에 제공되�
 
 ## 6. 4언어 벤치마크 회귀
 
-1.0의 생성 벤치마크(같은 상거래 API를 Python·Spring·Go·Rust로, 19/55/235 operation) dev 10작업 × 3규모 × 4언어를 1.1 코드(commit `30a8272`, 검색 밀어내기 수정 포함)로 spec-tools(명세의 operation마다 함수)와 a2api 두 방식에서 다시 실행했다(240 run, 교차 순서). 원자료 `artifacts/benchmark/runs/dev-1.1-1.jsonl`, 지표 [evidence](evidence/benchmark-dev-1.1.json).
+1.0의 생성 벤치마크(같은 상거래 API를 Python·Spring·Go·Rust로, 19/55/235 operation) dev 10작업 × 3규모 × 4언어를 1.1 코드(commit `1ef3c8a`, 라이브러리는 검색 밀어내기 수정 `30a8272`과 같음)로 spec-tools(명세의 operation마다 함수)와 a2api 두 방식에서 다시 실행했다(240 run, 교차 순서). 원자료 `artifacts/benchmark/runs/dev-1.1-1.jsonl`, 지표 [evidence](evidence/benchmark-dev-1.1.json).
 
 | 규모 | 방식 | 통과 | 작업당 토큰 중앙값 (평균, p90) | prompt / completion (평균) | 첫 요청 prompt (중앙값) | 첫 요청 도구 정의 |
 |---|---|---|---|---|---|---|
