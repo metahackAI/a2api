@@ -1,0 +1,635 @@
+{
+ "runs": [
+  "artifacts/acommerce/runs/ours-design-6.jsonl"
+ ],
+ "scoring": {
+  "a2api-acom": {
+   "byKind": {
+    "write_approval": "0/3",
+    "read": "2/9"
+   },
+   "toolPrecision": {
+    "n": 12,
+    "mean": 0.82,
+    "median": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "toolRecall": {
+    "n": 12,
+    "mean": 0.79,
+    "median": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   }
+  },
+  "a2api-facade": {
+   "byKind": {
+    "write_approval": "0/3",
+    "read": "1/9"
+   },
+   "toolPrecision": {
+    "n": 0
+   },
+   "toolRecall": {
+    "n": 0
+   }
+  }
+ },
+ "perTask": {
+  "b1-vip-weekend-sale|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 88910,
+   "seconds": 74.698,
+   "modelCalls": 12,
+   "toolCalls": 26,
+   "missing": [
+    "tool search_products",
+    "tool list_tiers",
+    "tool set_sale_prices",
+    "tool create_coupon",
+    "tool schedule_banner",
+    "change set",
+    "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7, 4 not shown)",
+    "fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (15, 67.15 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "b1-vip-weekend-sale|a2api-facade|0": {
+   "done": false,
+   "hostError": "MODEL_HTTP_502",
+   "tokens": 40830,
+   "seconds": 78.81,
+   "modelCalls": 7,
+   "toolCalls": 7,
+   "missing": [
+    "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7, 4 not shown)",
+    "fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (15, 67.15 not shown)",
+    "HOST:MODEL_HTTP_502"
+   ]
+  },
+  "mk-whats-running-this-weekend|a2api-facade|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 52571,
+   "seconds": 113.608,
+   "modelCalls": 10,
+   "toolCalls": 9,
+   "missing": [
+    "fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+   ]
+  },
+  "mk-whats-running-this-weekend|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 77597,
+   "seconds": 75.569,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8, 15, 15, 80, 10 not shown)",
+    "fact \"the knit sale covers 26 knitwear products\" (26 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "mk-hero-free-next-weekend|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 13770,
+   "seconds": 22.396,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown)",
+    "fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+   ]
+  },
+  "mk-hero-free-next-weekend|a2api-facade|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 25473,
+   "seconds": 54.484,
+   "modelCalls": 6,
+   "toolCalls": 5,
+   "missing": []
+  },
+  "md-low-stock-before-weekend|a2api-facade|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 50517,
+   "seconds": 37.651,
+   "modelCalls": 12,
+   "toolCalls": 14,
+   "missing": [
+    "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (4, 7 not shown)",
+    "fact \"Linen shirt is the one with a reorder task: it sells out in \" (4 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-low-stock-before-weekend|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 101356,
+   "seconds": 52.406,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (4, 7 not shown)",
+    "fact \"Linen shirt is the one with a reorder task: it sells out in \" (4 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-overcoat-runs-small|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 9664,
+   "seconds": 10.939,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "missing": []
+  },
+  "md-overcoat-runs-small|a2api-facade|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 24365,
+   "seconds": 24.222,
+   "modelCalls": 5,
+   "toolCalls": 6,
+   "missing": [
+    "fact \"41 reviews, average 4.6\" (41, 4.6 not shown)",
+    "fact \"29 say true to size, 12 say a bit snug, none say it runs lar\" (29, 12 not shown)",
+    "fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+   ]
+  },
+  "md-end-of-season-markdown|a2api-facade|0": {
+   "done": false,
+   "hostError": "MODEL_OUTPUT_TRUNCATED",
+   "tokens": 31608,
+   "seconds": 83.076,
+   "modelCalls": 6,
+   "toolCalls": 8,
+   "missing": [
+    "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown)",
+    "fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)",
+    "HOST:MODEL_OUTPUT_TRUNCATED"
+   ]
+  },
+  "md-end-of-season-markdown|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_OUTPUT_TRUNCATED",
+   "tokens": 39551,
+   "seconds": 95.168,
+   "modelCalls": 6,
+   "toolCalls": 5,
+   "missing": [
+    "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown)",
+    "fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)",
+    "HOST:MODEL_OUTPUT_TRUNCATED"
+   ]
+  },
+  "b2-returns-over-200|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 67791,
+   "seconds": 20.121,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "tool refund_return",
+    "tool send_customer_message",
+    "change set",
+    "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (12, 9, 2463, 2, 20366, 20409, 1, 20290 not shown)",
+    "fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown)",
+    "fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown)",
+    "fact \"the 3 messages cannot be taken back once sent\" (3 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "b2-returns-over-200|a2api-facade|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 62437,
+   "seconds": 29.12,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (12, 9, 2463, 2, 20366, 20409, 1, 20290 not shown)",
+    "fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown)",
+    "fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown)",
+    "fact \"the 3 messages cannot be taken back once sent\" (3 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-wismo-tracking-stuck|a2api-facade|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 33723,
+   "seconds": 60.472,
+   "modelCalls": 11,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"UPS 1ZNW271840001, the last scan is picked_up on Mon Nov 2\" (1znw271840001, 2 not shown)",
+    "fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+   ]
+  },
+  "ops-wismo-tracking-stuck|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 27958,
+   "seconds": 32.778,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+   ]
+  },
+  "ops-frequent-returner|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 37923,
+   "seconds": 44.898,
+   "modelCalls": 6,
+   "toolCalls": 7,
+   "missing": []
+  },
+  "ops-frequent-returner|a2api-facade|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 72953,
+   "seconds": 111.701,
+   "modelCalls": 12,
+   "toolCalls": 20,
+   "missing": [
+    "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20431, 20311, 20324, 20298 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "mgr-what-needs-me-today|a2api-facade|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 8953,
+   "seconds": 37.566,
+   "modelCalls": 4,
+   "toolCalls": 9,
+   "missing": [
+    "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown)",
+    "fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown)",
+    "fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039, 10 not shown)"
+   ]
+  },
+  "mgr-what-needs-me-today|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 10944,
+   "seconds": 16.059,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (3 not shown)",
+    "fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown)",
+    "fact \"two finished this morning: below-cost prices raised to the f\" (1040, 1039, 10 not shown)"
+   ]
+  },
+  "mgr-what-changed-this-morning|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_OUTPUT_TRUNCATED",
+   "tokens": 25033,
+   "seconds": 54.647,
+   "modelCalls": 4,
+   "toolCalls": 7,
+   "missing": [
+    "tool search_action_log",
+    "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 4, 9, 8, 31, 30 not shown)",
+    "fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)",
+    "HOST:MODEL_OUTPUT_TRUNCATED"
+   ]
+  },
+  "mgr-what-changed-this-morning|a2api-facade|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 24153,
+   "seconds": 67.984,
+   "modelCalls": 6,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 9, 8, 31, 30 not shown)",
+    "fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+   ]
+  },
+  "b3-why-sales-dropped|a2api-facade|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 49789,
+   "seconds": 87.766,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (5, 18240, 22900, 4660, 20, 201, 247 not shown)",
+    "fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown)",
+    "fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "b3-why-sales-dropped|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 11684,
+   "seconds": 17.045,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "missing": [
+    "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (20 not shown)"
+   ]
+  }
+ },
+ "metrics": {
+  "a2api-acom": {
+   "runs": 12,
+   "passed": 2,
+   "passRate": 0.167,
+   "passRateWithoutHostErrors": 0.333,
+   "hostErrors": {
+    "MODEL_CALL_LIMIT": 4,
+    "MODEL_OUTPUT_TRUNCATED": 2
+   },
+   "tokensPerRun": {
+    "total": {
+     "n": 12,
+     "mean": 42682,
+     "median": 32940,
+     "p90": 87779,
+     "min": 9664,
+     "max": 101356
+    },
+    "prompt": {
+     "n": 12,
+     "mean": 40271,
+     "median": 30068,
+     "p90": 83673,
+     "min": 9075,
+     "max": 98513
+    },
+    "completion": {
+     "n": 12,
+     "mean": 2411,
+     "median": 2160,
+     "p90": 4174,
+     "min": 589,
+     "max": 5606
+    },
+    "firstPrompt": {
+     "n": 12,
+     "mean": 3743,
+     "median": 3683,
+     "p90": 4883,
+     "min": 2817,
+     "max": 5033
+    },
+    "largestPrompt": {
+     "n": 12,
+     "mean": 6886,
+     "median": 6979,
+     "p90": 8844,
+     "min": 4154,
+     "max": 11480
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 12,
+     "mean": 43.1,
+     "median": 38.8,
+     "p90": 75.5,
+     "min": 10.9,
+     "max": 95.2
+    },
+    "model": {
+     "n": 12,
+     "mean": 42.9,
+     "median": 38.7,
+     "p90": 75.3,
+     "min": 10.9,
+     "max": 95.0
+    },
+    "tools": {
+     "n": 12,
+     "mean": 0.1,
+     "median": 0.1,
+     "p90": 0.1,
+     "min": 0.0,
+     "max": 0.2
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 79,
+    "mean": 6.52,
+    "median": 5.48,
+    "p90": 12.46,
+    "min": 1.11,
+    "max": 34.19
+   },
+   "msPerCompletionToken": 17.8,
+   "modelCallsPerRun": {
+    "n": 12,
+    "mean": 6.58,
+    "median": 5.5,
+    "p90": 12.0,
+    "min": 2,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 12,
+    "mean": 7.58,
+    "median": 6.0,
+    "p90": 12.0,
+    "min": 1,
+    "max": 26
+   },
+   "searchCallsPerRun": {
+    "n": 12,
+    "mean": 2.67,
+    "median": 1.0,
+    "p90": 3.9,
+    "min": 0,
+    "max": 18
+   },
+   "businessCalls": {
+    "total": 54,
+    "failed": 0,
+    "failedRate": 0.0
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 12,
+     "mean": 11173,
+     "median": 10976,
+     "p90": 15064,
+     "min": 7884,
+     "max": 15334
+    },
+    "largest": {
+     "n": 12,
+     "mean": 13798,
+     "median": 15300,
+     "p90": 15924,
+     "min": 7884,
+     "max": 15999
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 91,
+    "mean": 882,
+    "median": 424,
+    "p90": 3221,
+    "min": 49,
+    "max": 5047
+   }
+  },
+  "a2api-facade": {
+   "runs": 12,
+   "passed": 1,
+   "passRate": 0.083,
+   "passRateWithoutHostErrors": 0.167,
+   "hostErrors": {
+    "MODEL_HTTP_502": 1,
+    "MODEL_CALL_LIMIT": 4,
+    "MODEL_OUTPUT_TRUNCATED": 1
+   },
+   "tokensPerRun": {
+    "total": {
+     "n": 12,
+     "mean": 39781,
+     "median": 37276,
+     "p90": 61450,
+     "min": 8953,
+     "max": 72953
+    },
+    "prompt": {
+     "n": 12,
+     "mean": 36013,
+     "median": 33548,
+     "p90": 59650,
+     "min": 6675,
+     "max": 66425
+    },
+    "completion": {
+     "n": 12,
+     "mean": 3768,
+     "median": 3728,
+     "p90": 6391,
+     "min": 1328,
+     "max": 6639
+    },
+    "firstPrompt": {
+     "n": 12,
+     "mean": 1986,
+     "median": 1951,
+     "p90": 2834,
+     "min": 630,
+     "max": 3288
+    },
+    "largestPrompt": {
+     "n": 12,
+     "mean": 5683,
+     "median": 5975,
+     "p90": 7011,
+     "min": 2323,
+     "max": 8615
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 12,
+     "mean": 65.5,
+     "median": 64.2,
+     "p90": 109.3,
+     "min": 24.2,
+     "max": 113.6
+    },
+    "model": {
+     "n": 12,
+     "mean": 64.6,
+     "median": 64.2,
+     "p90": 109.0,
+     "min": 24.1,
+     "max": 113.5
+    },
+    "tools": {
+     "n": 12,
+     "mean": 0.1,
+     "median": 0.1,
+     "p90": 0.2,
+     "min": 0.0,
+     "max": 0.3
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 103,
+    "mean": 7.52,
+    "median": 6.94,
+    "p90": 14.0,
+    "min": 1.22,
+    "max": 33.46
+   },
+   "msPerCompletionToken": 17.1,
+   "modelCallsPerRun": {
+    "n": 12,
+    "mean": 8.58,
+    "median": 8.5,
+    "p90": 12.0,
+    "min": 4,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 12,
+    "mean": 10.33,
+    "median": 9.5,
+    "p90": 13.8,
+    "min": 5,
+    "max": 20
+   },
+   "searchCallsPerRun": {
+    "n": 12,
+    "mean": 5.17,
+    "median": 3.5,
+    "p90": 10.0,
+    "min": 0,
+    "max": 12
+   },
+   "businessCalls": {
+    "total": 62,
+    "failed": 1,
+    "failedRate": 0.016
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 12,
+     "mean": 4974,
+     "median": 5056,
+     "p90": 7758,
+     "min": 548,
+     "max": 9246
+    },
+    "largest": {
+     "n": 12,
+     "mean": 7677,
+     "median": 6848,
+     "p90": 11953,
+     "min": 2165,
+     "max": 12717
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 124,
+    "mean": 670,
+    "median": 425,
+    "p90": 1157,
+    "min": 41,
+    "max": 4912
+   }
+  }
+ }
+}
