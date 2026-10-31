@@ -27,6 +27,18 @@ SENSITIVE_HEADERS = frozenset({"authorization", "proxy-authorization", "cookie"}
 HEADER_NAME = re.compile(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+")
 
 
+_UPSTREAM_DETAIL = {
+    400: "The backend rejected the request values.",
+    401: "The backend did not accept the caller's credentials.",
+    403: "The backend denied access for this caller.",
+    404: "The backend reported that the target does not exist.",
+    409: "The backend reported that the current state does not allow this request.",
+    422: "The backend rejected the request values.",
+    429: "The backend is rate limiting this caller.",
+    503: "The backend reported that it is temporarily unavailable.",
+}
+
+
 def json_media_type(value: str) -> bool:
     return isinstance(value, str) and (value == "application/json" or
             re.fullmatch(r"application/[a-z0-9!#$&^_.+-]+\+json", value) is not None)
@@ -280,11 +292,15 @@ class HTTPAdapter:
             codec = route.responses.get(response.status)
             if codec is None:
                 code, status = {
+                    400: ("UPSTREAM_VALIDATION_FAILED", 422),
                     401: ("PERMISSION_DENIED", 403), 403: ("PERMISSION_DENIED", 403),
                     404: ("RESOURCE_NOT_FOUND", 404), 429: ("RATE_LIMITED", 429),
                     409: ("UPSTREAM_CONFLICT", 409), 422: ("UPSTREAM_VALIDATION_FAILED", 422),
+                    503: ("UPSTREAM_UNAVAILABLE", 503),
                 }.get(response.status, ("UPSTREAM_ERROR", 502))
-                raise A2APIError(code, "Backend did not return a successful JSON result.", status=status)
+                # Status-derived wording only; the backend body is never forwarded.
+                raise A2APIError(code, _UPSTREAM_DETAIL.get(response.status, "Backend did not return a successful JSON result.")
+                                 + f" (HTTP {response.status})", status=status)
             mime = response.getheader("Content-Type", "").split(";")[0].strip().lower()
             if codec.media_type is not None and not (mime == codec.media_type or codec.media_type == "application/json" and json_media_type(mime)):
                 raise A2APIError("INVALID_RESPONSE", "Backend response has an undeclared JSON media type.", status=502)

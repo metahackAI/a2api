@@ -6,6 +6,7 @@
 
 - `docs/00-product-direction.ko.md`: 현재 제품 방향, 레거시/신규 전환과 LLM 호출 설계.
 - `docs/03-roadmap-and-evaluation.ko.md`: 현재 개발 범위와 완료 조건.
+- `docs/33-completion-plan.ko.md`: 2026-10-31 사용자가 확정한 1.0 완성 목표(4개 언어·규모·작업 유형에서 일반 API 명세 전달 대비 정확도·컨텍스트·속도·안정성), 단계·완료 조건·변경 기록. 결과는 `docs/34-completion-results.ko.md`, 배포 절차는 `docs/35-release.ko.md`.
 - 다른 설계/구현 문서는 참고 자료다. 전체 초안의 모든 기능을 필수 구현 목록으로 해석하지 않는다.
 
 ## 제품 범위
@@ -18,6 +19,8 @@
 - 기존 review/build/diff/증분/재승인은 선택적인 관리 기능으로 보존한다. 첫 호출의 선행 조건으로 만들지 않는다.
 
 ## 작업 진행
+
+- 2026-10-31 이후 기준은 33 문서다. 벤치마크(`examples/benchmark`)의 holdout 작업은 해시를 기록한 뒤 수정하지 않는다. 개선은 dev 결과만 근거로 한다. PyPI 업로드는 사용자가 직접 한다(`scripts/release.sh --upload`).
 
 - 요청한 사용 경로를 끝낸다. 요청하지 않은 CI/CD·버전 정책·재배포·관리 플랫폼을 다음 목표로 자동 추가하지 않는다.
 - P0-1 메모리 convert/invoke, P0-2 Python 함수 등록, P0-3 경량 MCP 연결은 구현 완료다. 후속 범위는 사용자의 지시를 따르며 운영 기능이나 새 단계를 자동으로 추가하지 않는다.

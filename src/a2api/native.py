@@ -1,7 +1,9 @@
-"""Explicit synchronous Python capabilities sharing the direct-call protocol."""
+"""Explicit Python capabilities (sync or async, read or write) sharing the direct-call protocol."""
 
 from __future__ import annotations
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import wraps
 import inspect
@@ -28,17 +30,17 @@ class _Function:
     defaults_json: str
     inject_context: bool
     search_terms: tuple[str, ...] = ()
+    is_async: bool = False
 
 
 def _definition(function, identifier, effect, summary, input_schema, output_schema, keywords):
     original = inspect.unwrap(function)
     if (not (inspect.isfunction(original) or inspect.ismethod(original))
-            or inspect.iscoroutinefunction(original) or inspect.isgeneratorfunction(original)
-            or inspect.isasyncgenfunction(original)):
-        raise A2APIError('UNSUPPORTED_FUNCTION', 'Register synchronous, non-generator Python functions or bound methods.')
+            or inspect.isgeneratorfunction(original) or inspect.isasyncgenfunction(original)):
+        raise A2APIError('UNSUPPORTED_FUNCTION', 'Register plain or async (non-generator) Python functions or bound methods.')
     if (not isinstance(identifier, str) or not re.fullmatch(r'[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+', identifier)
-            or effect != 'read'):
-        raise A2APIError('INVALID_FUNCTION', 'Declare a dotted capability id and effect=read.')
+            or effect not in ('read', 'write')):
+        raise A2APIError('INVALID_FUNCTION', 'Declare a dotted capability id and effect=read or effect=write.')
     signature = inspect.signature(function)
     try:
         hints = get_type_hints(original, include_extras=True)
@@ -91,24 +93,43 @@ def _definition(function, identifier, effect, summary, input_schema, output_sche
     description = summary if summary is not None else (inspect.getdoc(function) or function.__name__).splitlines()[0]
     if not isinstance(description, str) or not description.strip():
         raise A2APIError('INVALID_FUNCTION', 'A nonempty summary or function docstring is required.')
-    descriptor = {'id': identifier, 'version': '0.1.0', 'summary': description.strip(), 'effects': {'kind': 'read'},
+    descriptor = {'id': identifier, 'version': '0.1.0', 'summary': description.strip(), 'effects': {'kind': effect},
                   'inputSchema': input_schema, 'outputSchema': output_schema}
     return _Function(function, json.dumps(descriptor, ensure_ascii=False, allow_nan=False),
                      freeze(input_schema), freeze(output_schema), json.dumps(defaults, ensure_ascii=False), inject_context,
-                     search_keywords(keywords, code='INVALID_FUNCTION'))
+                     search_keywords(keywords, code='INVALID_FUNCTION'), inspect.iscoroutinefunction(original))
 
 
 def capability(*, id: str, effect: str, summary: str | None = None, input_schema: dict | None = None,
                output_schema: dict | None = None, keywords: list[str] | tuple[str, ...] | None = None):
-    """Declare a read function explicitly. Decoration does not execute its body."""
+    """Declare a read or write function explicitly. Decoration does not execute its body.
+
+    effect is the developer's declaration, not an authorization. Writes are never retried.
+    """
     def register(function):
         definition = _definition(function, id, effect, summary, input_schema, output_schema, keywords)
-        @wraps(function)
-        def exported(*args, **kwargs):
-            return function(*args, **kwargs)
+        if inspect.iscoroutinefunction(inspect.unwrap(function)):
+            @wraps(function)
+            async def exported(*args, **kwargs):
+                return await function(*args, **kwargs)
+        else:
+            @wraps(function)
+            def exported(*args, **kwargs):
+                return function(*args, **kwargs)
         exported.__a2api_function__ = definition
         return exported
     return register
+
+
+def _complete(awaitable):
+    """Run an async handler to completion from the synchronous invoke API."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(awaitable)
+    # Called inside an event loop thread: finish on a private loop instead of nesting.
+    with ThreadPoolExecutor(1) as executor:
+        return executor.submit(asyncio.run, awaitable).result()
 
 
 class Application:
@@ -167,11 +188,14 @@ class Application:
                 arguments['context'] = context
             try:
                 data = definition.handler(**arguments)
+                if definition.is_async:
+                    data = _complete(data)
             except A2APIError:
                 raise
             except Exception:
                 raise A2APIError('HANDLER_ERROR', 'Registered function failed.', status=500) from None
             if inspect.iscoroutine(data):
+                # Only functions declared async are awaited; never run a stray coroutine.
                 data.close()
             data = json_copy(data, code='SCHEMA_MISMATCH', status=502)
             validate_value(definition.output_schema, data, code='SCHEMA_MISMATCH', status=502)

@@ -100,3 +100,9 @@ HEAD를 선택할 때는 importer에도 `methods={"GET", "HEAD"}`를 지정한�
 검증은 주문·배송 실제 HTTP, 빈 결과, backend 권한 거부, 전송 전 입력 거부, 선택 전 원본 응답 검증, 내부 참조/union/배열/HEAD/상태별 응답, 고정 GitHub 명세의 선택 API를 로컬 fixture로 호출하는 경우를 포함한다. 전체 명세의 모든 API나 실제 LLM 성공률을 검증했다는 뜻은 아니다.
 
 P0-1 검증 시 ResourceWarning도 오류로 처리한 전체 회귀 테스트 201개가 통과했다. 소스 폴더 밖에 추출한 wheel을 기본 의존성의 Python 3.14 환경에서 사용해 주문과 배송 두 건을 실제 로컬 HTTP로 조회했다. 실행 예제의 일반 주문과 빈 배송 주문도 각각 HTTP 3회·1회로 확인했다.
+
+## 중첩·배열 공개 필드와 실행 제한(2026-10-31, [33 문서](33-completion-plan.ko.md) 1단계)
+
+`select`는 최상위 이름 외에 `.`으로 이은 경로와 배열 항목 표시 `[]`를 받는다. 목록 응답은 `{"select": ["items[].id", "items[].status", "total", "hasMore"]}`, 최상위 배열은 `["[].login"]`, 중첩 객체는 `["id", "owner.login"]`처럼 지정한다. 원본 HTTP 응답 전체를 원래 schema로 검증한 뒤 경로를 선택하고, 선택한 공개 schema로 다시 검증한다. 선택하지 않은 필드가 원본 계약을 어겨도 실패한다. 경로는 단순 object/array와 로컬 `$ref`만 통과할 수 있으며, required·null·`minItems/maxItems`와 참조 정의를 보존한다. 한 단계에서 배열 항목과 객체 필드를 섞거나 경로가 겹치면 거부한다. 기존 최상위 이름 선택은 그대로 동작한다.
+
+`HTTPDeployment(origin, timeout_ms=1500, deadline_ms=5000, max_response_bytes=1048576)`로 호출별 제한을 호스트가 정한다. 기본값은 기존과 같다. 느린 서비스는 값을 늘리고, 시간 초과는 `DEADLINE_EXCEEDED`(쓰기 전송 후에는 `OUTCOME_UNKNOWN`)로 반환한다. 자동 재시도는 하지 않는다.

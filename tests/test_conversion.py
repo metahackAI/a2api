@@ -78,7 +78,7 @@ class ConversionTests(unittest.TestCase):
         app = self.app()
         description = app.describe('legacy.getorder')
         self.assertEqual(set(description), {'id', 'version', 'summary', 'effects', 'inputSchema', 'outputSchema'})
-        self.assertEqual(app.profile, 'a2api-call/0.1')
+        self.assertEqual(app.profile, 'a2api-call/1.0')
         self.assertNotIn('ownerId', json.dumps(description))
         self.assertNotIn('tenantId', json.dumps(description))
         self.assertNotIn('fixture.invalid', json.dumps(description))

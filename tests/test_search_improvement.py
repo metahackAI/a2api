@@ -101,7 +101,7 @@ class SearchIndexTests(unittest.TestCase):
 
 class SearchPageTests(unittest.IsolatedAsyncioTestCase):
     async def test_repeats_more_cap_and_input_validation_without_api_execution(self):
-        host = ToolSession(sample(), CONTEXT)
+        host = ToolSession(sample(), CONTEXT, search_limit=3)  # page mechanics use 3-item pages
         before = await host.call(SEARCH_NAME, {'query': 'item', 'more': True})
         self.assertEqual(before['error']['code'], 'SEARCH_NOT_STARTED')
         first = await host.call(SEARCH_NAME, {'query': 'item'})
@@ -128,7 +128,7 @@ class SearchPageTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_end_limit_change_and_catalog_drift_clear_cursors(self):
         client = Client(sample(4))
-        host = await ToolSession.from_mcp(client)
+        host = await ToolSession.from_mcp(client, search_limit=3)  # 4 items: one full page + one more page
         await host.select('item')
         end = await host.select('item', more=True)
         self.assertFalse(end['moreAvailable'])

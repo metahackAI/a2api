@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:a2api:call:0.1",
-  "title": "a2api-call/0.1 wire components; select a named $defs component",
+  "title": "a2api-call/1.0 wire components; select a named $defs component",
   "$defs": {
     "problem": {
       "type": "object",

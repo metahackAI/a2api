@@ -47,7 +47,7 @@ class OrdinarySession:
                 app, desc = self.runtime._get(item['id'], item['version'])
                 self._active[name] = {'app': app, 'binding': {'id': item['id'], 'version': item['version'],
                     'catalogVersion': self.runtime.version}, 'tool': {'type': 'function', 'function': {
-                        'name': name, 'description': function_description(desc),
+                        'name': name, 'description': function_description(desc, 'typed'),
                         'parameters': deepcopy(desc['inputSchema'])}}}
             else:self._stats['reused'] += 1
             selected.append({'name': name, 'id': item['id']})

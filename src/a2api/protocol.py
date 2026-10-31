@@ -1,4 +1,4 @@
-"""Transport-independent a2api-call/0.1 schemas, packaged for other clients."""
+"""Transport-independent a2api-call/1.0 schemas, packaged for other clients."""
 
 from copy import deepcopy
 from functools import lru_cache
@@ -7,7 +7,7 @@ import json
 
 from .errors import A2APIError
 
-PROTOCOL_PROFILE = 'a2api-call/0.1'
+PROTOCOL_PROFILE = 'a2api-call/1.0'
 METHODS = ('discover', 'describe', 'invoke')
 
 

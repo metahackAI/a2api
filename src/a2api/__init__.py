@@ -1,4 +1,11 @@
-"""a2api capability contracts and explicitly bound HTTP applications."""
+"""a2api: convert APIs and functions into a compact call protocol for LLM hosts."""
+
+from importlib.metadata import PackageNotFoundError, version as _version
+
+try:
+    __version__ = _version('a2api')
+except PackageNotFoundError:  # running from a source tree without installation
+    __version__ = '1.0.0'
 
 from .catalog import Catalog
 from .contracts import compile_contract, load_contract
@@ -16,7 +23,7 @@ from .native import Application, capability
 from .protocol import PROTOCOL_PROFILE, protocol_schema
 from .tool_session import TOOL_PROFILE, ToolSession
 
-__all__ = ["A2APIError", "Capability", "Catalog", "ExecutionContext", "HTTPAdapter", "HTTPHeaderParameter", "HTTPQueryParameter", "HTTPResponse", "HTTPRoute",
+__all__ = ["__version__", "A2APIError", "Capability", "Catalog", "ExecutionContext", "HTTPAdapter", "HTTPHeaderParameter", "HTTPQueryParameter", "HTTPResponse", "HTTPRoute",
            "Runtime", "compile_contract", "load_contract", "BuildResult", "build_contracts", "load_build", "load_review",
            "source_digest", "write_build", "HTTPDeployment", "ReviewedHTTPAdapter", "dependency_index", "diff_openapi",
            "IncrementalBuild", "regenerate", "prepare_review", "approve_review", "write_review", "ConvertedAPI", "convert",

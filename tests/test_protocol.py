@@ -25,7 +25,7 @@ class ProtocolTests(unittest.TestCase):
                         self.assertEqual(Draft202012Validator(protocol_schema(component)).is_valid(packet), expected)
 
     def test_transport_helpers_share_the_canonical_wire_and_isolate_mutations(self):
-        self.assertEqual(PROTOCOL_PROFILE, 'a2api-call/0.1')
+        self.assertEqual(PROTOCOL_PROFILE, 'a2api-call/1.0')
         for method in ('discover', 'describe', 'invoke'):
             self.assertEqual(input_schema(method), protocol_schema(method + '_request'))
             self.assertEqual(output_schemas()[method], protocol_schema(method + '_response'))

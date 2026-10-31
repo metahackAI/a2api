@@ -16,6 +16,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.shared.exceptions import MCPError
 
+from . import __version__
 from .api import METHODS, dispatch, input_schema
 from .errors import A2APIError
 from .ir import ExecutionContext
@@ -89,7 +90,7 @@ def create_mcp_server(runtime, context: ExecutionContext) -> Server:
         )
 
     return Server(
-        "a2api", version="0.1.0", on_list_tools=list_tools, on_call_tool=call_tool,
+        "a2api", version=__version__, on_list_tools=list_tools, on_call_tool=call_tool,
         instructions='Use a2api.discover, then a2api.describe, then a2api.invoke. Copy id and version from discovery. '
                      'Describe requires {"id":"<discovered id>","version":"<discovered version>"}; never use capabilityId or omit version. '
                      'Invoke requires id, version, catalogVersion and business arguments under input. Caller identity is fixed by the host. '

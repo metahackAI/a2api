@@ -14,7 +14,7 @@ from a2api import A2APIError, Application, ExecutionContext, ToolSession, capabi
 from a2api.api import dispatch
 from a2api.mcp_application import DirectApplications
 from a2api.sample import create_backend, running
-from a2api.tool_session import SEARCH_NAME, tool_bytes
+from a2api.tool_session import SEARCH_NAME, model_parameters, tool_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTEXT = ExecutionContext('alice', 'tenant-a', frozenset())
@@ -58,7 +58,7 @@ class ToolSessionTests(unittest.IsolatedAsyncioTestCase):
         host = ToolSession(app, CONTEXT)
         await host.prime(['sample.echo_0001'])
         tool = host.tools(include_search=False)[0]['function']
-        self.assertEqual(tool['parameters'], app.describe('sample.echo_0001')['inputSchema'])
+        self.assertEqual(tool['parameters'], model_parameters(app.describe('sample.echo_0001')['inputSchema']))
         self.assertNotIn('outputSchema', tool)
         for field in ('catalogVersion', 'version', 'context'):
             self.assertNotIn(field, tool['parameters']['properties'])
@@ -121,7 +121,8 @@ class ToolSessionTests(unittest.IsolatedAsyncioTestCase):
         host = ToolSession(app, CONTEXT)
         await host.prime(['sample.bounded'])
         function = host.tools(include_search=False)[0]['function']
-        self.assertEqual(function['parameters'], app.describe('sample.bounded')['inputSchema'])
+        self.assertEqual(function['parameters'], model_parameters(app.describe('sample.bounded')['inputSchema']))
+        self.assertEqual({k: v for k, v in app.describe('sample.bounded')['inputSchema'].items() if k != '$schema'}, function['parameters'])
         for bad in ({'value': 2}, {'value': 4}, {'value': '1'}, {'value': 1, 'context': {}}, {'value': float('nan')}):
             self.assertEqual((await host.call(function['name'], bad))['error']['code'], 'INVALID_INPUT')
         self.assertEqual(invoked, [])

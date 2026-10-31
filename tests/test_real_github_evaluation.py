@@ -40,7 +40,7 @@ class RealCatalogTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(self.source.document['paths'][route['path']]['get']['operationId'], route['operationId'])
             self.assertNotIn('fixture.', desc['id'])
         baseline = module('baseline').BaselineSession(self.app, self.catalog.CONTEXT)
-        selected = ToolSession(self.app, self.catalog.CONTEXT)
+        selected = ToolSession(self.app, self.catalog.CONTEXT, naming='hash', flatten=False, hints='typed', search_limit=3)
         for query in ('github.repos.get', 'get commit', 'list branches'):
             left, right = await baseline.select(query), await selected.select(query)
             self.assertEqual(left, right)

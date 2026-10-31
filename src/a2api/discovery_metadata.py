@@ -7,7 +7,7 @@ import re
 from .errors import A2APIError
 from .pointers import resolve
 
-SEARCH_REVISION = 'field-search/1'
+SEARCH_REVISION = 'field-search/2'
 _STOP = frozenset('a an the to of for with from using and or this that is be by in on'.split())
 
 
@@ -93,7 +93,14 @@ class SearchIndex:
     @staticmethod
     def _match(term, terms, text):
         if term in terms:return 1.0
-        if not term.isascii():return 0.85 if term in text.casefold() else 0.0
+        if not term.isascii():
+            if term in text.casefold():return 0.85
+            # Agglutinative words (Korean 주문을, 취소하고): a document word of two or more
+            # characters followed by a short particle/ending. No language dictionary.
+            if any(not word.isascii() and len(word) >= 2 and term.startswith(word) and len(term) - len(word) <= 3
+                   for word in terms):
+                return 0.75
+            return 0.0
         if len(term) >= 4 and any(word.isascii() and len(word) >= 4 and
                 (word.startswith(term) or term.startswith(word)) for word in terms):
             return 0.65

@@ -49,27 +49,107 @@ def _bundle(node, root: dict) -> dict:
     return result
 
 
+_ITEMS = '[]'
+
+
+def _select_tree(selected: tuple[str, ...]) -> dict:
+    """Parse field paths such as name, owner.login, items[].id or [].login into a tree."""
+    tree: dict = {}
+    for path in selected:
+        steps = []
+        for index, part in enumerate(path.split('.')):
+            name = part
+            arrays = 0
+            while name.endswith('[]'):
+                name, arrays = name[:-2], arrays + 1
+            if ('[' in name or ']' in name or (not name and (index or not arrays))):
+                raise A2APIError('INVALID_SELECTION', 'select paths use field names joined by "." with optional "[]" for array items.')
+            steps += ([name] if name else []) + [_ITEMS] * arrays
+        node = tree
+        for step in steps[:-1]:
+            node = node.setdefault(step, {})
+            if node is True:
+                raise A2APIError('INVALID_SELECTION', 'select paths must not overlap.')
+        if steps[-1] in node:
+            raise A2APIError('INVALID_SELECTION', 'select paths must not overlap.')
+        node[steps[-1]] = True
+    return tree
+
+
+def _nullable_branch(node):
+    """Return X for a sibling-free {"anyOf": [X, {"type": "null"}]} wrapper, else None."""
+    if not isinstance(node, dict) or set(node) - ANNOTATIONS - {key for key in node if key.startswith('x-')} != {'anyOf'}:
+        return None
+    branches = node['anyOf']
+    if not isinstance(branches, list) or len(branches) != 2 or {'type': 'null'} not in branches:
+        return None
+    other = branches[0] if branches[1] == {'type': 'null'} else branches[1]
+    return other if other != {'type': 'null'} else None
+
+
+def _plain(node, root: dict, kind: str):
+    """Follow finite local references to a plain object/array node without validation siblings."""
+    seen = set()
+    nullable = False
+    for _ in range(64):
+        branch = _nullable_branch(node)
+        if branch is not None:
+            node, nullable = branch, True
+            continue
+        if not (isinstance(node, dict) and '$ref' in node):
+            break
+        ref = node['$ref']
+        annotations = ANNOTATIONS | {key for key in node if key.startswith('x-')}
+        if (not isinstance(ref, str) or not ref.startswith('#/$defs/') or ref in seen
+                or set(node) - annotations - {'$ref'}):
+            raise A2APIError('UNSUPPORTED_SELECTION', 'select requires finite local references without validation siblings.')
+        seen.add(ref)
+        node = resolve(root, ref[1:])
+    allowed = ({'type', 'properties', 'required', 'additionalProperties'} if kind == 'object'
+               else {'type', 'items', 'minItems', 'maxItems'})
+    declared = node.get('type') if isinstance(node, dict) else None
+    kinds = {declared} if isinstance(declared, str) else set(declared) if isinstance(declared, list) else set()
+    if (not isinstance(node, dict) or kind not in kinds or not kinds <= {kind, 'null'}
+            or set(node) - allowed - ANNOTATIONS - {key for key in node if key.startswith('x-')}):
+        raise A2APIError('UNSUPPORTED_SELECTION', 'select paths may traverse only plain objects, arrays and local object references.')
+    if kind == 'array' and not isinstance(node.get('items'), dict):
+        raise A2APIError('UNSUPPORTED_SELECTION', 'Selected arrays must declare one item schema.')
+    return node, ([kind, 'null'] if 'null' in kinds or nullable else kind)
+
+
+def _project_schema(node, tree, root: dict):
+    if tree is True:
+        return copy.deepcopy(node)
+    if _ITEMS in tree:
+        if len(tree) != 1:
+            raise A2APIError('INVALID_SELECTION', 'Select either array items or object fields at one level.')
+        plain, kind = _plain(node, root, 'array')
+        result = {key: plain[key] for key in ('minItems', 'maxItems') if key in plain}
+        return {'type': kind, 'items': _project_schema(plain['items'], tree[_ITEMS], root), **result}
+    plain, kind = _plain(node, root, 'object')
+    properties = plain.get('properties', {})
+    if any(name not in properties for name in tree):
+        raise A2APIError('INVALID_SELECTION', 'select names must be declared response fields.')
+    return {'type': kind, 'properties': {name: _project_schema(properties[name], child, root) for name, child in tree.items()},
+            'required': [name for name in tree if name in plain.get('required', [])], 'additionalProperties': False}
+
+
+def _project(value, tree):
+    """Apply a validated selection; raw validation already ran and public validation follows."""
+    if tree is True or value is None:
+        return value
+    if _ITEMS in tree:
+        return [_project(item, tree[_ITEMS]) for item in value] if isinstance(value, list) else value
+    if not isinstance(value, dict):
+        return value
+    return {name: _project(value[name], child) for name, child in tree.items() if name in value}
+
+
 def _output_schema(wire: Operation, selected: tuple[str, ...] | None) -> dict:
     root = thaw(wire.output_schema)
     node = root['properties']['result']
     if selected is not None:
-        seen = set()
-        while isinstance(node, dict) and '$ref' in node:
-            ref = node['$ref']
-            annotations = ANNOTATIONS | {key for key in node if key.startswith('x-')}
-            if (not isinstance(ref, str) or not ref.startswith('#/$defs/') or ref in seen
-                    or set(node) - annotations - {'$ref'}):
-                raise A2APIError('UNSUPPORTED_SELECTION', 'select requires finite local references without validation siblings.')
-            seen.add(ref)
-            node = resolve(root, ref[1:])
-        allowed = {'type', 'properties', 'required', 'additionalProperties'} | ANNOTATIONS
-        if (not isinstance(node, dict) or node.get('type') != 'object'
-                or set(node) - allowed - {key for key in node if key.startswith('x-')}):
-            raise A2APIError('UNSUPPORTED_SELECTION', 'select requires a plain object response or a plain local object reference.')
-        if any(name not in node.get('properties', {}) for name in selected):
-            raise A2APIError('INVALID_SELECTION', 'select names must be declared top-level response fields.')
-        node = {'type': 'object', 'properties': {name: node['properties'][name] for name in selected},
-                'required': [name for name in selected if name in node.get('required', [])], 'additionalProperties': False}
+        node = _project_schema(node, _select_tree(selected), root)
     return _bundle(node, root)
 
 
@@ -90,6 +170,8 @@ class ConvertedAPI:
 
     _calls: Mapping[str, _Call] = field(repr=False)
     _adapter: HTTPAdapter = field(repr=False)
+    _timeout_ms: int = 1500
+    _deadline_ms: int = 5000
 
     @property
     def profile(self) -> str:
@@ -126,10 +208,10 @@ class ConvertedAPI:
                 arguments = json.loads(json.dumps(input, ensure_ascii=False, allow_nan=False).encode('utf-8'))
             except (ValueError, TypeError, UnicodeError, RecursionError):
                 raise A2APIError('INVALID_INPUT', 'Business input must contain finite UTF-8 JSON values.', status=422) from None
-            raw = self._adapter.call(call.wire, arguments, context, Budget(5000, 1), 1500)
+            raw = self._adapter.call(call.wire, arguments, context, Budget(self._deadline_ms, 1), self._timeout_ms)
             data = raw['result']
             if call.selected is not None:
-                data = {name: data[name] for name in call.selected if name in data}
+                data = _project(data, _select_tree(call.selected))
             validate_value(call.output_schema, data, code='SCHEMA_MISMATCH', status=502)
             result = {'status': 'succeeded', 'data': data,
                       'completeness': {'complete': True, 'scope': 'single_api_response'}}
@@ -162,7 +244,7 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
         selected = options.get('select')
         if 'select' in options and (not isinstance(selected, list) or not selected
                 or any(not isinstance(name, str) or not name for name in selected) or len(set(selected)) != len(selected)):
-            raise A2APIError('INVALID_SELECTION', 'select must be a nonempty list of unique top-level field names.')
+            raise A2APIError('INVALID_SELECTION', 'select must be a nonempty list of unique field paths.')
         summary = summary_override(options['summary']) if 'summary' in options else None
         keywords = search_keywords(options.get('keywords'))
         settings[identifier] = (tuple(selected) if selected is not None else None, options['effect'], summary, keywords)
@@ -198,4 +280,5 @@ def convert(source, *, operations: Mapping[str, Mapping], deployment: HTTPDeploy
         calls[descriptor['id']] = _Call(json.dumps(descriptor, ensure_ascii=False, allow_nan=False), wire,
                                        freeze(public_output), selected, tuple(dict.fromkeys((*keywords, *source_terms))),
                                        keywords, (record.operation_id,))
-    return ConvertedAPI(MappingProxyType(calls), HTTPAdapter(routes))
+    return ConvertedAPI(MappingProxyType(calls), HTTPAdapter(routes, max_response_bytes=deployment.max_response_bytes),
+                        deployment.timeout_ms, deployment.deadline_ms)

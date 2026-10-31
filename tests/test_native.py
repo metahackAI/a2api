@@ -86,7 +86,7 @@ class NativeTests(unittest.TestCase):
         app = Application([registered])
         view = app.describe('orders.lookup')
         self.assertEqual(set(view), {'id', 'version', 'summary', 'effects', 'inputSchema', 'outputSchema'})
-        self.assertEqual(app.profile, 'a2api-call/0.1')
+        self.assertEqual(app.profile, 'a2api-call/1.0')
         self.assertEqual(view['summary'], 'Look up one authorized order.')
         self.assertEqual(inspect.signature(registered), inspect.signature(legacy))
         self.assertNotIn('context', json.dumps(view))
@@ -242,15 +242,15 @@ class NativeTests(unittest.TestCase):
             return str(values)
         def keyword_variadic(**values: str) -> str:
             return str(values)
-        async def asynchronous() -> str:
-            return 'value'
         def generator() -> str:
             yield 'value'
-        for function in [positional, variadic, keyword_variadic, asynchronous, generator]:
+        async def async_generator() -> str:
+            yield 'value'
+        for function in [positional, variadic, keyword_variadic, generator, async_generator]:
             self.assert_error('UNSUPPORTED_FUNCTION', lambda: capability(id='values.unsupported', effect='read')(function))
         def plain() -> str:
             return 'value'
-        for effect in ['write', 'unknown']:
+        for effect in ['delete', 'unknown', None]:
             self.assert_error('INVALID_FUNCTION', lambda: capability(id='values.plain', effect=effect)(plain))
         def positional_context(context: ExecutionContext) -> str:
             return context.actor
