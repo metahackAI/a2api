@@ -99,8 +99,10 @@ class PresentationTests(unittest.IsolatedAsyncioTestCase):
         await session.auto()
         self.assertEqual((await session.call('orders_page', {'page': 2, 'active': True}))['data']['query'],
                          {'page': '2', 'active': 'true'})
-        # Body members are JSON values, not text: no conversion there.
-        self.assertEqual((await session.call('orders_page', {'limit': 3}))['error']['code'], 'INVALID_INPUT')
+        # A JSON body string takes an integer's digits (an ID like 20431); other JSON types stay errors.
+        self.assertEqual((await session.call('orders_page', {'limit': 3}))['data']['body'], {'limit': '3'})
+        self.assertEqual((await session.call('orders_page', {'limit': True}))['error']['code'], 'INVALID_INPUT')
+        self.assertEqual((await session.call('orders_page', {'limit': 2.5}))['error']['code'], 'INVALID_INPUT')
 
     async def test_hint_styles_describe_effects_without_extra_shape(self):
         @capability(id='notes.add', effect='write')

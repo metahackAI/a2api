@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from collections import OrderedDict
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import json
 import re
@@ -172,6 +172,9 @@ def render_result(payload: dict) -> str:
         view = {'status': 'failed', 'error': error}
         if problem.get('code') in _RESULT_HINTS:
             view['hint'] = _RESULT_HINTS[problem['code']]
+        if payload.get('repeated'):
+            view['hint'] = (f"This exact call already failed {payload['repeated']} time(s); repeating it will fail again. "
+                            'Change the arguments as the error says, or tell the user what is wrong.')
     return json.dumps(view, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
 
 
@@ -181,21 +184,30 @@ class _Bound:
     tool: dict
     layout: dict | None = None
     required_groups: tuple = ()
-    textual: frozenset = frozenset()
+    textual: dict = field(default_factory=dict)
 
 
-def _textual(parameters: dict, layout: dict | None) -> frozenset:
-    """Flat members sent as URL/header text whose declared type is exactly string."""
+def _textual(parameters: dict, layout: dict | None) -> dict:
+    """Flat members whose declared type is exactly string: {name: 'url' | 'body'}."""
     if layout is None:
-        return frozenset()
-    return frozenset(name for name, group in layout.items() if group in ('path', 'query', 'headers')
-                     and parameters['properties'].get(name, {}).get('type') == 'string')
+        return {}
+    return {name: 'url' if group in ('path', 'query', 'headers') else 'body' for name, group in layout.items()
+            if parameters['properties'].get(name, {}).get('type') == 'string'}
 
 
-def _as_text(arguments: dict, textual: frozenset) -> dict:
-    """HTTP path/query/header values are text on the wire: send JSON numbers/booleans as their text form."""
-    return {name: (json.dumps(value) if name in textual and type(value) in (int, float, bool) else value)
-            for name, value in arguments.items()}
+def _as_text(arguments: dict, textual: dict) -> dict:
+    """A number where a string is declared means its digits (an ID like 20431).
+
+    URL/header values are text on the wire, so numbers and booleans are sent as their text form;
+    a JSON body string member takes an integer's text form only (lossless)."""
+    def text_form(name, value):
+        where = textual.get(name)
+        if where == 'url' and type(value) in (int, float, bool):
+            return json.dumps(value)
+        if where == 'body' and type(value) is int:
+            return str(value)
+        return value
+    return {name: text_form(name, value) for name, value in arguments.items()}
 
 
 class ToolSession:
@@ -239,6 +251,8 @@ class ToolSession:
         self._lock = asyncio.Lock()
         self._pages = SearchPages()
         self._stats = {'discover': 0, 'describe': 0, 'invoke': 0, 'reused': 0, 'evicted': 0}
+        self._failed = {}  # (name, arguments) -> times this exact call failed in the session
+        self._used, self._tick = {}, 0  # recency for eviction; the tool list order never changes
 
     @classmethod
     async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none'):
@@ -372,12 +386,16 @@ class ToolSession:
                 self._stats['reused'] += 1
             else:
                 bound = await self._bind(item, name)
+            # Functions keep their place in the list (a stable prompt prefix for server caches);
+            # recency only decides which function leaves when the budget is exceeded.
             retained = OrderedDict(self._active)
-            retained.pop(name, None)
-            retained[name] = bound
+            retained.setdefault(name, bound)
+            self._tick += 1
+            self._used[name] = self._tick
             removed = []
             while tool_bytes([SEARCH_TOOL, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
-                victim = next((key for key in retained if key != name and key not in protected), None)
+                candidates = [key for key in retained if key != name and key not in protected]
+                victim = min(candidates, key=lambda key: self._used.get(key, 0)) if candidates else None
                 if victim is None:
                     break
                 retained.pop(victim)
@@ -458,8 +476,23 @@ class ToolSession:
 
         request_id (for example the model's tool-call id) names one intended call; a host that
         delivers the same call twice passes the same id, which the backend can deduplicate when the
-        deployment sets idempotency_header.
+        deployment sets idempotency_header. A failed call whose exact name and arguments already
+        failed in this session carries `repeated` (earlier failures), shown to the model as a hint.
         """
+        result = await self._call(name, arguments, request_id)
+        if name != SEARCH_NAME and 'error' in result:
+            try:
+                key = (name, json.dumps(arguments, sort_keys=True, allow_nan=False))
+            except (TypeError, ValueError, RecursionError):
+                key = None
+            if key is not None:
+                earlier = self._failed.get(key, 0)
+                self._failed[key] = earlier + 1
+                if earlier:
+                    result = {**result, 'repeated': earlier}
+        return result
+
+    async def _call(self, name, arguments, request_id):
         async with self._lock:
             try:
                 try:
@@ -484,7 +517,8 @@ class ToolSession:
                         if not Draft202012Validator(bound.descriptor['inputSchema']).is_valid(arguments):
                             raise
                     validate_value(bound.descriptor['inputSchema'], arguments, code='INVALID_INPUT', status=400)
-                self._active.move_to_end(name)
+                self._tick += 1
+                self._used[name] = self._tick
                 result = await self._request('invoke', {'id': bound.descriptor['id'],
                     'version': bound.descriptor['version'], 'catalogVersion': self._catalog, 'input': arguments,
                     **({'requestId': request_id} if request_id is not None else {})})

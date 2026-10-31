@@ -171,6 +171,23 @@ class CatalogTests(unittest.TestCase):
         self.assertNotIn('note', first_text)
         self.assertIn('No new functions', again_text)
 
+    def test_numbers_for_string_ids_and_repeated_failures(self):
+        app, _ = self.app()
+
+        async def run():
+            session = ToolSession(app, CALLER)
+            await session.auto('refund')
+            coerced = await session.call('legacy_refund', {'clmNo': 20431})
+            first = await session.call('legacy_search_claims', {'pageSize': 0})
+            again = await session.call('legacy_search_claims', {'pageSize': 0})
+            return coerced, first, again, session.render(again)
+        coerced, first, again, text = asyncio.run(run())
+        self.assertEqual(coerced['status'], 'succeeded')
+        self.assertEqual(Handler.seen[-1][1], {'input': {'clmNo': '20431'}})
+        self.assertNotIn('repeated', first)
+        self.assertEqual(again['repeated'], 1)
+        self.assertIn('already failed 1 time', text)
+
     def test_backend_error_messages_only_through_host_extraction(self):
         hidden, _ = self.app()
         error = hidden.invoke('legacy.refund', {'body': {'clmNo': 'missing'}}, context=CALLER)['error']

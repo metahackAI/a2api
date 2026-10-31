@@ -45,7 +45,9 @@ class RealCatalogTests(unittest.IsolatedAsyncioTestCase):
             left, right = await baseline.select(query), await selected.select(query)
             # The frozen baseline predates `added` (newly callable names); selection must otherwise match.
             self.assertEqual(left, {key: value for key, value in right.items() if key != 'added'})
-            self.assertEqual(baseline.tools(), selected.tools())
+            # Same functions and schemas; the order may differ (ToolSession keeps a stable list order).
+            by_name = lambda tools: sorted(tools, key=lambda tool: tool['function']['name'])
+            self.assertEqual(by_name(baseline.tools()), by_name(selected.tools()))
         await baseline.call(left['selected'][0]['name'], {'unexpected': True})
         self.assertEqual(baseline.stats['invoke'], 0)
 
