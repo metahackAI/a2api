@@ -1,5 +1,7 @@
 """Detailed per-mode performance metrics from evaluation runs (a-commerce, RealWorld, benchmark JSONL).
 
+python examples/run_metrics.py runs.jsonl [more.jsonl] [--by mode,scale] [--json out.json]
+
 A run record has: steps [{seconds, usage{prompt_tokens, completion_tokens, total_tokens}, toolBytes}],
 toolCalls [{name, seconds, resultBytes}], usage totals, seconds, optional hostError and a pass flag
 (`done` or `passed`). Business calls are `tools` [(name, ok)] (a-commerce) or `calls` [{ok}] (others).
@@ -34,7 +36,11 @@ def stats(values, digits=1):
 
 
 def passed(run):
-    return bool(run.get('done', run.get('passed')))
+    if 'done' in run:
+        return bool(run['done'])
+    if 'passed' in run:
+        return bool(run['passed'])
+    return bool((run.get('assessment') or {}).get('passed'))
 
 
 def business(run):
@@ -87,9 +93,10 @@ def mode_metrics(runs):
     }
 
 
-def by_mode(runs):
-    modes = list(dict.fromkeys(run['mode'] for run in runs))
-    return {mode: mode_metrics([run for run in runs if run['mode'] == mode]) for mode in modes}
+def by_mode(runs, keys=('mode',)):
+    groups = list(dict.fromkeys(' / '.join(str(run.get(key)) for key in keys) for run in runs))
+    return {group: mode_metrics([run for run in runs if ' / '.join(str(run.get(key)) for key in keys) == group])
+            for group in groups}
 
 
 def markdown(metrics):
@@ -121,3 +128,24 @@ def markdown(metrics):
 def dump(path, metrics, **extra):
     with open(path, 'w') as sink:
         json.dump({**extra, 'metrics': metrics}, sink, ensure_ascii=False, indent=1)
+
+
+def main():
+    import argparse
+    from pathlib import Path
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('runs', nargs='+')
+    parser.add_argument('--by', default='mode')
+    parser.add_argument('--json', type=Path)
+    options = parser.parse_args()
+    runs = [json.loads(line) for path in options.runs for line in Path(path).read_text().splitlines()]
+    runs = sorted((run for run in runs if run.get('type') == 'run'),
+                  key=lambda run: tuple(str(run.get(key)) for key in options.by.split(',')))
+    metrics = by_mode(runs, tuple(options.by.split(',')))
+    print(markdown(metrics))
+    if options.json:
+        dump(options.json, metrics, runs=options.runs, groupedBy=options.by)
+
+
+if __name__ == '__main__':
+    main()
