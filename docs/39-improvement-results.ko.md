@@ -168,7 +168,36 @@ held_out 작업은 이 실행 전까지 열어 보지 않았다. 코드는 commi
 | mgr-weekly-summary | E E | E E | ✗ ✗ | ✗ ✗ |
 | mgr-how-is-business | E E | E E | ✗ ✗ | ✗ ✗ |
 
+**a-commerce 자체 에이전트(L1·L2) held_out**: 다시 실행한 평가도 provider 502로 64실행 중 62번째에서 자체 평가기가 멈춰 보고서가 없다(로그 `acom-own-heldout-2.log`, 원인은 a-commerce 에이전트 로그의 `502 Bad Gateway`, 2026-10-31T19:19Z). 실행 행에서 집계했고, 장애로 0.1초에 끝난 2건을 뺐으며 facade의 마지막 작업(mgr-how-is-business) 2회는 실행되지 않았다. 실행 행에는 토큰이 없다. [evidence](evidence/acommerce-own-heldout.json)
+
+| 방식 | 통과 | 작업 시간 중앙값 (평균, p90) | 모델 호출/작업 | 도구 호출/작업 |
+|---|---|---|---|---|
+| L2 자체+A-Commerce | **7/32 (22%)** | 11.1 (12.0, 18.1) | 3.56 | 2.00 |
+| L1 자체+facade | 6/28 (21%) | 10.9 (11.9, 19.0) | 3.79 | 1.57 |
+
+| 작업 | L2 | L1 |
+|---|---|---|
+| mk-pause-knit-until-monday | ✗ ✗ | ✗ ✗ |
+| mk-category-promotion | ✗ ✗ | ✗ ✗ |
+| mk-winback | ✗ ✗ | ✓ ✓ |
+| mk-viewed-not-purchased | ✓ ✓ | ✓ ✓ |
+| md-broken-sizes-outerwear | ✗ ✗ | ✗ ✗ |
+| md-how-many-left | ✓ ✓ | ✗ ✗ |
+| md-below-cost | ✗ ✗ | ✗ ✗ |
+| md-best-sellers-this-month | ✗ ✗ | ✗ ✗ |
+| md-out-of-stock-30-days | ✓ ✓ | ✓ ✓ |
+| ops-unfulfilled-3-days | ✗ ✗ | ✗ ✗ |
+| ops-photo-request | ✗ ✗ | ✗ ✗ |
+| ops-cancel-delivered | ✗ ✗ | ✗ ✗ |
+| ops-change-address-in-transit | ✓ ✗ | ✗ ✗ |
+| mgr-undo-banner | ✗ ✗ | ✗ ✗ |
+| mgr-weekly-summary | ✗ ✗ | 장애 2 |
+| mgr-how-is-business | ✗ ✗ | 실행 안 됨 |
+
+자체 평가기는 쓰기 작업 앞에서만 상점을 초기화하고(`run_eval.rs`, `reset && kind != "read"`) facade의 쓰기는 즉시 반영되므로, L1의 읽기 작업은 앞선 facade 쓰기의 영향을 받을 수 있다(우리 하네스는 매 실행 초기화).
+
 **판정**:
+- **a-commerce 자체 에이전트 대 우리 하네스**: L2(7/32)가 A1(3/32)보다, L1(6/28)이 A2(5/32)·L3(4/32)보다 많이 풀었고 시간(중앙값 11초 대 47–72초)과 모델 호출(3.6–3.8회 대 7.7–8.8회)도 적었다. 이 차이는 도구 표현만이 아니라 전용 에이전트(계획기, 관계 기반 후보, UI block 채점, 60초 한도에서 짧은 답)와 범용 하네스의 차이다. 도구 표현만 바꾼 비교는 아래 두 항목이다.
 - **레거시 화면 facade**: a2api(A2)가 원본 전달(L3)보다 많이 풀었고(5/32 대 4/32), 작업당 토큰 중앙값 −53%(30.9k 대 66.0k), 첫 요청 prompt −62%(1,782 대 4,650), 작업 시간 중앙값 −31%(47.4초 대 68.9초), 실패한 업무 호출 5% 대 70%였다. 통과 수 차이(1건)는 2회 반복의 편차 안이다. 비용·호출 실패의 차이는 크다.
 - **A-Commerce 253개 도구**: 원본 전달(L4)은 32회 모두 문맥을 넘어 시작하지 못했고 a2api(A1)는 실행해 3/32를 풀었다. 그러나 A1은 작업당 검색 7.97회로 design(2.3회)보다 훨씬 많이 검색하다 모델 호출 한도에 걸렸다.
 

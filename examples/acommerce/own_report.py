@@ -2,6 +2,11 @@
 statistics as run_metrics: done, tokens, seconds, model and tool calls per task.
 
 python examples/acommerce/own_report.py artifacts/acommerce/runs/acom-own-design-2.md [--json out.json]
+
+When the evaluator stops before writing its report (it does after two runs in a row get no model
+answer), pass its log instead: the per-run lines give done, tool and model calls and seconds (no
+tokens). Runs that ended in under half a second without a tool call are the provider outage that
+stopped it and are left out, listed under `outage`.
 """
 
 from __future__ import annotations
@@ -29,15 +34,33 @@ def rows(path):
     return found
 
 
+LINE = re.compile(r'^(\S+) \[(\w+)\] run (\d+): (done|not done) — (\d+) tool call\(s\), (\d+) model call\(s\), ([\d.]+)s(?: — missing (.*))?$')
+
+
+def log_rows(path):
+    found, outage = [], []
+    for line in Path(path).read_text().splitlines():
+        match = LINE.match(line.strip())
+        if not match:
+            continue
+        task, tool_set, repetition, done, tools, model_calls, seconds, missing = match.groups()
+        row = {'task': task, 'mode': tool_set, 'repetition': int(repetition), 'done': done == 'done',
+               'toolCalls': int(tools), 'failedToolCalls': None, 'modelCalls': int(model_calls), 'tokens': None,
+               'seconds': float(seconds), 'missing': missing or ''}
+        (outage if row['seconds'] < 0.5 and row['toolCalls'] == 0 else found).append(row)
+    return found, outage
+
+
 def summarize(runs):
     out = {}
     for mode in dict.fromkeys(run['mode'] for run in runs):
         group = [run for run in runs if run['mode'] == mode]
         calls = sum(run['toolCalls'] for run in group)
+        failed = [run['failedToolCalls'] for run in group if run['failedToolCalls'] is not None]
         out[mode] = {'runs': len(group), 'passed': sum(run['done'] for run in group),
                      'tokensPerRun': stats([run['tokens'] for run in group], 0), 'secondsPerRun': stats([run['seconds'] for run in group]),
                      'modelCallsPerRun': stats([run['modelCalls'] for run in group], 2), 'toolCallsPerRun': stats([run['toolCalls'] for run in group], 2),
-                     'failedToolCalls': f"{sum(run['failedToolCalls'] for run in group)}/{calls}"}
+                     'failedToolCalls': f"{sum(failed)}/{calls}" if failed else '—'}
     return out
 
 
@@ -46,16 +69,24 @@ def main():
     parser.add_argument('report')
     parser.add_argument('--json', type=Path)
     options = parser.parse_args()
-    runs = rows(options.report)
+    outage = []
+    if options.report.endswith('.log'):
+        runs, outage = log_rows(options.report)
+    else:
+        runs = rows(options.report)
     summary = summarize(runs)
     print('| tool set | passed | tokens/run median (mean, p90) | seconds/run median (mean, p90) | model calls/run | tool calls/run | failed tool calls |')
     print('|---|---|---|---|---|---|---|')
     for mode, m in summary.items():
         t, s = m['tokensPerRun'], m['secondsPerRun']
-        print(f"| {mode} | {m['passed']}/{m['runs']} | {t['median']} ({t['mean']}, {t['p90']}) | {s['median']} ({s['mean']}, {s['p90']}) | "
+        tokens = f"{t['median']} ({t['mean']}, {t['p90']})" if t.get('n') else '—'
+        print(f"| {mode} | {m['passed']}/{m['runs']} | {tokens} | {s['median']} ({s['mean']}, {s['p90']}) | "
               f"{m['modelCallsPerRun']['mean']} | {m['toolCallsPerRun']['mean']} | {m['failedToolCalls']} |")
+    if outage:
+        print('outage (left out):', ', '.join(f"{r['task']} [{r['mode']}] run {r['repetition']}" for r in outage))
     if options.json:
-        options.json.write_text(json.dumps({'report': options.report, 'metrics': summary, 'runs': runs}, ensure_ascii=False, indent=1))
+        options.json.write_text(json.dumps({'report': options.report, 'metrics': summary, 'runs': runs, 'outage': outage},
+                                           ensure_ascii=False, indent=1))
 
 
 if __name__ == '__main__':
