@@ -184,6 +184,55 @@ class SourceImporterTests(unittest.TestCase):
         self.assertEqual(create.diagnostics[0]['code'], 'CONTEXT_EXTRACTOR')
         self.assertEqual(thaw(remove.operation.output_schema)['properties']['result'], {'type': 'null'})
 
+    def test_gin_groups_across_functions_validators_and_prefilled_update_forms(self):
+        source = self.source(GoSourceImporter, '''package main
+import "github.com/gin-gonic/gin"
+type Form struct {
+    Item struct {
+        Title string `json:"title" binding:"required,min=4"`
+        Note  string `json:"note"`
+    } `json:"item"`
+}
+type ItemResponse struct { Title string `json:"title"`; Count uint `json:"count"` }
+type Serializer struct { c *gin.Context }
+func (s *Serializer) Response() ItemResponse { return ItemResponse{} }
+func NewForm() Form { return Form{} }
+func FormFrom(title string) Form { form := NewForm(); form.Item.Title = title; return form }
+func (f *Form) Bind(c *gin.Context) error { return bind(c, f) }
+func bind(c *gin.Context, obj interface{}) error { return c.ShouldBindWith(obj, nil) }
+func Create(c *gin.Context) {
+    form := NewForm()
+    if err := form.Bind(c); err != nil { c.JSON(http.StatusUnprocessableEntity, err); return }
+    s := Serializer{c}
+    c.JSON(http.StatusCreated, gin.H{"item": s.Response()})
+}
+func Update(c *gin.Context) {
+    slug := c.Param("slug")
+    form := FormFrom(slug)
+    if err := form.Bind(c); err != nil { return }
+    c.JSON(http.StatusOK, gin.H{"item": "updated"})
+}
+func List(c *gin.Context) { tag := c.Query("tag"); c.JSON(http.StatusOK, gin.H{"tag": tag}) }
+func Register(router *gin.RouterGroup) {
+    router.POST("", Create)
+    router.POST("/", Create)
+    router.PUT("/:slug", Update)
+    router.GET("", List)
+}
+func main() { r := gin.Default(); v1 := r.Group("/api"); Register(v1.Group("/items")) }''', 'go')
+        ops = {r.operation_id: r for r in source.iter_operations()}
+        self.assertEqual({(r.method, r.path) for r in ops.values()},
+                         {('POST', '/api/items'), ('PUT', '/api/items/{slug}'), ('GET', '/api/items')})
+        create = thaw(ops['Create'].operation.input_schema)['properties']['body']['properties']['item']
+        self.assertEqual(create['required'], ['title'])
+        self.assertEqual(create['properties']['title']['minLength'], 4)
+        update = thaw(ops['Update'].operation.input_schema)['properties']['body']['properties']['item']
+        self.assertEqual(update['required'], [])
+        output = thaw(ops['Create'].operation.output_schema)
+        self.assertEqual(output['properties']['httpStatus']['enum'], [201])
+        self.assertEqual(set(output['properties']['result']['properties']['item']['properties']), {'title', 'count'})
+        self.assertIn('tag', thaw(ops['List'].operation.input_schema)['properties']['query']['properties'])
+
     def test_untyped_output_is_rejected_unless_the_host_opts_in(self):
         code = '@RestController class Api { @GetMapping("/x") public ResponseEntity get(){ return ResponseEntity.ok(service.load()); } }'
         strict = next(self.source(SpringSourceImporter, code, 'java').iter_operations())

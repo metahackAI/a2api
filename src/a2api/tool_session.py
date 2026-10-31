@@ -164,6 +164,9 @@ def render_result(payload: dict) -> str:
             view['httpStatus'] = payload['httpStatus']
         if payload.get('completeness') not in (None, _DEFAULT_COMPLETENESS):
             view['completeness'] = payload['completeness']
+        if payload.get('repeated'):
+            view['note'] = (f"Same call and result as {payload['repeated']} earlier time(s); you already have this data. "
+                            'Use it, or answer the user.')
     else:
         problem = payload.get('error', {})
         error = {'code': problem.get('code'), 'detail': problem.get('detail')}
@@ -252,6 +255,7 @@ class ToolSession:
         self._pages = SearchPages()
         self._stats = {'discover': 0, 'describe': 0, 'invoke': 0, 'reused': 0, 'evicted': 0}
         self._failed = {}  # (name, arguments) -> times this exact call failed in the session
+        self._reads = {}  # (name, arguments) -> times this exact read succeeded since the last write
         self._used, self._tick = {}, 0  # recency for eviction; the tool list order never changes
 
     @classmethod
@@ -480,16 +484,25 @@ class ToolSession:
         failed in this session carries `repeated` (earlier failures), shown to the model as a hint.
         """
         result = await self._call(name, arguments, request_id)
-        if name != SEARCH_NAME and 'error' in result:
-            try:
-                key = (name, json.dumps(arguments, sort_keys=True, allow_nan=False))
-            except (TypeError, ValueError, RecursionError):
-                key = None
-            if key is not None:
-                earlier = self._failed.get(key, 0)
-                self._failed[key] = earlier + 1
-                if earlier:
-                    result = {**result, 'repeated': earlier}
+        if name == SEARCH_NAME:
+            return result
+        try:
+            key = (name, json.dumps(arguments, sort_keys=True, allow_nan=False))
+        except (TypeError, ValueError, RecursionError):
+            return result
+        bound = self._active.get(name)
+        if 'error' in result:
+            earlier = self._failed.get(key, 0)
+            self._failed[key] = earlier + 1
+            if earlier:
+                result = {**result, 'repeated': earlier}
+        elif bound is not None and bound.descriptor['effects']['kind'] == 'read':
+            earlier = self._reads.get(key, 0)
+            self._reads[key] = earlier + 1
+            if earlier:
+                result = {**result, 'repeated': earlier}
+        else:
+            self._reads.clear()  # after a change, reading again is new information
         return result
 
     async def _call(self, name, arguments, request_id):

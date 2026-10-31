@@ -188,6 +188,18 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(again['repeated'], 1)
         self.assertIn('already failed 1 time', text)
 
+        async def reads():
+            session = ToolSession(app, CALLER)
+            await session.auto('claims')
+            one = await session.call('legacy_search_claims', {'pageSize': 2})
+            two = await session.call('legacy_search_claims', {'pageSize': 2})
+            await session.call('legacy_refund', {'clmNo': 'clm_1'})
+            three = await session.call('legacy_search_claims', {'pageSize': 2})
+            return one, two, three, session.render(two)
+        one, two, three, note = asyncio.run(reads())
+        self.assertEqual((one.get('repeated'), two.get('repeated'), three.get('repeated')), (None, 1, None))
+        self.assertIn('already have this data', note)
+
     def test_backend_error_messages_only_through_host_extraction(self):
         hidden, _ = self.app()
         error = hidden.invoke('legacy.refund', {'body': {'clmNo': 'missing'}}, context=CALLER)['error']

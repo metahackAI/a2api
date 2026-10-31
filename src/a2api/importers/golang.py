@@ -141,7 +141,8 @@ class GoSourceImporter(SourceImporter):
                     rule_name, _, argument = rule.partition('=')
                     plain = item['anyOf'][0] if 'anyOf' in item else item
                     if rule_name == 'required':
-                        required.append(key)
+                        if binding != 'prefilled':
+                            required.append(key)
                     elif rule_name in ('min', 'max') and argument.isdigit():
                         suffix = {'string': 'Length', 'array': 'Items'}.get(plain.get('type'))
                         if suffix:

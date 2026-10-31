@@ -20,6 +20,9 @@ JSON_WRITERS = ('JSON', 'IndentedJSON', 'PureJSON', 'SecureJSON', 'AsciiJSON')
 BODY_BINDERS = ('ShouldBindJSON', 'BindJSON', 'ShouldBind', 'Bind', 'ShouldBindWith', 'BindWith', 'ShouldBindBodyWith',
                 'MustBindWith')
 QUERY_BINDERS = ('ShouldBindQuery', 'BindQuery')
+CONTEXT_RESULTS = {'Query': ['string'], 'DefaultQuery': ['string'], 'Param': ['string'], 'GetHeader': ['string'],
+                   'PostForm': ['string'], 'GetQuery': ['string', 'bool'], 'QueryArray': ['[]string'],
+                   'GetQueryArray': ['[]string', 'bool'], 'FullPath': ['string'], 'ClientIP': ['string']}
 STATUS = {'StatusOK': 200, 'StatusCreated': 201, 'StatusAccepted': 202, 'StatusNoContent': 204,
           'StatusResetContent': 205, 'StatusPartialContent': 206}
 
@@ -208,13 +211,30 @@ class GinReader:
                         kind = self.type_of(value, types, path)
                         if kind:
                             types[text(target)] = kind
+                        if value.type == 'call_expression':
+                            self._inits[text(target)] = (value, path)
         return types
+
+    def _prefilled(self, name):
+        """A value built by a constructor that sets its fields before binding (an update form filled from
+        the stored record): binding:"required" is met by those values, so the caller may leave fields out."""
+        call, path = self._inits.get(name, (None, None))
+        if call is None:
+            return False
+        _, function = self.function(text(named(call, 'function')), path)
+        if function is None or named(function, 'body') is None:
+            return False
+        return any(node.type == 'assignment_statement' and named(node, 'left') is not None
+                   and any(item.type == 'selector_expression' for item in named(node, 'left').named_children)
+                   for node in walk(named(function, 'body')))
 
     def _call_results(self, call, types, path):
         function = named(call, 'function')
         if function.type == 'selector_expression':
             operand = named(function, 'operand')
             owner = types.get(text(operand)) if operand.type == 'identifier' else None
+            if owner == '*gin.Context':
+                return CONTEXT_RESULTS.get(text(named(function, 'field')))
             if owner:
                 found = self.methods.get((owner.lstrip('*').split('.')[-1], text(named(function, 'field'))), [])
                 return _results(found[0][1]) if len(found) == 1 else None
@@ -242,7 +262,7 @@ class GinReader:
     def _binds_receiver(self, method):
         receiver = text(named(named(method, 'receiver').named_children[0], 'name'))
         for call in walk(named(method, 'body')):
-            if call.type != 'call_expression' or 'Bind' not in text(named(call, 'function')).split('.')[-1]:
+            if call.type != 'call_expression' or 'bind' not in text(named(call, 'function')).split('.')[-1].lower():
                 continue
             if any(text(arg).lstrip('&') == receiver for arg in named(call, 'arguments').named_children):
                 return True
@@ -254,6 +274,7 @@ class GinReader:
         if len(params) != 1 or params[0][1] != '*gin.Context':
             raise Unsupported('Gin handlers need one *gin.Context parameter.')
         context = params[0][0]
+        self._inits = {}
         types = self._types(function, path)
         placeholders = re.findall(r'\{([^{}]+)\}', route)
         groups, required, paths, queries, has_body = {}, [], {}, {}, False
@@ -296,7 +317,8 @@ class GinReader:
                     else:
                         if has_body:
                             raise Unsupported('Only one bound request body is supported.')
-                        groups['body'] = im.schema(target, binding=True);has_body = True
+                        prefilled = args[0].type == 'unary_expression' and self._prefilled(text(args[0]).lstrip('&'))
+                        groups['body'] = im.schema(target, binding='prefilled' if prefilled else True);has_body = True
                 elif name in JSON_WRITERS and len(args) == 2:
                     raw = text(args[0]).split('.')[-1]
                     status = int(raw) if raw.isdigit() else STATUS.get(raw)
@@ -320,7 +342,8 @@ class GinReader:
                 if len(found) == 1 and self._binds_receiver(found[0][1]):
                     if has_body:
                         raise Unsupported('Only one bound request body is supported.')
-                    groups['body'] = im.schema(owner, binding=True);has_body = True
+                    prefilled = self._prefilled(text(operand))
+                    groups['body'] = im.schema(owner, binding='prefilled' if prefilled else True);has_body = True
         if any(text(node) in (context + '.Request.Body', context + '.Request.Form') for node in walk(named(function, 'body'))) and not has_body:
             raise Unsupported('Request body use needs a typed Gin binding.')
         if has_body:
