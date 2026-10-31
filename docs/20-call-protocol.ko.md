@@ -2,6 +2,8 @@
 
 > **1.0 확정(2026-10-31, [33 문서](33-completion-plan.ko.md))**: 요청·응답 wire는 0.1과 같다. 바뀐 점은 `INVALID_INPUT` issues의 선택적 교정 정보(`missing`·`unexpected`·`allowed`·`expected`)와, HTTP binding의 backend 400/503을 각각 `UPSTREAM_VALIDATION_FAILED`(422)/`UPSTREAM_UNAVAILABLE`(503)로 구분한 오류 코드다. 0.1 클라이언트는 그대로 동작한다. 아래 본문에서 `0.1`로 표기한 곳은 같은 wire를 가리킨다.
 
+> **1.1 (2026-11-01)**: wire는 그대로다. `requestId`는 여전히 추적 값이며, 호스트가 `HTTPDeployment(idempotency_header='Idempotency-Key')`를 설정한 HTTP binding에서만 **쓰기 operation에** 그 헤더로 원 서버에 전달된다(아래 requestId 문단). 라이브러리의 `ConvertedAPI.invoke`·`Application.invoke`가 `request_id=`를 받는다. 원 서버 오류 문장은 호스트의 `error_detail` 함수가 고른 부분만 `detail`에 붙는다.
+
 2026-10-30 기준 구현 명세다. [제품 방향](00-product-direction.ko.md)을 따르며 전체 IR·검토/배포 초안인 [02 문서](02-protocol-draft.ko.md)와 구분한다. 지원 범위의 API를 선택해 메모리에서 연결하고 세 메서드로 호출한다. 새로운 사용자 산출물·registry·승인 단계는 요구하지 않는다.
 
 ## 범위와 기준 스키마
@@ -105,7 +107,7 @@ dispatch/카탈로그 선택 등에서 발생한 사전 오류는 `{"error":{...
 
 오류 코드는 확장 가능한 문자열이다. 위 표가 전체 오류 목록은 아니다. 알려지지 않은 코드를 성공으로 처리하거나 재시도 가능하다고 가정하지 않는다. 현재 프로필의 실행 status는 succeeded/failed이며, OUTCOME_UNKNOWN은 failed envelope의 오류 코드로 전달한다. accepted/running/partial/requires_approval 등 과거 초안의 상태나 실행 조회/취소는 구현된 경량 프로필에 포함하지 않는다.
 
-requestId는 추적/상관관계 값이다. 서버가 이를 돌려주더라도 중복 제거·idempotency key·exactly-once 보장은 아니다. 현재 직접 호출은 backend를 자동 재시도하지 않는다. failed는 호출/검증 실패이며 효과가 전혀 없었다는 증명이 아니다.
+requestId는 추적/상관관계 값이다. 서버가 이를 돌려주더라도 중복 제거·idempotency key·exactly-once 보장은 아니다. (1.1) 호스트가 idempotency 헤더를 설정하면 쓰기 호출에 그 값을 원 서버로 보내므로, 원 서버가 같은 키의 중복을 거르는 경우에만 중복 전달이 걸러진다. 현재 직접 호출은 backend를 자동 재시도하지 않는다. failed는 호출/검증 실패이며 효과가 전혀 없었다는 증명이 아니다.
 
 ## 호스트와 binding의 책임
 

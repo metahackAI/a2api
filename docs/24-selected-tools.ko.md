@@ -1,5 +1,12 @@
 # a2api-tools/1.0: 필요한 호출 계약만 모델에 제공하기
 
+> **1.1 호스트 동작(2026-11-01, [38](38-improvement-execution-plan.ko.md)·[39](39-improvement-results.ko.md) 문서)**: wire와 MCP 세 도구, 도구 이름·평탄화 규칙은 그대로다.
+> - **함수 목록 순서 고정**: 호출·재검색 뒤에도 이미 제공한 함수의 위치를 바꾸지 않는다(같은 작업의 다음 요청이 같은 prompt prefix를 쓰도록). 예산 초과 시 제거 대상은 최근 사용 순서로 고른다.
+> - **검색 결과의 `added`**: 이번 검색으로 새로 호출 가능해진 함수 이름. 일치한 함수가 모두 이미 제공된 것이면 모델용 결과에 "새 함수 없음 — 다시 검색하지 말고 부족한 것을 말하라"는 `note`가 붙는다.
+> - **반복 안내**: 같은 이름·인자로 이미 실패한 호출은 `repeated`(이전 실패 수)와 hint가, 마지막 쓰기 이후 같은 인자로 이미 성공한 조회는 `repeated`와 "이미 받은 데이터" note가 붙는다. 실행은 막지 않는다.
+> - **정수 ID**: 평탄화한 body의 string 필드에 정수가 오면 그 숫자 문자열로 바꾼다(path/query/header는 기존처럼 숫자·불리언을 텍스트로).
+> - `call(name, args, request_id=...)`: 모델의 tool call ID 등을 넘기면 `idempotency_header`를 설정한 쓰기 binding에서 원 서버로 전달한다.
+
 `auto()`의 전체 제공 기준은 `all_bytes=10000`(약 20개 함수)이다. dev에서 19개 함수 카탈로그는 전체 제공이 사전 선택보다 빨랐고(중앙값 7.9초 대 9.3초, spec-tools 9.3초) 토큰은 spec-tools보다 17% 적었다. 55개 카탈로그는 전체 제공이 빠르지 않아(10.5초 대 사전 선택 9.4초) 사전 선택을 유지한다([34 문서](34-completion-results.ko.md) 5절).
 
 `TOOL_PROFILE`은 `a2api-tools/1.0`이며 아래 0.4 변경을 확정한 것이다. 이후 추가: `auto(question, preselect=8)`은 호스트 사전 검색에서 모델 검색(`search_limit`, 기본 3)보다 넓은 후보를 준비하고, 평탄화한 path/query/header의 문자열 인자에 들어온 JSON 숫자·불리언은 텍스트로 바꿔 전달한다(body는 그대로). 함수 설명 기본값(`hints="none"`)은 요약과 쓰기 함수의 `[write]` 표시뿐이다. holdout 판정 이후 4개 언어 dev 360 run에서 반환 이름 목록(`hints="shape"`, `Returns {items:[{id,status}],total}`)보다 정확도는 같고(120/120) 작업당 토큰이 8.5% 적어 기본값으로 정했다([34 문서](34-completion-results.ko.md) 5절). `shape`는 선택으로 남기고, `hints="typed"`가 0.3 형식과 원래 입력 schema를 유지한다. 검색 index는 `field-search/2`(비ASCII 단어 뒤 짧은 조사·어미 허용)다.
