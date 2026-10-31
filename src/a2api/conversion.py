@@ -201,7 +201,10 @@ class Vocabulary:
                         child = self._worded(child, self.codes[name])
                     if key == 'properties' and name in self.describe and isinstance(child, dict):
                         child = {**child, 'description': self.describe[name]}
-                    mapped[self.rename.get(name, name) if key == 'properties' else name] = child
+                    public = self.rename.get(name, name) if key == 'properties' else name
+                    if public in mapped:
+                        raise A2APIError('INVALID_CONVERSION', f'Vocabulary names two fields "{public}" in one object.')
+                    mapped[public] = child
                 out[key] = mapped
             elif key in ('required', 'dependentRequired') and isinstance(value, list):
                 out[key] = [self.rename.get(name, name) for name in value]

@@ -313,6 +313,8 @@ class HTTPAdapter:
         if route.body_envelope is not None:
             present, value = True, {route.body_envelope: value if present else {}}
         if host_body:
+            if route.method in {"GET", "HEAD"}:
+                raise A2APIError("HOST_VALUE_CONFLICT", "Host body values cannot be sent with GET/HEAD.", status=500)
             if present and not isinstance(value, dict):
                 raise A2APIError("HOST_VALUE_CONFLICT", "Host body values need a JSON object body.", status=500)
             value = dict(value) if present else {}

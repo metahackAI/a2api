@@ -2,16 +2,16 @@
 
 **a2api turns existing APIs and functions into a small call protocol that LLM hosts can search, describe and invoke cheaply — at any API size.**
 
-Convert what you already have — an OpenAPI document, a Java/Spring MVC, Go `net/http` or Rust Axum source tree, or plain Python functions — and call it directly, through three fixed MCP tools, or as selected function tools for a model. No review files, build directories or registry are required for the first call.
+Convert what you already have — an OpenAPI document, a Java/Spring MVC, Go (`net/http`, Gin), Rust Axum or Python FastAPI source tree, a running service's tool catalog, or plain Python functions — and call it directly, through three fixed MCP tools, or as selected function tools for a model. No review files, build directories or registry are required for the first call.
 
 ```bash
 pip install a2api                 # core: convert, invoke, ToolSession
 pip install "a2api[mcp]"          # MCP stdio bridge
 pip install "a2api[openapi]"      # YAML OpenAPI documents
-pip install "a2api[source]"       # Spring / Go / Rust source importers
+pip install "a2api[source]"       # Spring / Go / Rust source importers (FastAPI needs no extra)
 ```
 
-Guides (Korean): [converting legacy APIs](https://github.com/metahackAI/a2api/blob/main/docs/36-legacy-conversion-guide.ko.md) — with OpenAPI and code, or code only (Spring, Go, Rust, Python, other languages) · [call protocol](https://github.com/metahackAI/a2api/blob/main/docs/20-call-protocol.ko.md) · [model host tools](https://github.com/metahackAI/a2api/blob/main/docs/24-selected-tools.ko.md) · [evaluation](https://github.com/metahackAI/a2api/blob/main/docs/34-completion-results.ko.md)
+Guides: [converting existing APIs](https://github.com/metahackAI/a2api/blob/main/docs/en/legacy-conversion-guide.md) — OpenAPI and code, code only (Spring, Go net/http and Gin, Rust Axum, Python FastAPI), Python functions, tool catalogs and legacy vocabularies · [call protocol](https://github.com/metahackAI/a2api/blob/main/docs/en/call-protocol.md) · [model host tools](https://github.com/metahackAI/a2api/blob/main/docs/en/tool-session.md) · Korean development record and evaluations in [`docs/`](https://github.com/metahackAI/a2api/tree/main/docs)
 
 ## Python functions
 
@@ -47,15 +47,28 @@ Type hints and `TypedDict`s become JSON Schemas; inputs and outputs are validate
 from a2api import HTTPDeployment, convert
 from a2api.importers import OpenAPIImporter, SpringSourceImporter
 
-source = OpenAPIImporter.from_file("orders.openapi.json", namespace="shop")
-# or: SpringSourceImporter.from_directory("src/main/java", namespace="shop")  (GoSourceImporter, RustSourceImporter)
+source = OpenAPIImporter.from_file("orders.openapi.json", namespace="shop", methods={"GET", "POST"})
+# or: SpringSourceImporter.from_directory("src/main/java", namespace="shop")
+#     (GoSourceImporter, RustSourceImporter, FastAPISourceImporter; untyped_output="open" for unreadable responses)
 app = convert(source, operations={
     "listOrders": {"effect": "read", "select": ["items[].id", "items[].status", "total", "hasMore"]},
     "cancelOrder": {"effect": "write"},
 }, deployment=HTTPDeployment("https://orders.internal", credential_provider=lambda ctx: {...}, timeout_ms=5000))
 ```
 
-`select` keeps only public fields (nested paths and `[]` array items supported) after the raw response is validated against the original schema. Credentials and origins stay with the host.
+`select` keeps only public fields (nested paths and `[]` array items supported) after the raw response is validated against the original schema. Credentials and origins stay with the host; so do host request values (`request_values`, e.g. a change-set id on writes), the opt-in backend error sentence (`error_detail`) and an idempotency header for writes (`idempotency_header`).
+
+## Running services and legacy vocabularies
+
+```python
+from a2api.importers import ToolCatalogImporter
+
+source = ToolCatalogImporter.from_url("https://legacy.internal/v1/tools", namespace="claims")   # name, summary, input schema
+app = convert(source, operations={"getClmGridList": {"effect": "read"}}, deployment=HTTPDeployment("https://legacy.internal"),
+              vocabulary={"rename": {"clmStatCd": "claim_status"}, "codes": {"clmStatCd": {"R10": "requested"}}})
+```
+
+Abbreviated legacy field names and code values are shown to the model as readable names and words and mapped back on the wire.
 
 ## Model hosts: ToolSession
 

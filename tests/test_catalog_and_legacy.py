@@ -100,6 +100,14 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(Handler.seen[-1], ('/v1/tools/search_claims?set=facade', {'input': {'pageSize': 2}}))
         clash, _ = self.app(request_values=lambda context, call: {'body': {'input': 'x'}})
         self.assertEqual(clash.invoke('legacy.refund', {'body': {'clmNo': 'c'}}, context=CALLER)['error']['code'], 'HOST_VALUE_CONFLICT')
+        from a2api.http_adapter import HTTPAdapter, HTTPRoute
+        from a2api.execution import Budget
+        from a2api.ir import Operation
+        get_route = HTTPRoute(self.origin, '/v1/x', method='GET', request_values=lambda context: {'body': {'x': 1}})
+        operation = Operation('x', 'svc', 'x', {'type': 'object'}, {'type': 'object'}, 'GET')
+        with self.assertRaises(A2APIError) as caught:
+            HTTPAdapter({('svc', 'x'): get_route}).call(operation, {}, CALLER, Budget(1000, 1), 500)
+        self.assertEqual(caught.exception.code, 'HOST_VALUE_CONFLICT')
         broken, _ = self.app(request_values=lambda context, call: 1 / 0)
         self.assertEqual(broken.invoke('legacy.refund', {'body': {'clmNo': 'c'}}, context=CALLER)['error']['code'], 'HOST_VALUES_UNAVAILABLE')
 
@@ -122,6 +130,9 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaises(A2APIError):
             convert(ToolCatalogImporter(CATALOG), operations={'refund': {'effect': 'write'}},
                     deployment=HTTPDeployment(self.origin), vocabulary={'rename': {'a': 'x', 'b': 'x'}})
+        with self.assertRaises(A2APIError):  # the readable name equals another field of the same object
+            convert(ToolCatalogImporter(CATALOG), operations={'refund': {'effect': 'write'}},
+                    deployment=HTTPDeployment(self.origin), vocabulary={'rename': {'clmNo': 'rfndMthdCd'}})
 
     def test_model_view_is_flat_and_readable(self):
         app, _ = self.app(vocabulary=VOCABULARY)
