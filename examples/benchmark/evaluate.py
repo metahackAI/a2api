@@ -158,7 +158,7 @@ async def evaluate(options):
               'gitCommit': git('rev-parse', 'HEAD'), 'gitDirty': bool(git('status', '--porcelain', '--', '../../src', '.')),
               'baseUrl': options.base_url, 'split': options.split, 'taskFingerprint': fingerprint(options.split),
               'tasks': [item['id'] for item in selected], 'scales': options.scales, 'languages': options.languages,
-              'modes': modes, 'repetitions': options.repetitions, 'maxToolBytes': options.max_tool_bytes,
+              'modes': modes, 'repetitions': options.repetitions, 'firstRepetition': options.first_repetition, 'maxToolBytes': options.max_tool_bytes,
               'searchLimit': options.search_limit, 'limits': {'turns': MAX_TURNS, 'taskSeconds': TASK_SECONDS}}
     with output.open('a') as sink:
         def write(record):
@@ -166,7 +166,7 @@ async def evaluate(options):
             sink.flush()
         write(header)
         counter = 0
-        for repetition in range(options.repetitions):
+        for repetition in range(options.first_repetition, options.first_repetition + options.repetitions):
             for scale in options.scales.split(','):
                 spec = json.loads((GENERATED / scale / 'openapi.json').read_text())
                 for language in options.languages.split(','):
@@ -219,6 +219,7 @@ def main():
     parser.add_argument('--languages', default='python,spring,go,rust')
     parser.add_argument('--modes', default='spec-tools,spec-prompt,a2api')
     parser.add_argument('--repetitions', type=int, default=1)
+    parser.add_argument('--first-repetition', type=int, default=0, help='repetition index of the first pass (rotates mode order)')
     parser.add_argument('--max-tool-bytes', type=int, default=32000)
     parser.add_argument('--search-limit', type=int, default=5)
     parser.add_argument('--output', type=Path, required=True)
