@@ -246,10 +246,11 @@ def load_tasks(task_set):
 
 
 def prepare(task, admin_token):
-    if task['kind'] != 'read':
-        status, body = call(COMMERCE, 'POST', '/v1/platform/demo/reset', bearer=admin_token, timeout=120)
-        if status != 200:
-            raise RuntimeError(f'reset: {status} {body}')
+    # Every run starts from the demo store: facade writes apply at once, so a read task must not
+    # see what an earlier run changed.
+    status, body = call(COMMERCE, 'POST', '/v1/platform/demo/reset', bearer=admin_token, timeout=120)
+    if status != 200:
+        raise RuntimeError(f'reset: {status} {body}')
     status, body = call(COMMERCE, 'PUT', '/v1/platform/demo-clock', {'now': CLOCK, 'is_running': False}, bearer=admin_token)
     if status != 200:
         raise RuntimeError(f'clock: {status} {body}')
