@@ -329,7 +329,7 @@ def spring_controller(r: Resource, imports):
                 if item.enum or item.kind == 'boolean':
                     filters.append(f'.filter(row -> {name} == null || row.{name}() == {name})')
                 else:
-                    filters.append(f'.filter(row -> {name} == null || {name}.equals(row.{name}()))')
+                    filters.append(f'.filter(row -> {name} == null || {name}.isEmpty() || {name}.equals(row.{name}()))')
             params += ['@RequestParam(required = false) Integer page', '@RequestParam(required = false) Integer limit']
             body.append(f'''    @GetMapping
     public {cls}Page list({", ".join(params)}) {{
@@ -897,7 +897,7 @@ fn page_of<T: Clone>(rows: &[T], page: u32, limit: u32) -> (Vec<T>, bool) {{
 }}
 
 fn one_of(value: &Option<String>, choices: &[&str]) -> Result<(), StatusCode> {{
-    match value {{ Some(v) if !choices.contains(&v.as_str()) => Err(StatusCode::BAD_REQUEST), _ => Ok(()) }}
+    match value {{ Some(v) if !v.is_empty() && !choices.contains(&v.as_str()) => Err(StatusCode::BAD_REQUEST), _ => Ok(()) }}
 }}
 
 fn nonempty(value: &str) -> Result<(), StatusCode> {{
@@ -1006,7 +1006,7 @@ def rust_resource(r: Resource):
                 if item.kind == 'boolean':
                     conditions.append(f'query.{field}.map_or(true, |value| row.{field} == value)')
                 else:
-                    conditions.append(f'query.{field}.as_ref().map_or(true, |value| &row.{field} == value)')
+                    conditions.append(f'query.{field}.as_ref().filter(|value| !value.is_empty()).map_or(true, |value| &row.{field} == value)')
             out.append(f'''async fn {fn}(State(state): State<Shared>, Query(query): Query<{cls}ListQuery>) -> Result<Json<{cls}Page>, StatusCode> {{
     let (page, limit) = bounds(query.page, query.limit)?;
 {chr(10).join(checks)}

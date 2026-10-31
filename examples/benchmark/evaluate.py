@@ -142,7 +142,11 @@ def executor_for(mode, scale, spec, origin, app, ops, options):
         return SpecTools(scale, spec, origin)
     if mode == 'spec-prompt':
         return SpecPrompt(scale, spec, origin)
-    return A2API(app, ops, max_tool_bytes=options.max_tool_bytes, search_limit=options.search_limit)
+    # 'a2api-plain' is the same host with hints='none' (no result-shape text), for presentation comparisons.
+    hints = 'none' if mode == 'a2api-plain' else options.hints
+    executor = A2API(app, ops, max_tool_bytes=options.max_tool_bytes, search_limit=options.search_limit, hints=hints)
+    executor.mode = mode
+    return executor
 
 
 async def evaluate(options):
@@ -150,6 +154,13 @@ async def evaluate(options):
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.exists():
         raise SystemExit('Choose a new output path; earlier runs are never overwritten.')
+    done = set()
+    for earlier in options.resume_from:
+        # Continue an interrupted pass: runs already recorded (passed or failed) are never repeated.
+        for line in Path(earlier).read_text().splitlines():
+            record = json.loads(line)
+            if record.get('type') == 'run':
+                done.add((record['repetition'], record['scale'], record['language'], record['task'], record['mode']))
     selected = [item for item in tasks(options.split) if not options.tasks or item['id'] in options.tasks.split(',')]
     modes = options.modes.split(',')
     import subprocess
@@ -159,7 +170,8 @@ async def evaluate(options):
               'baseUrl': options.base_url, 'split': options.split, 'taskFingerprint': fingerprint(options.split),
               'tasks': [item['id'] for item in selected], 'scales': options.scales, 'languages': options.languages,
               'modes': modes, 'repetitions': options.repetitions, 'firstRepetition': options.first_repetition, 'maxToolBytes': options.max_tool_bytes,
-              'searchLimit': options.search_limit, 'limits': {'turns': MAX_TURNS, 'taskSeconds': TASK_SECONDS}}
+              'searchLimit': options.search_limit, 'hints': options.hints, 'limits': {'turns': MAX_TURNS, 'taskSeconds': TASK_SECONDS},
+              'resumedFrom': [str(path) for path in options.resume_from]}
     with output.open('a') as sink:
         def write(record):
             sink.write(json.dumps(record, ensure_ascii=False) + '\n')
@@ -183,6 +195,8 @@ async def evaluate(options):
                         for index, item in enumerate(selected):
                             order = modes[(index + repetition) % len(modes):] + modes[:(index + repetition) % len(modes)]
                             for mode in order:
+                                if (repetition, scale, language, item['id'], mode) in done:
+                                    continue
                                 counter += 1
                                 waited = await asyncio.to_thread(wait_for_model, options.base_url, options.model,
                                                                  os.environ.get(options.api_key_env))
@@ -222,7 +236,10 @@ def main():
     parser.add_argument('--first-repetition', type=int, default=0, help='repetition index of the first pass (rotates mode order)')
     parser.add_argument('--max-tool-bytes', type=int, default=32000)
     parser.add_argument('--search-limit', type=int, default=5)
+    parser.add_argument('--hints', choices=['none', 'shape', 'typed'], default=None, help='ToolSession hints (library default if omitted)')
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--resume-from', type=Path, action='append', default=[],
+                        help='earlier JSONL of the same pass; its runs are skipped, never repeated')
     asyncio.run(evaluate(parser.parse_args()))
 
 

@@ -102,6 +102,21 @@ class PresentationTests(unittest.IsolatedAsyncioTestCase):
         # Body members are JSON values, not text: no conversion there.
         self.assertEqual((await session.call('orders_page', {'limit': 3}))['error']['code'], 'INVALID_INPUT')
 
+    async def test_hint_styles_describe_effects_without_extra_shape(self):
+        @capability(id='notes.add', effect='write')
+        def add(text: str) -> dict[str, str]:
+            """Add a note."""
+            return {'id': 'N-1'}
+        plain = ToolSession(Application([add]), CALLER, hints='none')
+        await plain.auto()
+        self.assertEqual(plain.tools()[0]['function']['description'], 'Add a note. [write]')
+        read = ToolSession(self.app, CALLER, hints='none')
+        await read.auto()
+        self.assertNotIn('Returns', json.dumps(read.tools()))
+        self.assertNotIn('[read]', json.dumps(read.tools()))
+        with self.assertRaises(ValueError):
+            ToolSession(self.app, CALLER, hints='verbose')
+
     async def test_hash_naming_and_wire_shape_remain_available(self):
         session = ToolSession(self.app, CALLER, naming='hash', flatten=False)
         await session.prime(['legacy.getorder'])

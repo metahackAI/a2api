@@ -119,7 +119,9 @@ def output_shape(schema, *, max_fields=12):
 
 
 def function_description(descriptor, style='shape'):
-    """0.4 'shape' (compact names) or 0.3 'typed' (names, types and required flags)."""
+    """'none' (summary, [write] marks writes), 'shape' (compact result names) or 0.3 'typed'."""
+    if style == 'none':
+        return descriptor['summary'] + (' [write]' if descriptor['effects']['kind'] == 'write' else '')
     if style == 'typed':
         return (descriptor['summary'] + ' [effect: ' + descriptor['effects']['kind'] + '] '
                 + output_hint(descriptor['outputSchema']))

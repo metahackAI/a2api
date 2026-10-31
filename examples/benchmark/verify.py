@@ -50,6 +50,8 @@ CORE_PROBES = [
     ('PATCH', '/tickets/T-9003', {'assigneeId': 'A-04', 'priority': 'urgent'}),
     ('GET', '/agents?team=' + quote('지원2팀') + '&active=true', None), ('GET', '/agents?active=maybe', None),
     ('GET', '/agents/A-04', None),
+    # Empty query values mean "no filter" in every implementation (found in the holdout run).
+    ('GET', '/tickets?customerId=&status=open&priority=high&limit=2', None), ('GET', '/orders?status=&customerId=C-002', None),
 ]
 DISTRACTOR_PROBES = [
     ('GET', '/purchase-orders?status=approved&limit=20', None), ('POST', '/returns/search', {'query': '반품 요청 1'}),
@@ -99,11 +101,12 @@ def http_equivalence(scale, origins):
 def direct_checks(scale, language, origin):
     app = application(scale, language, origin)
     ids = {d['id'] for d in app.descriptors()}
-    def find(suffixes):
-        return next(i for i in ids if any(i.endswith(s) for s in suffixes))
-    get_order = find(['.orders.get', 'ordercontroller.get', '.getorder', '.get_order'])
-    cancel = find(['.orders.cancel', 'ordercontroller.cancel', '.cancelorder', '.cancel_order'])
-    tracking = find(['.shipments.tracking', 'shipmentcontroller.tracking', '.getshipmenttracking', '.get_shipment_tracking'])
+    def find(names):
+        # Exact IDs: suffix matching would also hit distractors such as purchaseordercontroller.get.
+        return next(i for i in ids if i in {'shop.' + name for name in names})
+    get_order = find(['orders.get', 'ordercontroller.get', 'getorder', 'get_order'])
+    cancel = find(['orders.cancel', 'ordercontroller.cancel', 'cancelorder', 'cancel_order'])
+    tracking = find(['shipments.tracking', 'shipmentcontroller.tracking', 'getshipmenttracking', 'get_shipment_tracking'])
     flat = language == 'python'
     def args(identifier):
         return {'id': identifier} if flat else {'path': {'id': identifier}}

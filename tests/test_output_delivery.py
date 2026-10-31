@@ -55,7 +55,7 @@ class OutputToolTests(unittest.IsolatedAsyncioTestCase):
         @capability(id='repo.get', effect='read', output_schema=schema)
         def get(name: str) -> dict:return {'default_branch': name}
         app = Application([get])
-        host = ToolSession(app, ExecutionContext('alice', 'tenant', frozenset()))
+        host = ToolSession(app, ExecutionContext('alice', 'tenant', frozenset()), hints='shape')
         self.assertNotIn('default_branch', str(host.tools()))
         await host.prime(['repo.get'])
         tool = host.tools(include_search=False)[0]['function']
@@ -68,3 +68,6 @@ class OutputToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(legacy['parameters'], app.describe('repo.get')['inputSchema'])
         self.assertNotIn('outputSchema', tool)
         self.assertEqual((await host.call(tool['name'], {'name': 'actual'}))['data'], {'default_branch': 'actual'})
+        plain = ToolSession(app, ExecutionContext('alice', 'tenant', frozenset()))  # 1.0 default: hints='none'
+        await plain.prime(['repo.get'])
+        self.assertEqual(plain.tools(include_search=False)[0]['function']['description'], 'get')

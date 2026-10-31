@@ -204,7 +204,7 @@ class ToolSession:
     profile = TOOL_PROFILE
 
     def __init__(self, apps, context: ExecutionContext, *, max_tool_bytes=16000, search_limit=5,
-                 naming='readable', flatten=True, hints='shape'):
+                 naming='readable', flatten=True, hints='none'):
         if not isinstance(context, ExecutionContext):
             raise TypeError('A trusted ExecutionContext is required.')
         runtime = DirectApplications(apps)
@@ -214,13 +214,13 @@ class ToolSession:
 
         self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints)
 
-    def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='shape'):
+    def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='none'):
         if type(budget) is not int or budget < tool_bytes([SEARCH_TOOL]):
             raise ValueError('max_tool_bytes must fit the complete search tool.')
         if type(limit) is not int or not 1 <= limit <= 20:
             raise ValueError('search_limit must be an integer from 1 to 20.')
-        if naming not in ('readable', 'hash') or not isinstance(flatten, bool) or hints not in ('shape', 'typed'):
-            raise ValueError('naming must be readable or hash, flatten a boolean, hints shape or typed.')
+        if naming not in ('readable', 'hash') or not isinstance(flatten, bool) or hints not in ('none', 'shape', 'typed'):
+            raise ValueError('naming must be readable or hash, flatten a boolean, hints none, shape or typed.')
         self._request_impl = request
         self.max_tool_bytes = budget
         self.search_limit = limit
@@ -236,7 +236,7 @@ class ToolSession:
         self._stats = {'discover': 0, 'describe': 0, 'invoke': 0, 'reused': 0, 'evicted': 0}
 
     @classmethod
-    async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='shape'):
+    async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none'):
         """Use an already connected, trusted MCP client; no connection is owned."""
         listing = await client.list_tools()
         expected = {'a2api.discover', 'a2api.describe', 'a2api.invoke'}
@@ -329,7 +329,7 @@ class ToolSession:
             check_draft_schema(schema)
         flat = flatten_input(descriptor['inputSchema']) if self.flatten else None
         parameters = flat[0] if flat else deepcopy(descriptor['inputSchema'])
-        if self.hints == 'shape':  # 0.4 model view; hints='typed' keeps the 0.3 descriptions and parameters
+        if self.hints != 'typed':  # 0.4+ model view; hints='typed' keeps the 0.3 descriptions and parameters
             parameters = model_parameters(parameters)
         tool = {'type': 'function', 'function': {'name': name,
             'description': function_description(descriptor, self.hints), 'parameters': parameters}}
