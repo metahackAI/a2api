@@ -193,7 +193,8 @@ class A2API:
         return {'strategy': result['strategy'], 'functions': len(self.session.tools()), 'hostCalls': self.session.stats}
 
     def system(self):
-        return COMMON + MODE_RULES['a2api']
+        # Mention the search tool only when the host actually provides it.
+        return COMMON + (MODE_RULES['a2api'] if self.session.strategy != 'all' else '')
 
     def tools(self):
         return self.session.tools()
