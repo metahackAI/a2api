@@ -143,8 +143,11 @@ def executor_for(mode, scale, spec, origin, app, ops, options):
     if mode == 'spec-prompt':
         return SpecPrompt(scale, spec, origin)
     # 'a2api-plain' is the same host with hints='none' (no result-shape text), for presentation comparisons.
+    # 'a2api-all' exposes the whole catalog whenever it fits max_tool_bytes (no pre-selection).
     hints = 'none' if mode == 'a2api-plain' else options.hints
-    executor = A2API(app, ops, max_tool_bytes=options.max_tool_bytes, search_limit=options.search_limit, hints=hints)
+    all_bytes = options.max_tool_bytes if mode == 'a2api-all' else None
+    executor = A2API(app, ops, max_tool_bytes=options.max_tool_bytes, search_limit=options.search_limit, hints=hints,
+                     all_bytes=all_bytes)
     executor.mode = mode
     return executor
 

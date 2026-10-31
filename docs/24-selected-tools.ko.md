@@ -1,5 +1,7 @@
 # a2api-tools/1.0: 필요한 호출 계약만 모델에 제공하기
 
+`auto()`의 전체 제공 기준은 `all_bytes=10000`(약 20개 함수)이다. dev에서 19개 함수 카탈로그는 전체 제공이 사전 선택보다 빨랐고(중앙값 7.9초 대 9.3초, spec-tools 9.3초) 토큰은 spec-tools보다 17% 적었다. 55개 카탈로그는 전체 제공이 빠르지 않아(10.5초 대 사전 선택 9.4초) 사전 선택을 유지한다([34 문서](34-completion-results.ko.md) 5절).
+
 `TOOL_PROFILE`은 `a2api-tools/1.0`이며 아래 0.4 변경을 확정한 것이다. 이후 추가: `auto(question, preselect=8)`은 호스트 사전 검색에서 모델 검색(`search_limit`, 기본 3)보다 넓은 후보를 준비하고, 평탄화한 path/query/header의 문자열 인자에 들어온 JSON 숫자·불리언은 텍스트로 바꿔 전달한다(body는 그대로). 함수 설명 기본값(`hints="none"`)은 요약과 쓰기 함수의 `[write]` 표시뿐이다. holdout 판정 이후 4개 언어 dev 360 run에서 반환 이름 목록(`hints="shape"`, `Returns {items:[{id,status}],total}`)보다 정확도는 같고(120/120) 작업당 토큰이 8.5% 적어 기본값으로 정했다([34 문서](34-completion-results.ko.md) 5절). `shape`는 선택으로 남기고, `hints="typed"`가 0.3 형식과 원래 입력 schema를 유지한다. 검색 index는 `field-search/2`(비ASCII 단어 뒤 짧은 조사·어미 허용)다.
 
 > **0.4 (2026-10-31, [33 문서](33-completion-plan.ko.md) 1단계)**: wire(`a2api-call`)와 MCP 세 도구는 그대로이고 호스트 표현만 바뀐다.

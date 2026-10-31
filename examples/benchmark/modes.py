@@ -180,16 +180,16 @@ class SpecPrompt(SpecTools):
 class A2API:
     mode = 'a2api'
 
-    def __init__(self, app, ops, *, max_tool_bytes=16000, search_limit=5, hints=None):
+    def __init__(self, app, ops, *, max_tool_bytes=16000, search_limit=5, hints=None, all_bytes=None):
         self.app, self.ops = app, ops
         self.max_tool_bytes, self.search_limit = max_tool_bytes, search_limit
-        self.hints = hints
+        self.hints, self.all_bytes = hints, all_bytes
         self.session = None
 
     async def setup(self, question):
         options = {'hints': self.hints} if self.hints else {}
         self.session = ToolSession(self.app, CONTEXT, max_tool_bytes=self.max_tool_bytes, search_limit=self.search_limit, **options)
-        result = await self.session.auto(question)
+        result = await self.session.auto(question, **({'all_bytes': self.all_bytes} if self.all_bytes is not None else {}))
         return {'strategy': result['strategy'], 'functions': len(self.session.tools()), 'hostCalls': self.session.stats}
 
     def system(self):

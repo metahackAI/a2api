@@ -6,6 +6,16 @@
 
 [완성 계획](docs/33-completion-plan.ko.md)에 따라 **Python·Java/Spring·Go·Rust로 구현된 API를 a2api로 연결해, 일반적인 API 명세를 모델에 전달하는 방식과 정확도·컨텍스트·속도·안정성을 비교**하도록 마무리했다. 측정 결과와 한계는 [완성 평가 결과](docs/34-completion-results.ko.md)에 있다.
 
+고정 holdout(4언어 × small/medium/large 19/55/235 operation × 10작업 × 2반복, 720 run, `nvidia/Muse-Glimmer-30B-NVFP4`) 요약:
+
+| | a2api | 명세 → 전체 function | 명세 → prompt |
+|---|---:|---:|---:|
+| 통과 | 239/240(provider 500 1건) | 237/240 | 240/240 |
+| 작업당 토큰 중앙값 small / medium / large | 4.9k / 4.8k / 5.0k | 8.1k / 19.6k / 75.2k | 12.6k / 28.2k / 103.3k |
+| 작업 시간 중앙값 small / medium / large | 10.7 / 10.6 / 10.7초 | 9.4 / 9.8 / 14.8초 | 10.2 / 11.3 / 18.8초 |
+
+컨텍스트는 규모와 거의 무관하게 유지됐고, 지연은 명세가 큰 대규모에서 27–43% 줄었다. 정확도는 세 방식 모두 상한에 가까웠고, 소·중규모에서는 a2api가 명세 function 방식보다 느렸다. 원인 분석과 이후 개선은 34 문서에 있다.
+
 ```bash
 pip install a2api                    # 핵심: convert / Application / ToolSession / 프로토콜 schema
 pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer

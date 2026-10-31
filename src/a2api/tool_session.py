@@ -407,7 +407,7 @@ class ToolSession:
             if not set(identifiers) <= active:
                 raise A2APIError('SCHEMA_BUDGET', 'The requested known function set does not fit max_tool_bytes.')
 
-    async def auto(self, question: str = '', *, max_functions: int = 64, preselect: int = 8, all_bytes: int = 6000):
+    async def auto(self, question: str = '', *, max_functions: int = 64, preselect: int = 8, all_bytes: int = 10000):
         """Host strategy without a model turn.
 
         A catalog whose complete function set fits `all_bytes` (and max_functions and

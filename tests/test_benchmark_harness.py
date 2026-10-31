@@ -96,11 +96,15 @@ class BenchmarkHarnessTests(unittest.TestCase):
             run, result, seen = self.run_task(self.modes.A2API(app, ops, max_tool_bytes=16000), 'D1',
                                               [[('shop_orders_get', {'id': 'ORD-1003'})], final], origin)
             self.assertTrue(result['passed'], result)
-            # 19 functions (~8.5KB) exceed auto's all_bytes: the host pre-searches the question.
-            self.assertEqual(run['setup']['strategy'], 'search')
-            self.assertEqual(seen[0]['tools'][0], 'a2api_search')
-            self.assertIn('shop_orders_get', seen[0]['tools'])
-            self.assertLessEqual(len(seen[0]['tools']), 9)
+            # 19 plain functions (~8KB) fit auto's all_bytes (10KB): the whole small catalog, no search tool.
+            self.assertEqual(run['setup']['strategy'], 'all')
+            self.assertNotIn('a2api_search', seen[0]['tools'])
+            self.assertEqual(len(seen[0]['tools']), 19)
+            narrow = self.modes.A2API(app, ops, max_tool_bytes=16000, all_bytes=6000)
+            asyncio.run(narrow.setup(item_request := '주문 ORD-1003의 현재 상태와 총액을 알려줘.'))
+            self.assertEqual(narrow.tools()[0]['function']['name'], 'a2api_search')
+            self.assertIn('shop_orders_get', [tool['function']['name'] for tool in narrow.tools()])
+            self.assertLessEqual(len(narrow.tools()), 9)
             self.assertNotIn('internalNote', json.dumps(run['toolCalls']))
 
     def test_writes_missing_input_and_failures_are_scored_from_state_and_calls(self):

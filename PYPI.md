@@ -85,6 +85,14 @@ The MCP tool list is always the same three tools, whatever the catalog size.
 
 ## Evaluation
 
-The repository contains a benchmark that implements the same API in Python, Spring, Go and Rust at three sizes and compares a2api with passing the OpenAPI specification to the model. See `docs/34-completion-results.ko.md` in the source repository for the measured accuracy, context size, latency and stability, including failures.
+The repository contains a benchmark that implements the same API in Python, Spring, Go and Rust at three sizes (19 / 55 / 235 operations) and compares a2api with passing the OpenAPI specification to the model, either as one function per operation or as the whole document in the prompt. On a fixed holdout of 720 runs with `nvidia/Muse-Glimmer-30B-NVFP4`:
+
+| | a2api | spec → functions | spec → prompt |
+|---|---:|---:|---:|
+| Tasks passed | 239/240 (1 provider error) | 237/240 | 240/240 |
+| Median tokens per task (small / medium / large) | 4.9k / 4.8k / 5.0k | 8.1k / 19.6k / 75.2k | 12.6k / 28.2k / 103.3k |
+| Median seconds per task (small / medium / large) | 10.7 / 10.6 / 10.7 | 9.4 / 9.8 / 14.8 | 10.2 / 11.3 / 18.8 |
+
+Context stays flat as the API grows and latency drops 27–43% for the large API. Accuracy was near the ceiling for all approaches, and for small and medium APIs a2api was slower than one-function-per-operation. Details, failures and limits: `docs/34-completion-results.ko.md` in the source repository. Synthetic API, one model — not a guarantee for every API or model.
 
 Licensed under MIT.
