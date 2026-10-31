@@ -1,14 +1,18 @@
 """Summarize evaluate.py runs (and a-commerce's own report rows) per mode.
 
-python examples/acommerce/summarize.py artifacts/acommerce/runs/ours-design-1.jsonl [more.jsonl ...]
+python examples/acommerce/summarize.py artifacts/acommerce/runs/ours-design-1.jsonl [more.jsonl ...] [--json out.json]
 """
 
 from __future__ import annotations
 
 import json
+import argparse
 from pathlib import Path
 import statistics
 import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from run_metrics import by_mode, dump, markdown, stats  # noqa: E402
 
 
 def load(paths):
@@ -55,15 +59,44 @@ def per_task(runs):
     return '\n'.join(rows)
 
 
+def extra(runs):
+    """a-commerce scoring details: tool precision/recall (A-Commerce tool sets) and pass rate by task kind."""
+    out = {}
+    for mode in dict.fromkeys(run['mode'] for run in runs):
+        group = [run for run in runs if run['mode'] == mode]
+        kinds = {kind: f"{sum(r['done'] for r in group if r['kind'] == kind)}/{sum(1 for r in group if r['kind'] == kind)}"
+                 for kind in dict.fromkeys(r['kind'] for r in group)}
+        out[mode] = {'byKind': kinds, 'toolPrecision': stats([r.get('precision') for r in group], 2),
+                     'toolRecall': stats([r.get('recall') for r in group], 2)}
+    return out
+
+
 def main():
-    runs = load(sys.argv[1:])
-    print(table(runs))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('runs', nargs='+')
+    parser.add_argument('--json', type=Path)
+    options = parser.parse_args()
+    runs = load(options.runs)
+    metrics, details = by_mode(runs), extra(runs)
+    print(markdown(metrics))
+    print()
+    print('| mode | by task kind | tool precision (mean) | tool recall (mean) |')
+    print('|---|---|---|---|')
+    for mode, item in details.items():
+        print(f"| {mode} | {', '.join(f'{k} {v}' for k, v in item['byKind'].items())} | "
+              f"{item['toolPrecision'].get('mean', '—')} | {item['toolRecall'].get('mean', '—')} |")
     print()
     print(per_task(runs))
     print()
     for run in runs:
         if not run['done']:
             print(f"- {run['task']} [{run['mode']}] {run.get('hostError') or ''} {'; '.join(run['missing'])[:400]}")
+    if options.json:
+        dump(options.json, metrics, runs=options.runs, scoring=details,
+             perTask={f"{r['task']}|{r['mode']}|{r.get('repetition', 0)}": {
+                 'done': r['done'], 'hostError': r.get('hostError'), 'tokens': r['usage']['total_tokens'],
+                 'seconds': r['seconds'], 'modelCalls': r['modelRequests'], 'toolCalls': len(r['toolCalls']),
+                 'missing': r['missing']} for r in runs})
 
 
 if __name__ == '__main__':
