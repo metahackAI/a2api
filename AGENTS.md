@@ -8,7 +8,8 @@
 - `docs/03-roadmap-and-evaluation.ko.md`: 현재 개발 범위와 완료 조건.
 - `docs/33-completion-plan.ko.md`: 2026-10-31 사용자가 확정한 1.0 완성 목표(4개 언어·규모·작업 유형에서 일반 API 명세 전달 대비 정확도·컨텍스트·속도·안정성), 단계·완료 조건·변경 기록. 결과는 `docs/34-completion-results.ko.md`, 배포 절차는 `docs/35-release.ko.md`.
 - `docs/36-legacy-conversion-guide.ko.md`: 레거시 API 전환 사용자 가이드(OpenAPI+코드 / 코드만). 공개 API가 바뀌면 이 문서와 `examples/legacy-conversion`을 함께 갱신한다.
-- `docs/37-next-improvement-plan.ko.md`: 1.1 이후 개선 후보. 사용자가 범위를 확정하기 전에는 구현하지 않는다.
+- `docs/37-next-improvement-plan.ko.md`: 1.1 개선 후보. 2026-11-01 사용자가 전체 진행을 지시했다.
+- `docs/38-improvement-execution-plan.ko.md`: 1.1 실행 계획(a-commerce부터 레거시 호출과 비교)과 진행 기록. 결과는 `docs/39-improvement-results.ko.md`. a-commerce 저장소는 수정하지 않고 실행 대상으로만 쓴다. 영어 사용자 문서는 `docs/en/`.
 - 다른 설계/구현 문서는 참고 자료다. 전체 초안의 모든 기능을 필수 구현 목록으로 해석하지 않는다.
 
 ## 제품 범위
