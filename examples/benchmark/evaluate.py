@@ -152,7 +152,10 @@ async def evaluate(options):
         raise SystemExit('Choose a new output path; earlier runs are never overwritten.')
     selected = [item for item in tasks(options.split) if not options.tasks or item['id'] in options.tasks.split(',')]
     modes = options.modes.split(',')
+    import subprocess
+    git = lambda *args: subprocess.run(['git', *args], cwd=HERE, capture_output=True, text=True).stdout.strip()
     header = {'type': 'header', 'startedAt': datetime.now(timezone.utc).isoformat(), 'model': options.model,
+              'gitCommit': git('rev-parse', 'HEAD'), 'gitDirty': bool(git('status', '--porcelain', '--', '../../src', '.')),
               'baseUrl': options.base_url, 'split': options.split, 'taskFingerprint': fingerprint(options.split),
               'tasks': [item['id'] for item in selected], 'scales': options.scales, 'languages': options.languages,
               'modes': modes, 'repetitions': options.repetitions, 'maxToolBytes': options.max_tool_bytes,
