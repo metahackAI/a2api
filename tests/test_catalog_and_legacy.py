@@ -214,5 +214,18 @@ class CatalogTests(unittest.TestCase):
                          'RESOURCE_NOT_FOUND')
 
 
+class LegacyScreensExampleTests(unittest.TestCase):
+    def test_documented_example_runs(self):
+        import subprocess
+        import sys
+        from pathlib import Path
+        script = Path(__file__).resolve().parent.parent / 'examples/legacy-conversion/legacy_screens.py'
+        out = subprocess.run([sys.executable, str(script)], capture_output=True, text=True, timeout=120)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn('"claim_status":"requested"', out.stdout)
+        self.assertIn('"changeSet":"cs_alice"', out.stdout)
+        self.assertIn('Invalid paging.', out.stdout)
+
+
 if __name__ == '__main__':
     unittest.main()
