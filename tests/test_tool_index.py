@@ -22,7 +22,8 @@ def entry(tool, kind, summary, properties, required=(), consumes=(), produces=()
 
 ID = {'type': 'string'}
 CATALOG = [
-    entry('list_orders', 'read', 'List recent orders. Newest first.', {'customer_id': ID}, produces=['order_id']),
+    entry('list_orders', 'read', 'List recent orders. Newest first.', {'customer_id': ID, 'status': ID, 'cursor': ID},
+          produces=['order_id']),
     entry('get_order', 'read', 'Read one order with its deliveries.', {'order_id': ID}, ['order_id'],
           consumes=['order_id'], produces=['delivery_id', 'customer_id']),
     entry('track_shipment', 'read', 'Where a delivery is now.', {'delivery_id': ID}, ['delivery_id'], consumes=['delivery_id']),
@@ -202,6 +203,37 @@ class IndexTests(unittest.TestCase):
             plain = ToolSession(self.app, CALLER)
             await plain.index()
             self.assertEqual((await plain.call(BATCH_NAME, {'calls': []}))['error']['code'], 'UNKNOWN_FUNCTION')
+        asyncio.run(scenario())
+
+    def test_variant_note_after_the_same_read_with_other_conditions(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER, variant_note=3)
+            await session.index()
+            await session.call(LOAD_NAME, {'names': ['list_orders', 'get_order', 'cancel_order']})
+            first = await session.call('list_orders', {'customer_id': 'cus_1'})
+            second = await session.call('list_orders', {'customer_id': 'cus_1', 'cursor': 'o20'})  # paging: not another condition
+            self.assertNotIn('variants', first)
+            self.assertNotIn('variants', second)
+            for order in ('ord_1', 'ord_2', 'ord_3'):  # one read per item: other targets
+                self.assertNotIn('variants', await session.call('get_order', {'order_id': order}))
+            await session.call('list_orders', {})
+            third = await session.call('list_orders', {'customer_id': 'cus_1'})  # same as the first: a repeat
+            self.assertEqual(third.get('repeated'), 1)
+            self.assertNotIn('variants', await session.call('list_orders', {'customer_id': 'cus_2'}))
+            self.assertNotIn('variants', await session.call('list_orders', {'customer_id': 'cus_3'}))
+            # Without ID filters every call is about the same target: the third other condition gets the note.
+            fresh = ToolSession(self.app, CALLER, variant_note=3)
+            await fresh.index()
+            await fresh.call(LOAD_NAME, {'names': ['list_orders', 'cancel_order']})
+            results = [await fresh.call('list_orders', arguments) for arguments in ({}, {'status': 'a'}, {'status': 'b'})]
+            self.assertEqual([item.get('variants') for item in results], [None, None, 3])
+            self.assertIn('answer with what you found', json.loads(render_result(results[-1]))['note'])
+            await fresh.call('cancel_order', {'order_id': 'ord_1'})  # a change: reading again is new
+            self.assertNotIn('variants', await fresh.call('list_orders', {'status': 'c'}))
+            await fresh.focus('another request')
+            self.assertNotIn('variants', await fresh.call('list_orders', {'status': 'd'}))
+            with self.assertRaises(ValueError):
+                ToolSession(self.app, CALLER, variant_note=1)
         asyncio.run(scenario())
 
     def test_relations_read_from_catalog_entries(self):

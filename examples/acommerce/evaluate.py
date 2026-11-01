@@ -17,6 +17,8 @@ Modes (same model, system prompt, limits and scoring):
   a2api-acom-hybrid  names only by domain, and the host search's 8 candidates loaded up front (as auto())
   a2api-acom-names-batch  names only, and a2api_batch (several independent calls in one step; each call
                     counts toward the tool-call limit)
+  …-guard           any a2api mode with ToolSession(variant_note=3): the third read of one function for the
+                    same target with other conditions carries a note to answer from what was found
 Writes are previewed into one change set per task (a person approves later); nothing is approved.
 """
 
@@ -128,9 +130,10 @@ class RawCatalog:
 
 
 class A2APIExecutor:
-    def __init__(self, mode, app, names, host, search_streak=None, index=None, max_tool_bytes=16000):
+    def __init__(self, mode, app, names, host, search_streak=None, index=None, max_tool_bytes=16000, variant_note=None):
         self.mode, self.app, self.names, self.host = mode, app, names, host
         self.search_streak, self.session, self.max_tool_bytes = search_streak, None, max_tool_bytes
+        self.variant_note = variant_note
         index = dict(index) if index is not None else None
         self.batch = bool(index and index.pop('batch', False))
         self.index, self.index_text = index, None  # ToolSession.index() options, or None for auto()
@@ -138,7 +141,7 @@ class A2APIExecutor:
     async def setup(self, request):
         self.session = ToolSession(self.app, ExecutionContext('adm_sj', 'store_northwind', frozenset()),
                                    max_search_streak=self.search_streak, max_tool_bytes=self.max_tool_bytes,
-                                   batch=self.batch)
+                                   batch=self.batch, variant_note=self.variant_note)
         if self.index is not None:
             result = await self.session.index(request, **self.index)
             self.index_text = result['text']
@@ -149,8 +152,8 @@ class A2APIExecutor:
 
     async def turn(self, line):
         """A later turn: the host searches the new request too (no model turn); earlier functions stay."""
+        await self.session.focus(line)  # a new request: related next steps ranked again, variant count reset
         if self.session.strategy == 'index':
-            await self.session.focus(line)  # ranks the related next steps for this request
             return None
         if self.session.strategy != 'search':
             return None
@@ -238,7 +241,12 @@ async def run_turns(executor, task, options):
                 message, usage = choice['message'], response.get('usage') or {}
                 run['steps'].append({'seconds': round(time.monotonic() - tick, 3), 'finish': choice.get('finish_reason'),
                                      'usage': usage, 'toolBytes': len(compact(executor.tools()).encode()),
-                                     'contentChars': len(message.get('content') or '')})
+                                     'contentChars': len(message.get('content') or ''),
+                                     # What the model wrote at this step (its reasoning field, when the server
+                                     # returns one), so a trace shows why it called what it called.
+                                     'reasoning': (message.get('reasoning') or message.get('reasoning_content') or '')[:3000],
+                                     'content': (message.get('content') or '')[:2000],
+                                     'calls': [item['id'] for item in message.get('tool_calls') or []]})
                 for key in run['usage']:
                     run['usage'][key] += usage.get(key) or 0
                 if choice.get('finish_reason') == 'length':
@@ -271,7 +279,7 @@ async def run_turns(executor, task, options):
                         text, business = (await executor.call(name, arguments, item['id'])
                                           if tool_calls + size - 1 <= LIMITS['tool_calls']
                                           else (compact({'error': 'tool call limit reached for this turn'}), None))
-                    run['toolCalls'].append({'name': name, 'arguments': arguments, 'result': text[:1500],
+                    run['toolCalls'].append({'id': item['id'], 'turn': number, 'name': name, 'arguments': arguments, 'result': text[:3000],
                                              'resultBytes': len(text.encode()), 'seconds': round(time.monotonic() - tick, 3)})
                     if isinstance(business, list):  # a2api_batch: each call counts toward the tool-call limit
                         tool_calls += max(0, len(business) - 1)
@@ -343,7 +351,9 @@ async def evaluate(options):
                     items = manifests['facade' if facade else 'acom']
                     if mode.startswith('a2api'):
                         app, names, source = a2api_app(items, host, facade=facade)
-                        variant = mode.split('-', 2)[2] if mode.count('-') >= 2 else None
+                        guard = mode.endswith('-guard')
+                        base = mode[:-len('-guard')] if guard else mode
+                        variant = base.split('-', 2)[2] if base.count('-') >= 2 else None
                         index = None
                         if variant:
                             depth = 2 if options.index_group == 'resource' else 1  # catalog address: domain.resource.verb
@@ -352,7 +362,8 @@ async def evaluate(options):
                                        for item in items if 'address' in item}
                             index = {**INDEX_VARIANTS[variant], 'relations': source.relations(),
                                      'group': lambda entry, domains=domains: domains.get(entry['id'], 'other')}
-                        executor = A2APIExecutor(mode, app, names, host, options.search_streak, index, options.max_tool_bytes)
+                        executor = A2APIExecutor(mode, app, names, host, options.search_streak, index, options.max_tool_bytes,
+                                                 3 if guard else None)
                     else:
                         executor = RawCatalog(mode, items, host, facade)
                     run = await run_turns(executor, task, options)

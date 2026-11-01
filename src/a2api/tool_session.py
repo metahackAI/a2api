@@ -281,6 +281,10 @@ def render_result(payload: dict, *, max_chars: int | None = None) -> str:
         if payload.get('repeated'):
             view['note'] = (f"Same call and result as {payload['repeated']} earlier time(s); you already have this data. "
                             'Use it, or answer the user.')
+        if payload.get('variants'):
+            view['note'] = (f"This is read {payload['variants']} of this function for the same target with other "
+                            'conditions. If these results cannot answer the request, the data is not kept in this form: '
+                            'answer with what you found and say what cannot be answered.')
         if payload.get('related'):
             view['next'] = 'Functions that take IDs from this result: ' + '; '.join(
                 f"{', '.join(names)} ({key})" for key, names in payload['related'].items())
@@ -361,6 +365,20 @@ def _returned_ids(value, found, budget=400):
     return found
 
 
+_PAGING = {'cursor', 'page', 'page_no', 'pageNo', 'offset', 'next_cursor', 'page_token'}
+
+
+def _target(arguments):
+    """(IDs it is about, the other conditions) of a call, each as canonical JSON; paging is neither."""
+    ids, rest = {}, {}
+    for key, value in arguments.items():
+        if key in _PAGING:
+            continue
+        (ids if key == 'id' or _id_key(key) else rest)[key] = value
+    canonical = lambda value: json.dumps(value, sort_keys=True, ensure_ascii=False, default=str)
+    return canonical(ids), canonical(rest)
+
+
 def _first_sentence(text, limit=110):
     text = ' '.join(str(text).split())
     match = re.search(r'(?<=[.!?])\s', text)
@@ -381,7 +399,7 @@ class ToolSession:
     profile = TOOL_PROFILE
 
     def __init__(self, apps, context: ExecutionContext, *, max_tool_bytes=16000, search_limit=5,
-                 naming='readable', flatten=True, hints='none', max_search_streak=None, batch=False):
+                 naming='readable', flatten=True, hints='none', max_search_streak=None, batch=False, variant_note=None):
         if not isinstance(context, ExecutionContext):
             raise TypeError('A trusted ExecutionContext is required.')
         runtime = DirectApplications(apps)
@@ -389,10 +407,11 @@ class ToolSession:
         async def request(method, arguments):
             return await asyncio.to_thread(dispatch, runtime, method, arguments, context)
 
-        self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak, batch)
+        self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak, batch,
+                         variant_note)
 
     def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='none', max_search_streak=None,
-                    batch=False):
+                    batch=False, variant_note=None):
         if type(budget) is not int or budget < tool_bytes([SEARCH_TOOL]):
             raise ValueError('max_tool_bytes must fit the complete search tool.')
         if type(limit) is not int or not 1 <= limit <= 20:
@@ -403,6 +422,12 @@ class ToolSession:
             raise ValueError('max_search_streak must be None or an integer from 1 to 50.')
         if not isinstance(batch, bool):
             raise ValueError('batch must be a boolean.')
+        if variant_note is not None and (type(variant_note) is not int or not 2 <= variant_note <= 20):
+            raise ValueError('variant_note must be None or an integer from 2 to 20.')
+        # variant_note=N: the Nth read of one function for the same target with other filters (the same
+        # IDs, other conditions; not paging) carries a note to answer from what was found. A model
+        # otherwise keeps re-filtering when the data cannot answer the request.
+        self.variant_note, self._variants = variant_note, {}
         # batch=True offers a2api_batch: several independent calls in one model step.
         self.batch = batch
         # Searches in a row without calling a function; the host may cap them (a search loop otherwise
@@ -434,7 +459,7 @@ class ToolSession:
 
     @classmethod
     async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none',
-                       max_search_streak=None, batch=False):
+                       max_search_streak=None, batch=False, variant_note=None):
         """Use an already connected, trusted MCP client; no connection is owned."""
         listing = await client.list_tools()
         expected = {'a2api.discover', 'a2api.describe', 'a2api.invoke'}
@@ -446,7 +471,8 @@ class ToolSession:
             return result.structured_content
 
         session = cls.__new__(cls)
-        session._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak, batch)
+        session._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak, batch,
+                            variant_note)
         return session
 
     @property
@@ -755,7 +781,8 @@ class ToolSession:
             return {'strategy': 'index', 'functions': len(self._index), 'text': text, 'preselected': preselected}
 
     async def focus(self, question: str):
-        """The user's current request (each new user turn): ranks the related functions results name."""
+        """The user's current request (each new user turn, in any strategy): ranks the related functions
+        results name, and starts the variant_note count again."""
         if not isinstance(question, str):
             raise ValueError('focus requires a question string.')
         async with self._lock:
@@ -763,7 +790,7 @@ class ToolSession:
 
     async def _focus(self, question):
         query = ' '.join(question.split())[:1000]
-        self._rank = {}
+        self._rank, self._variants = {}, {}  # a new request may search again
         if not query or not self._related:
             return
         found = await self._request('discover', {'query': query, 'limit': 50})
@@ -886,8 +913,15 @@ class ToolSession:
             self._reads[key] = earlier + 1
             if earlier:
                 result = {**result, 'repeated': earlier}
+            elif self.variant_note is not None:
+                target, condition = _target(arguments)
+                seen = self._variants.setdefault((name, target), set())
+                seen.add(condition)
+                if len(seen) >= self.variant_note:
+                    result = {**result, 'variants': len(seen)}
         else:
             self._reads.clear()  # after a change, reading again is new information
+            self._variants.clear()
         if self._related and result.get('status') == 'succeeded' and not result.get('repeated'):
             related = self._next_steps(name, result.get('data'))
             if related:
