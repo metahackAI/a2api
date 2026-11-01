@@ -90,6 +90,14 @@ class CatalogTests(unittest.TestCase):
                                      {'tool': 'get_clm_grid_list', 'input_schema': {'type': 'object'}}], namespace='legacy')
         first, second = camel.iter_operations()
         self.assertEqual((first.id, first.status, second.status), ('legacy.get_clm_grid_list', 'imported', 'unsupported'))
+        # Abbreviated name parts spelled out in the ID; the call still uses the catalog name.
+        spelled = ToolCatalogImporter([{'tool': 'getClmGridListCnt', 'input_schema': {'type': 'object'}}], namespace='legacy',
+                                      words={'Clm': 'claim', 'cnt': 'count'})
+        record, = spelled.iter_operations()
+        self.assertEqual((record.id, record.operation_id, record.path), ('legacy.get_claim_grid_list_count', 'getClmGridListCnt',
+                                                                         '/v1/tools/getClmGridListCnt'))
+        with self.assertRaises(A2APIError):
+            ToolCatalogImporter([], words={'clm': 'Claim Words'})
 
     def test_host_request_values_are_added_per_call_and_cannot_replace_business_fields(self):
         app, _ = self.app(request_values=lambda context, call: (

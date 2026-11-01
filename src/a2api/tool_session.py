@@ -44,9 +44,22 @@ LOAD_TOOL = {'type': 'function', 'function': {
     'parameters': {'type': 'object', 'properties': {'names': {'type': 'array', 'minItems': 1, 'maxItems': 10,
                                                              'items': {'type': 'string', 'maxLength': 128}}},
                    'required': ['names'], 'additionalProperties': False}}}
+BATCH_NAME = 'a2api_batch'
+BATCH_TOOL = {'type': 'function', 'function': {
+    'name': BATCH_NAME,
+    'description': 'Make several function calls in one step when none needs the result of another, for example one '
+                   'call per item of a list. Each call is checked and run like a direct call; the results come back '
+                   'in the same order. Use functions from your tool list.',
+    'parameters': {'type': 'object', 'properties': {'calls': {'type': 'array', 'minItems': 1, 'maxItems': 20, 'items': {
+        'type': 'object', 'properties': {'name': {'type': 'string', 'maxLength': 128}, 'arguments': {'type': 'object'}},
+        'required': ['name', 'arguments'], 'additionalProperties': False}}},
+                   'required': ['calls'], 'additionalProperties': False}}}
 INDEX_HEAD = ('Function index (every function of this service). Load the ones you need with a2api_load, then call '
-              'them. [write] marks a function that changes data. If no function fits the request, say so instead '
+              'them. Calls that do not depend on each other (such as one call per item of a list) can be made '
+              'together in one step. If a function you expect is not listed where you looked, load the closest '
+              'name: unknown names come back with suggestions. If no function fits the request, say so instead '
               'of guessing.')
+INDEX_WRITES = ' [write] marks a function that changes data.'
 
 
 GROUPS = ('path', 'query', 'headers', 'body')
@@ -228,6 +241,20 @@ def render_result(payload: dict, *, max_chars: int | None = None) -> str:
     """
     if not isinstance(payload, dict):
         raise TypeError('render_result expects a call() or search result.')
+    if isinstance(payload.get('batch'), list):
+        # Each call keeps its own share of the bound, so one long result cannot push out the others.
+        # A share too small to keep valid JSON (a short error) is shown whole.
+        share = None if max_chars is None else max(200, max_chars // max(1, len(payload['batch'])))
+        parts = []
+        for item in payload['batch']:
+            result = {key: value for key, value in item.items() if key != 'name'}
+            text = render_result(result, max_chars=share)
+            try:
+                json.loads(text)
+            except ValueError:
+                text = render_result(result)
+            parts.append('{"name":' + _dumps(item.get('name')) + ',"result":' + text + '}')
+        return '{"batch":[' + ','.join(parts) + ']}'
     if 'selected' in payload:
         view = {key: value for key, value in payload.items() if value not in ([], None) and key not in ('added', 'new')}
         if payload.get('selected') and not payload.get('new', payload.get('added', [None])):
@@ -240,6 +267,11 @@ def render_result(payload: dict, *, max_chars: int | None = None) -> str:
                             + (', such as those in suggest.' if payload.get('suggest') else '.'))
         elif payload.get('already') and not payload.get('loaded'):
             view['note'] = 'These functions are already callable; call them.'
+        if payload.get('omitted'):
+            # Without this the model takes the omitted functions as loaded, or as missing from the service.
+            view['note'] = ((view['note'] + ' ') if 'note' in view else '') + (
+                'Omitted functions did not fit with the others loaded in this call; load them again when you need '
+                'them (the functions used least recently are then unloaded).')
     elif payload.get('status') == 'succeeded':
         view = {'status': 'succeeded', 'data': payload.get('data')}
         if payload.get('httpStatus') not in (None, 200):
@@ -349,7 +381,7 @@ class ToolSession:
     profile = TOOL_PROFILE
 
     def __init__(self, apps, context: ExecutionContext, *, max_tool_bytes=16000, search_limit=5,
-                 naming='readable', flatten=True, hints='none', max_search_streak=None):
+                 naming='readable', flatten=True, hints='none', max_search_streak=None, batch=False):
         if not isinstance(context, ExecutionContext):
             raise TypeError('A trusted ExecutionContext is required.')
         runtime = DirectApplications(apps)
@@ -357,9 +389,10 @@ class ToolSession:
         async def request(method, arguments):
             return await asyncio.to_thread(dispatch, runtime, method, arguments, context)
 
-        self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak)
+        self._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak, batch)
 
-    def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='none', max_search_streak=None):
+    def _initialize(self, request, budget, limit, naming='readable', flatten=True, hints='none', max_search_streak=None,
+                    batch=False):
         if type(budget) is not int or budget < tool_bytes([SEARCH_TOOL]):
             raise ValueError('max_tool_bytes must fit the complete search tool.')
         if type(limit) is not int or not 1 <= limit <= 20:
@@ -368,6 +401,10 @@ class ToolSession:
             raise ValueError('naming must be readable or hash, flatten a boolean, hints none, shape or typed.')
         if max_search_streak is not None and (type(max_search_streak) is not int or not 1 <= max_search_streak <= 50):
             raise ValueError('max_search_streak must be None or an integer from 1 to 50.')
+        if not isinstance(batch, bool):
+            raise ValueError('batch must be a boolean.')
+        # batch=True offers a2api_batch: several independent calls in one model step.
+        self.batch = batch
         # Searches in a row without calling a function; the host may cap them (a search loop otherwise
         # runs until the model's call limit when the catalog has no function for the request).
         self.max_search_streak, self._streak = max_search_streak, 0
@@ -397,7 +434,7 @@ class ToolSession:
 
     @classmethod
     async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none',
-                       max_search_streak=None):
+                       max_search_streak=None, batch=False):
         """Use an already connected, trusted MCP client; no connection is owned."""
         listing = await client.list_tools()
         expected = {'a2api.discover', 'a2api.describe', 'a2api.invoke'}
@@ -409,7 +446,7 @@ class ToolSession:
             return result.structured_content
 
         session = cls.__new__(cls)
-        session._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak)
+        session._initialize(request, max_tool_bytes, search_limit, naming, flatten, hints, max_search_streak, batch)
         return session
 
     @property
@@ -424,6 +461,13 @@ class ToolSession:
     def _front(self):
         return LOAD_TOOL if self._strategy == 'index' else SEARCH_TOOL
 
+    def _fixed(self, include_search=True, *, budget=False):
+        """The session's own tools ahead of the business functions. a2api_batch joins once a function
+        is callable: offered before, it changed which functions a model chose to load. The budget
+        always counts it."""
+        batch = self.batch and (budget or bool(self._active))
+        return [*([self._front()] if include_search else []), *([BATCH_TOOL] if batch else [])]
+
     def tools(self, *, include_search=None):
         """Fresh model view. include_search=None omits search only after auto() chose 'all'.
 
@@ -431,8 +475,7 @@ class ToolSession:
         if include_search is None:
             include_search = self._strategy != 'all'
         self._unseen.clear()  # the model receives these definitions now
-        return deepcopy([*([self._front()] if include_search else []),
-                         *(bound.tool for bound in self._active.values())])
+        return deepcopy([*self._fixed(include_search), *(bound.tool for bound in self._active.values())])
 
     render = staticmethod(render_result)
 
@@ -559,15 +602,15 @@ class ToolSession:
         retained.setdefault(name, bound)
         self._tick += 1
         self._used[name] = self._tick
-        removed, front = [], self._front()
-        while tool_bytes([front, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
+        removed, fixed = [], self._fixed(budget=True)
+        while tool_bytes([*fixed, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
             candidates = [key for key in retained if key != name and key not in protected and key not in self._unseen]
             victim = min(candidates, key=lambda key: self._used.get(key, 0)) if candidates else None
             if victim is None:
                 break
             retained.pop(victim)
             removed.append(victim)
-        if tool_bytes([front, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
+        if tool_bytes([*fixed, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
             return None
         if name not in self._active:
             self._unseen.add(name)
@@ -696,7 +739,8 @@ class ToolSession:
             groups = {}
             for name, item in sorted(self._index.items()):
                 groups.setdefault(str(group(item)) if group else '', []).append((name, item))
-            lines = [INDEX_HEAD + (' Functions already in your tool list are loaded; call them directly.' if preselect else '')]
+            lines = [INDEX_HEAD + (INDEX_WRITES if detail == 'summary' else '')
+                     + (' Functions already in your tool list are loaded; call them directly.' if preselect else '')]
             for heading, members in sorted(groups.items()):
                 if detail == 'names':
                     lines.append((heading + ': ' if heading else '') + ', '.join(name for name, _ in members))
@@ -731,10 +775,13 @@ class ToolSession:
         if self._catalog is None:
             raise A2APIError('CONTRACT_DRIFT', 'The catalog changed; the host must build the index again.', status=409)
         loaded, already, unknown, omitted, evicted, protected = [], [], [], [], [], set()
-        for name in dict.fromkeys(names):
+        for asked in dict.fromkeys(names):
+            name = self._resolve(asked)
             item = self._index.get(name)
             if item is None:
-                unknown.append(name)
+                unknown.append(asked)
+            elif name in loaded or name in already:
+                continue
             elif name in self._active:
                 self._tick += 1
                 self._used[name] = self._tick
@@ -760,6 +807,17 @@ class ToolSession:
             result['suggest'] = [name for name in dict.fromkeys(suggest) if name not in self._active][:5]
         return result
 
+    def _resolve(self, name):
+        """The index name meant: also when a heading was joined to it (`fulfillment.claim.get_claim`) or
+        its case changed; None when there is none."""
+        if name in self._index:
+            return name
+        tail = re.split(r'[\s./›:>|]+', name.strip())[-1] if name.strip() else name
+        for candidate in (tail, name.lower(), tail.lower()):
+            if candidate in self._index:
+                return candidate
+        return None
+
     def _next_steps(self, name, data):
         """{id name: [functions taking it]} for IDs a successful result returned; at most `related` functions.
         An ID many functions take is shown only through functions that match the user's request."""
@@ -780,6 +838,7 @@ class ToolSession:
                 chosen.add(other)
                 related.setdefault(key, []).append(other)
         return related
+
     async def call(self, name: str, arguments: dict, *, request_id: str | None = None):
         """Return search results or the original validated invoke envelope; no retry.
 
@@ -787,7 +846,23 @@ class ToolSession:
         delivers the same call twice passes the same id, which the backend can deduplicate when the
         deployment sets idempotency_header. A failed call whose exact name and arguments already
         failed in this session carries `repeated` (earlier failures), shown to the model as a hint.
+        With batch=True, a2api_batch returns {'batch': [{'name', ...each call's own result}]}: every
+        call goes through call() exactly as if made directly (request ids `<request_id>.<n>`).
         """
+        if name == BATCH_NAME and self.batch:
+            try:
+                validate_value(BATCH_TOOL['function']['parameters'], arguments, code='INVALID_INPUT', status=400)
+            except A2APIError as error:
+                return {'error': error.problem()}
+            results = []
+            for index, item in enumerate(arguments['calls']):
+                if item['name'] in (SEARCH_NAME, LOAD_NAME, BATCH_NAME):
+                    result = {'error': A2APIError('INVALID_INPUT', f"{item['name']} cannot run inside {BATCH_NAME}.").problem()}
+                else:
+                    result = await self.call(item['name'], item['arguments'],
+                                             request_id=None if request_id is None else f'{request_id}.{index}')
+                results.append({'name': item['name'], **result})
+            return {'batch': results}
         if name in (SEARCH_NAME, LOAD_NAME):
             if self.max_search_streak is not None and self._streak >= self.max_search_streak:
                 return {'error': A2APIError('SEARCH_LIMIT', f'{self._streak} searches in a row found no function to call '

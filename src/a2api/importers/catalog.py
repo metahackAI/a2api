@@ -24,9 +24,14 @@ from ..openapi_schema import check_draft_schema
 from .source import SourceRecord, Unsupported, identifier, object_schema, record
 
 
-def snake(name):
-    """`getClmGridList` -> `get_clm_grid_list`, so ids and function names keep their words."""
-    return re.sub(r'(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])', '_', name).replace('-', '_')
+def snake(name, words=None):
+    """`getClmGridList` -> `get_clm_grid_list`, so ids and function names keep their words.
+
+    words ({'clm': 'claim', 'cnt': 'count'}) spells out abbreviated parts: `get_claim_grid_list`."""
+    name = re.sub(r'(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])', '_', name).replace('-', '_')
+    if words:
+        name = '_'.join(words.get(part.lower(), part) for part in name.split('_'))
+    return name
 
 
 @dataclass(frozen=True)
@@ -42,9 +47,16 @@ class ToolCatalogImporter:
     language = 'catalog'
 
     def __init__(self, tools, *, namespace='tools', name_key='tool', summary_key='summary',
-                 input_key='input_schema', call_path='/v1/tools/{name}', envelope='input', source_name='<memory>'):
+                 input_key='input_schema', call_path='/v1/tools/{name}', envelope='input', source_name='<memory>',
+                 words=None):
         if not re.fullmatch(r'[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*', namespace):
             raise A2APIError('INVALID_SOURCE', 'Use a lowercase dotted namespace.')
+        # Abbreviated name parts spelled out in capability IDs (the call still uses the catalog name).
+        if words is not None and (not isinstance(words, Mapping) or any(
+                not isinstance(k, str) or not isinstance(v, str) or not re.fullmatch(r'[a-z][a-z0-9_]*', v)
+                for k, v in words.items())):
+            raise A2APIError('INVALID_SOURCE', 'words maps name parts to lowercase snake_case words.')
+        self.words = {key.lower(): value for key, value in (words or {}).items()}
         if isinstance(tools, Mapping):
             tools = tools.get('items', tools.get('tools'))
         if not isinstance(tools, list):
@@ -60,10 +72,10 @@ class ToolCatalogImporter:
             try:
                 if not isinstance(name, str) or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_.-]{0,127}', name):
                     raise Unsupported('Each entry needs a plain tool name.')
-                if name in seen or identifier(namespace, snake(name)) in ids:
+                if name in seen or identifier(namespace, snake(name, self.words)) in ids:
                     raise Unsupported('Duplicate tool name.')
                 seen.add(name)
-                ids.add(identifier(namespace, snake(name)))
+                ids.add(identifier(namespace, snake(name, self.words)))
                 self._records.append(self._record(entry, name, summary_key, input_key, call_path, envelope, location))
             except (Unsupported, A2APIError) as error:
                 self._records.append(SourceRecord(str(name or f'entry_{index}'), '', 'POST', '', '', None, None, location,
@@ -89,7 +101,7 @@ class ToolCatalogImporter:
         binding['bodyEnvelope'] = envelope
         values = {item.name: getattr(built, item.name) for item in fields(SourceRecord)}
         values['binding'] = freeze(binding)
-        values['id'] = identifier(self.namespace, snake(name))
+        values['id'] = identifier(self.namespace, snake(name, self.words))
         return CatalogRecord(**values, entry=freeze(json.loads(json.dumps(entry, default=str))))
 
     @classmethod

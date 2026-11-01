@@ -9,6 +9,8 @@ stay unknown, as they would in a real conversion.
 
 from __future__ import annotations
 
+import re
+
 # codes.rs, as {legacy field: {code: word}}. The words are the back end's own (`word()`).
 CODES = {
     'sellStatCd': {'10': 'in_stock', '20': 'out_of_stock', '30': 'pre_order', '40': 'back_order', '90': 'discontinued'},
@@ -40,6 +42,13 @@ CODES = {
                  'T04': 'add_on', 'T05': 'other'},
     # clm.rs `clm_tp`.
     'clmTpCd': {'R': 'return', 'C': 'cancel', 'X': 'exchange', '9': 'other'},
+    # codes.rs OrdStatCd (order and order line status) and DlvStatCd (a-commerce PR #103).
+    'ordStatCd': {'10': 'payment_due', '20': 'processing', '30': 'in_transit', '40': 'delivered', '50': 'returned',
+                  '80': 'problem', '90': 'cancelled'},
+    'ordDtlStatCd': {'10': 'payment_due', '20': 'processing', '30': 'in_transit', '40': 'delivered', '50': 'returned',
+                     '80': 'problem', '90': 'cancelled'},
+    'dlvStatCd': {'10': 'awaiting_stock', '20': 'ship_instructed', '30': 'packed', '40': 'label_created',
+                  '50': 'picked_up', '60': 'in_transit', '70': 'delivered', '80': 'delivery_failed', '90': 'cancelled'},
 }
 
 # The field doc comments, as names. Inputs and outputs share one table, as the screens share fields.
@@ -75,6 +84,12 @@ RENAME = {
     'dlvCmplDtm': 'delivery_completed_at', 'payMthdCd': 'payment_method', 'cardNo': 'card_last4', 'prdList': 'items',
     'ordSeq': 'order_line_id', 'ordQty': 'order_quantity', 'dcAmt': 'discount', 'rfndMthdCd': 'refund_method',
     'msgTpCd': 'message_type', 'sndChnlCd': 'channel', 'msgTitl': 'subject', 'msgCntt': 'text', 'msgNo': 'message_id',
+    # orders (ord.rs OrdSrchIn, the order grid and the order detail popup)
+    'ordStatCd': 'order_status', 'ordDtmFrom': 'ordered_from', 'ordDtmTo': 'ordered_to', 'ordDtm': 'ordered_at',
+    'ordAmt': 'order_total', 'ordDtlStatCd': 'line_status', 'totPrdAmt': 'items_total', 'dlvCst': 'shipping_fee',
+    'totPayAmt': 'total_paid', 'rcvrNm': 'recipient', 'zipNo': 'postal_code', 'baseAddr': 'street_address',
+    'dtlAddr': 'city_region_country', 'dlvStatCd': 'delivery_status', 'dlvCoNm': 'carrier', 'invcNo': 'tracking_number',
+    'dlvStrtDtm': 'shipped_at', 'clmList': 'claims',
     # sales analysis
     'srchStrtDt': 'from_date', 'srchEndDt': 'to_date', 'cmprBaseCd': 'compare_to', 'saleAmt': 'revenue',
     'ordCnt': 'order_count', 'cmprSaleAmt': 'compare_revenue', 'cmprOrdCnt': 'compare_order_count',
@@ -96,6 +111,12 @@ DESCRIBE = {
     'pageSize': 'Rows per page, 1 to 100 (20 when not sent).',
     'rowStat': 'insert adds a row; update changes the status of an existing row; delete ends it.',
     'prmtStatCd': 'Promotion status. In a save row with row_action update: paused pauses it, ended ends it.',
+    # ord.rs: the popup reads get_order with ordNo as the order key; a bare order number is not found.
+    'ordNo': 'Order key such as ord_20402 (order_id in order and claim rows). A bare order number (20402) is not '
+             'found; search it with the order grid keyword.',
+    'ordDtmFrom': 'Orders placed on or after this day (YYYY-MM-DD, store time).',
+    'ordDtmTo': 'Orders placed on or before this day (YYYY-MM-DD, store time).',
+    'dlvStrtDtm': "When the parcel left: the carrier's first scan.",
 }
 
 # Each screen's body, as one sentence (summary) and the words people use for it (keywords).
@@ -133,12 +154,25 @@ SCREENS = {
                         ['message', 'customer', 'email', 'notify', 'photos']),
     'getSaleAnlsGridList': ('Sales (revenue, order count) of a date range against a comparison basis, with the '
                             'change.', ['sales', 'revenue', 'orders', 'compare', 'drop']),
+    'getOrdGridList': ('Search orders by status, order day range, member or keyword (a number finds that order '
+                       'number, anything else the orderer by name, email or phone); one page of rows (no total).',
+                       ['order', 'orders', 'status', 'purchase']),
+    'getOrdGridListCnt': ('Count the orders an order search would return.', ['order', 'orders', 'count', 'how many']),
+    'getOrdDtlPopInitData': ('One order: lines, totals, payment method, delivery address, the parcel (delivery status, '
+                             'carrier, tracking number, shipped and delivered times) and the claims on it.',
+                             ['order', 'detail', 'delivery', 'shipment', 'tracking', 'address', 'parcel']),
     'getCartList': ("The shopper's cart.", ['cart']),
     'saveCartList': ("Change the shopper's cart lines. Runs immediately.", ['cart']),
     'getOrdShtInitData': ("Prepare the shopper's order from the cart.", ['order', 'checkout']),
 }
 
 VOCABULARY = {'rename': RENAME, 'codes': CODES, 'describe': DESCRIBE}
+
+# The abbreviations in the screen names, spelled out as the field names above spell them
+# (ToolCatalogImporter words): getOrdGridListCnt -> get_order_grid_list_count.
+WORDS = {'clm': 'claim', 'cnt': 'count', 'disp': 'display', 'mbr': 'member', 'grd': 'grade', 'ord': 'order',
+         'dtl': 'detail', 'pop': 'popup', 'prd': 'product', 'prmt': 'promotion', 'tgt': 'target', 'rfnd': 'refund',
+         'anls': 'analysis', 'cpn': 'coupon', 'cust': 'customer', 'msg': 'message', 'bnr': 'banner', 'proc': 'process'}
 
 
 def facade_options(items):
@@ -152,9 +186,11 @@ def facade_options(items):
 
 
 def error_detail(status, body):
-    """The back end's sentence (and the tool it suggests next, on the A-Commerce tools)."""
+    """The back end's sentence (and the tool it suggests next, on the A-Commerce tools). Screen field
+    names it quotes (`tgtMbrGrdCd`) are shown by their readable names, as the model knows them."""
     error = body.get('error') if isinstance(body, dict) else None
     if not isinstance(error, dict) or not isinstance(error.get('message'), str):
         return None
     hint = f" Next: {error['next_tool']}." if isinstance(error.get('next_tool'), str) and error['next_tool'] else ''
-    return error['message'] + hint
+    message = re.sub(r'`([A-Za-z][A-Za-z0-9]*)`', lambda match: '`' + RENAME.get(match[1], match[1]) + '`', error['message'])
+    return message + hint

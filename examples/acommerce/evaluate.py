@@ -15,6 +15,8 @@ Modes (same model, system prompt, limits and scoring):
   a2api-acom-names  names only by domain, with related next steps
   a2api-acom-names-norelated  names only by domain, no related next steps
   a2api-acom-hybrid  names only by domain, and the host search's 8 candidates loaded up front (as auto())
+  a2api-acom-names-batch  names only, and a2api_batch (several independent calls in one step; each call
+                    counts toward the tool-call limit)
 Writes are previewed into one change set per task (a person approves later); nothing is approved.
 """
 
@@ -39,8 +41,8 @@ sys.path.insert(0, str(HERE.parent / 'benchmark'))
 from a2api import ExecutionContext, HTTPDeployment, ToolSession, convert  # noqa: E402
 from a2api.importers import ToolCatalogImporter  # noqa: E402
 from a2api.importers.catalog import snake  # noqa: E402
-from a2api.tool_session import LOAD_NAME, SEARCH_NAME  # noqa: E402
-from legacy_facade import VOCABULARY, error_detail, facade_options  # noqa: E402
+from a2api.tool_session import BATCH_NAME, LOAD_NAME, SEARCH_NAME  # noqa: E402
+from legacy_facade import VOCABULARY, WORDS, error_detail, facade_options  # noqa: E402
 from evaluate import DEFAULT_BASE_URL, DEFAULT_MODEL, ModelError, chat, wait_for_model  # noqa: E402
 from scoring import score  # noqa: E402
 from stack import COMMERCE, REPO, call, token  # noqa: E402
@@ -58,7 +60,8 @@ Store time: Friday, November 6, 2026, 11:00 (America/New_York). Prices are in US
 SEARCH_RULE = '\n- If a function you need is not in your tool list, use a2api_search to find it; selected functions become callable on the next step.'
 INDEX_VARIANTS = {'index': {'detail': 'summary', 'related': 0}, 'graph': {'detail': 'summary', 'related': 5},
                   'names': {'detail': 'names', 'related': 5}, 'names-norelated': {'detail': 'names', 'related': 0},
-                  'hybrid': {'detail': 'names', 'related': 0, 'preselect': 8}}
+                  'hybrid': {'detail': 'names', 'related': 0, 'preselect': 8},
+                  'names-batch': {'detail': 'names', 'related': 0, 'batch': True}}
 
 
 def compact(value):
@@ -125,14 +128,17 @@ class RawCatalog:
 
 
 class A2APIExecutor:
-    def __init__(self, mode, app, names, host, search_streak=None, index=None):
+    def __init__(self, mode, app, names, host, search_streak=None, index=None, max_tool_bytes=16000):
         self.mode, self.app, self.names, self.host = mode, app, names, host
-        self.search_streak, self.session = search_streak, None
+        self.search_streak, self.session, self.max_tool_bytes = search_streak, None, max_tool_bytes
+        index = dict(index) if index is not None else None
+        self.batch = bool(index and index.pop('batch', False))
         self.index, self.index_text = index, None  # ToolSession.index() options, or None for auto()
 
     async def setup(self, request):
         self.session = ToolSession(self.app, ExecutionContext('adm_sj', 'store_northwind', frozenset()),
-                                   max_search_streak=self.search_streak)
+                                   max_search_streak=self.search_streak, max_tool_bytes=self.max_tool_bytes,
+                                   batch=self.batch)
         if self.index is not None:
             result = await self.session.index(request, **self.index)
             self.index_text = result['text']
@@ -160,6 +166,17 @@ class A2APIExecutor:
         return self.session.tools()
 
     async def call(self, name, arguments, call_id=None):
+        if name == BATCH_NAME and self.batch:
+            payload = await self.session.call(name, arguments, request_id=call_id)
+            text = self.session.render(payload, max_chars=RESULT_CHARS)
+            calls = []  # every call in the batch, as if made directly
+            for item in payload.get('batch') or []:
+                binding = self.session.binding(item['name'])
+                if binding is not None:
+                    calls.append((self.names.get(binding['id'], binding['id']), item.get('status') == 'succeeded'))
+                else:
+                    calls.append(None)
+            return text, calls
         business = name not in (SEARCH_NAME, LOAD_NAME)
         payload = await self.session.call(name, arguments, request_id=call_id if business else None)
         # Read after the call: a function called straight from the index is loaded by the call itself.
@@ -178,7 +195,7 @@ def a2api_app(items, host, *, facade):
     else:
         options = {item['tool']: {'effect': 'read' if item['kind'] == 'read' else 'write'} for item in items}
         vocabulary = None
-    source = ToolCatalogImporter(items, namespace='facade' if facade else 'acom')
+    source = ToolCatalogImporter(items, namespace='facade' if facade else 'acom', words=WORDS if facade else None)
 
     def values(context, call_info):
         if facade:
@@ -211,7 +228,7 @@ async def run_turns(executor, task, options):
                 tick = time.monotonic()
                 try:
                     response = await asyncio.to_thread(chat, options.base_url, options.model, messages, executor.tools(),
-                                                       timeout=min(120, remaining))
+                                                       timeout=min(120, remaining), max_tokens=options.max_tokens or None)
                 except ModelError as error:
                     # A request cut by the turn's own time limit is that limit, not a provider failure.
                     if str(error) == 'MODEL_CONNECTION_FAILED' and time.monotonic() - turn_started >= LIMITS['seconds'] - 1:
@@ -220,10 +237,15 @@ async def run_turns(executor, task, options):
                 choice = response['choices'][0]
                 message, usage = choice['message'], response.get('usage') or {}
                 run['steps'].append({'seconds': round(time.monotonic() - tick, 3), 'finish': choice.get('finish_reason'),
-                                     'usage': usage, 'toolBytes': len(compact(executor.tools()).encode())})
+                                     'usage': usage, 'toolBytes': len(compact(executor.tools()).encode()),
+                                     'contentChars': len(message.get('content') or '')})
                 for key in run['usage']:
                     run['usage'][key] += usage.get(key) or 0
                 if choice.get('finish_reason') == 'length':
+                    # Keep what the model was writing when it hit the output limit (diagnosis only).
+                    content = message.get('content') or ''
+                    run['truncated'] = {'content': content[:2000] + ('…' + content[-1500:] if len(content) > 3500 else content[2000:]),
+                                        'toolCalls': [compact(item.get('function'))[:1500] for item in message.get('tool_calls') or []]}
                     raise ModelError('MODEL_OUTPUT_TRUNCATED')
                 calls = message.get('tool_calls') or []
                 assistant = {'role': 'assistant', 'content': message.get('content') or ''}
@@ -245,11 +267,16 @@ async def run_turns(executor, task, options):
                         text, business = compact({'error': 'arguments must be a JSON object'}), None
                         arguments = None
                     else:
-                        text, business = (await executor.call(name, arguments, item['id']) if tool_calls <= LIMITS['tool_calls']
+                        size = len(arguments['calls']) if name == BATCH_NAME and isinstance(arguments.get('calls'), list) else 1
+                        text, business = (await executor.call(name, arguments, item['id'])
+                                          if tool_calls + size - 1 <= LIMITS['tool_calls']
                                           else (compact({'error': 'tool call limit reached for this turn'}), None))
                     run['toolCalls'].append({'name': name, 'arguments': arguments, 'result': text[:1500],
                                              'resultBytes': len(text.encode()), 'seconds': round(time.monotonic() - tick, 3)})
-                    if business:
+                    if isinstance(business, list):  # a2api_batch: each call counts toward the tool-call limit
+                        tool_calls += max(0, len(business) - 1)
+                        run['tools'].extend(entry for entry in business if entry)
+                    elif business:
                         run['tools'].append(business)
                     messages.append({'role': 'tool', 'tool_call_id': item['id'], 'name': name, 'content': text})
             else:
@@ -296,7 +323,8 @@ async def evaluate(options):
     git = lambda *a: subprocess.run(['git', *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
     header = {'type': 'header', 'startedAt': datetime.now(timezone.utc).isoformat(), 'model': options.model,
               'set': options.set, 'modes': modes, 'tasks': [t['id'] for t in tasks], 'limits': LIMITS,
-              'searchStreak': options.search_streak,
+              'searchStreak': options.search_streak, 'maxTokens': options.max_tokens or None,
+              'maxToolBytes': options.max_tool_bytes, 'indexGroup': options.index_group,
               'resultChars': RESULT_CHARS, 'gitCommit': git('rev-parse', 'HEAD'), 'catalog': {k: len(v) for k, v in manifests.items()},
               'acommerceCommit': subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=REPO, capture_output=True, text=True).stdout.strip()}
     with options.output.open('a') as sink:
@@ -318,11 +346,13 @@ async def evaluate(options):
                         variant = mode.split('-', 2)[2] if mode.count('-') >= 2 else None
                         index = None
                         if variant:
-                            domains = {f"{source.namespace}.{snake(item['tool'])}": item['address'].split('.')[0]
+                            depth = 2 if options.index_group == 'resource' else 1  # catalog address: domain.resource.verb
+                            # ' › ', not '.': a dotted heading reads as part of the function name.
+                            domains = {f"{source.namespace}.{snake(item['tool'])}": ' › '.join(item['address'].split('.')[:depth])
                                        for item in items if 'address' in item}
                             index = {**INDEX_VARIANTS[variant], 'relations': source.relations(),
                                      'group': lambda entry, domains=domains: domains.get(entry['id'], 'other')}
-                        executor = A2APIExecutor(mode, app, names, host, options.search_streak, index)
+                        executor = A2APIExecutor(mode, app, names, host, options.search_streak, index, options.max_tool_bytes)
                     else:
                         executor = RawCatalog(mode, items, host, facade)
                     run = await run_turns(executor, task, options)
@@ -353,6 +383,12 @@ def main():
     parser.add_argument('--only', default='')
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--search-streak', type=int, default=None, help='ToolSession max_search_streak for a2api modes')
+    # Runs before 2026-11-01 17:00 used --max-tokens 2048 --max-tool-bytes 16000 --index-group domain.
+    parser.add_argument('--max-tokens', type=int, default=0,
+                        help='output cap per model request; 0 = none, as a-commerce\'s own agent (hidden reasoning counts too)')
+    parser.add_argument('--max-tool-bytes', type=int, default=32000, help='ToolSession max_tool_bytes for a2api modes')
+    parser.add_argument('--index-group', choices=['domain', 'resource'], default='resource',
+                        help='index headings: catalog domain, or domain.resource')
     parser.add_argument('--output', type=Path, required=True)
     asyncio.run(evaluate(parser.parse_args()))
 

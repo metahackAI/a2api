@@ -1,0 +1,531 @@
+{
+  "headers": [
+    {
+      "type": "header",
+      "startedAt": "2026-11-01T09:54:44.420729+00:00",
+      "model": "nvidia/Muse-Glimmer-30B-NVFP4",
+      "gitCommit": "c8c944ecd133ece4a5caae88e309422225eb94b8",
+      "gitDirty": true,
+      "baseUrl": "https://qwen-api-xgen.x2bee.com/v1",
+      "split": "dev",
+      "taskFingerprint": "sha256:794f6f1d7a88a854747c3e90ab7b2e960312908b1644ddad2193236494520c7e",
+      "tasks": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D8",
+        "D9",
+        "D10"
+      ],
+      "scales": "large",
+      "languages": "python,spring,go,rust",
+      "modes": [
+        "a2api",
+        "a2api-index-batch"
+      ],
+      "repetitions": 1,
+      "firstRepetition": 0,
+      "maxToolBytes": 32000,
+      "searchLimit": 5,
+      "hints": null,
+      "limits": {
+        "turns": 12,
+        "taskSeconds": 180
+      },
+      "resumedFrom": []
+    },
+    {
+      "type": "group",
+      "repetition": 0,
+      "scale": "large",
+      "language": "python",
+      "convertSeconds": 0.0001
+    },
+    {
+      "type": "group",
+      "repetition": 0,
+      "scale": "large",
+      "language": "spring",
+      "convertSeconds": 2.3378
+    },
+    {
+      "type": "group",
+      "repetition": 0,
+      "scale": "large",
+      "language": "go",
+      "convertSeconds": 12.5205
+    },
+    {
+      "type": "group",
+      "repetition": 0,
+      "scale": "large",
+      "language": "rust",
+      "convertSeconds": 1.5446
+    },
+    {
+      "type": "footer",
+      "finishedAt": "2026-11-01T10:13:10.192842+00:00",
+      "runs": 80
+    }
+  ],
+  "summary": [
+    {
+      "scale": "large",
+      "mode": "a2api",
+      "runs": 40,
+      "passed": 40,
+      "passRate": 1.0,
+      "medianTotalTokens": 4164.5,
+      "meanTotalTokens": 5424.4,
+      "medianFirstPromptTokens": 1686.0,
+      "medianSeconds": 8.153,
+      "meanSeconds": 10.144,
+      "meanModelRequests": 2.425,
+      "meanBusinessCalls": 1.325,
+      "failedBusinessCalls": 4,
+      "tokensPerPass": 5424,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "scale": "large",
+      "mode": "a2api-index-batch",
+      "runs": 40,
+      "passed": 36,
+      "passRate": 0.9,
+      "medianTotalTokens": 7053.5,
+      "meanTotalTokens": 11104.3,
+      "medianFirstPromptTokens": 1877.0,
+      "medianSeconds": 11.157,
+      "meanSeconds": 15.556,
+      "meanModelRequests": 4.025,
+      "meanBusinessCalls": 2.175,
+      "failedBusinessCalls": 4,
+      "tokensPerPass": 12338,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 4
+      },
+      "infraErrors": 0
+    }
+  ],
+  "byMode": [
+    {
+      "mode": "a2api",
+      "runs": 40,
+      "passed": 40,
+      "passRate": 1.0,
+      "medianTotalTokens": 4164.5,
+      "meanTotalTokens": 5424.4,
+      "medianFirstPromptTokens": 1686.0,
+      "medianSeconds": 8.153,
+      "meanSeconds": 10.144,
+      "meanModelRequests": 2.425,
+      "meanBusinessCalls": 1.325,
+      "failedBusinessCalls": 4,
+      "tokensPerPass": 5424,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "mode": "a2api-index-batch",
+      "runs": 40,
+      "passed": 36,
+      "passRate": 0.9,
+      "medianTotalTokens": 7053.5,
+      "meanTotalTokens": 11104.3,
+      "medianFirstPromptTokens": 1877.0,
+      "medianSeconds": 11.157,
+      "meanSeconds": 15.556,
+      "meanModelRequests": 4.025,
+      "meanBusinessCalls": 2.175,
+      "failedBusinessCalls": 4,
+      "tokensPerPass": 12338,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 4
+      },
+      "infraErrors": 0
+    }
+  ],
+  "byLanguage": [
+    {
+      "language": "go",
+      "mode": "a2api",
+      "runs": 10,
+      "passed": 10,
+      "passRate": 1.0,
+      "medianTotalTokens": 4045.0,
+      "meanTotalTokens": 5185.4,
+      "medianFirstPromptTokens": 1632.0,
+      "medianSeconds": 7.614,
+      "meanSeconds": 10.101,
+      "meanModelRequests": 2.4,
+      "meanBusinessCalls": 1.3,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 5185,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "language": "go",
+      "mode": "a2api-index-batch",
+      "runs": 10,
+      "passed": 9,
+      "passRate": 0.9,
+      "medianTotalTokens": 6746.0,
+      "meanTotalTokens": 10631.2,
+      "medianFirstPromptTokens": 1864.0,
+      "medianSeconds": 10.384,
+      "meanSeconds": 15.096,
+      "meanModelRequests": 4.0,
+      "meanBusinessCalls": 2.2,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 11812,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 1
+      },
+      "infraErrors": 0
+    },
+    {
+      "language": "python",
+      "mode": "a2api",
+      "runs": 10,
+      "passed": 10,
+      "passRate": 1.0,
+      "medianTotalTokens": 4024.0,
+      "meanTotalTokens": 5381.5,
+      "medianFirstPromptTokens": 1710.0,
+      "medianSeconds": 7.492,
+      "meanSeconds": 9.378,
+      "meanModelRequests": 2.4,
+      "meanBusinessCalls": 1.3,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 5382,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "language": "python",
+      "mode": "a2api-index-batch",
+      "runs": 10,
+      "passed": 9,
+      "passRate": 0.9,
+      "medianTotalTokens": 6756.5,
+      "meanTotalTokens": 11074.2,
+      "medianFirstPromptTokens": 1760.0,
+      "medianSeconds": 11.203,
+      "meanSeconds": 15.72,
+      "meanModelRequests": 4.1,
+      "meanBusinessCalls": 2.2,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 12305,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 1
+      },
+      "infraErrors": 0
+    },
+    {
+      "language": "rust",
+      "mode": "a2api",
+      "runs": 10,
+      "passed": 10,
+      "passRate": 1.0,
+      "medianTotalTokens": 4112.5,
+      "meanTotalTokens": 5528.6,
+      "medianFirstPromptTokens": 1665.5,
+      "medianSeconds": 7.821,
+      "meanSeconds": 10.717,
+      "meanModelRequests": 2.5,
+      "meanBusinessCalls": 1.4,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 5529,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "language": "rust",
+      "mode": "a2api-index-batch",
+      "runs": 10,
+      "passed": 9,
+      "passRate": 0.9,
+      "medianTotalTokens": 7114.0,
+      "meanTotalTokens": 11405.4,
+      "medianFirstPromptTokens": 1889.0,
+      "medianSeconds": 11.766,
+      "meanSeconds": 16.576,
+      "meanModelRequests": 4.0,
+      "meanBusinessCalls": 2.1,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 12673,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 1
+      },
+      "infraErrors": 0
+    },
+    {
+      "language": "spring",
+      "mode": "a2api",
+      "runs": 10,
+      "passed": 10,
+      "passRate": 1.0,
+      "medianTotalTokens": 4246.5,
+      "meanTotalTokens": 5602.1,
+      "medianFirstPromptTokens": 1791.5,
+      "medianSeconds": 8.543,
+      "meanSeconds": 10.38,
+      "meanModelRequests": 2.4,
+      "meanBusinessCalls": 1.3,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 5602,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "language": "spring",
+      "mode": "a2api-index-batch",
+      "runs": 10,
+      "passed": 9,
+      "passRate": 0.9,
+      "medianTotalTokens": 7222.0,
+      "meanTotalTokens": 11306.4,
+      "medianFirstPromptTokens": 2013.0,
+      "medianSeconds": 10.274,
+      "meanSeconds": 14.831,
+      "meanModelRequests": 4.0,
+      "meanBusinessCalls": 2.2,
+      "failedBusinessCalls": 1,
+      "tokensPerPass": 12563,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 1
+      },
+      "infraErrors": 0
+    }
+  ],
+  "byKind": [
+    {
+      "kind": "complex",
+      "mode": "a2api",
+      "runs": 16,
+      "passed": 16,
+      "passRate": 1.0,
+      "medianTotalTokens": 5574.5,
+      "meanTotalTokens": 7995.438,
+      "medianFirstPromptTokens": 1694.0,
+      "medianSeconds": 11.869,
+      "meanSeconds": 14.085,
+      "meanModelRequests": 3.312,
+      "meanBusinessCalls": 2.062,
+      "failedBusinessCalls": 0,
+      "tokensPerPass": 7995,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "kind": "complex",
+      "mode": "a2api-index-batch",
+      "runs": 16,
+      "passed": 12,
+      "passRate": 0.75,
+      "medianTotalTokens": 10984.0,
+      "meanTotalTokens": 17865.688,
+      "medianFirstPromptTokens": 1884.0,
+      "medianSeconds": 17.297,
+      "meanSeconds": 23.67,
+      "meanModelRequests": 5.75,
+      "meanBusinessCalls": 3.938,
+      "failedBusinessCalls": 0,
+      "tokensPerPass": 23821,
+      "hostErrors": {
+        "MODEL_TURN_LIMIT": 4
+      },
+      "infraErrors": 0
+    },
+    {
+      "kind": "fault",
+      "mode": "a2api",
+      "runs": 4,
+      "passed": 4,
+      "passRate": 1.0,
+      "medianTotalTokens": 4237.0,
+      "meanTotalTokens": 4238.75,
+      "medianFirstPromptTokens": 1691.5,
+      "medianSeconds": 13.148,
+      "meanSeconds": 12.825,
+      "meanModelRequests": 2.0,
+      "meanBusinessCalls": 1.0,
+      "failedBusinessCalls": 4,
+      "tokensPerPass": 4239,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "kind": "fault",
+      "mode": "a2api-index-batch",
+      "runs": 4,
+      "passed": 4,
+      "passRate": 1.0,
+      "medianTotalTokens": 6721.0,
+      "meanTotalTokens": 6683.25,
+      "medianFirstPromptTokens": 1875.5,
+      "medianSeconds": 11.157,
+      "meanSeconds": 10.645,
+      "meanModelRequests": 3.0,
+      "meanBusinessCalls": 1.0,
+      "failedBusinessCalls": 4,
+      "tokensPerPass": 6683,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "kind": "missing",
+      "mode": "a2api",
+      "runs": 4,
+      "passed": 4,
+      "passRate": 1.0,
+      "medianTotalTokens": 1733.5,
+      "meanTotalTokens": 1747.75,
+      "medianFirstPromptTokens": 1568.0,
+      "medianSeconds": 3.159,
+      "meanSeconds": 3.163,
+      "meanModelRequests": 1.0,
+      "meanBusinessCalls": 0.0,
+      "failedBusinessCalls": 0,
+      "tokensPerPass": 1748,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "kind": "missing",
+      "mode": "a2api-index-batch",
+      "runs": 4,
+      "passed": 4,
+      "passRate": 1.0,
+      "medianTotalTokens": 2127.0,
+      "meanTotalTokens": 2562.5,
+      "medianFirstPromptTokens": 1832.5,
+      "medianSeconds": 3.942,
+      "meanSeconds": 4.371,
+      "meanModelRequests": 1.25,
+      "meanBusinessCalls": 0.0,
+      "failedBusinessCalls": 0,
+      "tokensPerPass": 2562,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "kind": "simple",
+      "mode": "a2api",
+      "runs": 16,
+      "passed": 16,
+      "passRate": 1.0,
+      "medianTotalTokens": 3867.0,
+      "meanTotalTokens": 4068.938,
+      "medianFirstPromptTokens": 1710.0,
+      "medianSeconds": 6.247,
+      "meanSeconds": 7.279,
+      "meanModelRequests": 2.0,
+      "meanBusinessCalls": 1.0,
+      "failedBusinessCalls": 0,
+      "tokensPerPass": 4069,
+      "hostErrors": {},
+      "infraErrors": 0
+    },
+    {
+      "kind": "simple",
+      "mode": "a2api-index-batch",
+      "runs": 16,
+      "passed": 16,
+      "passRate": 1.0,
+      "medianTotalTokens": 6952.5,
+      "meanTotalTokens": 7583.625,
+      "medianFirstPromptTokens": 1871.5,
+      "medianSeconds": 9.11,
+      "meanSeconds": 11.465,
+      "meanModelRequests": 3.25,
+      "meanBusinessCalls": 1.25,
+      "failedBusinessCalls": 0,
+      "tokensPerPass": 7584,
+      "hostErrors": {},
+      "infraErrors": 0
+    }
+  ],
+  "stability": [
+    {
+      "scale": "large",
+      "mode": "a2api",
+      "consistentTasks": 10,
+      "tasks": 10,
+      "unexpectedWrites": 0,
+      "repeatedFailingCalls": 0,
+      "faultAndMissingPassed": 8,
+      "faultAndMissingRuns": 8,
+      "failedBusinessCalls": 4,
+      "hostErrors": 0
+    },
+    {
+      "scale": "large",
+      "mode": "a2api-index-batch",
+      "consistentTasks": 9,
+      "tasks": 10,
+      "unexpectedWrites": 0,
+      "repeatedFailingCalls": 0,
+      "faultAndMissingPassed": 8,
+      "faultAndMissingRuns": 8,
+      "failedBusinessCalls": 4,
+      "hostErrors": 4
+    }
+  ],
+  "failures": [
+    {
+      "task": "D7",
+      "scale": "large",
+      "language": "python",
+      "mode": "a2api-index-batch",
+      "repetition": 0,
+      "failures": [
+        "ANSWER_NOT_JSON",
+        "STATE_NOT_UPDATED",
+        "HOST:MODEL_TURN_LIMIT"
+      ]
+    },
+    {
+      "task": "D7",
+      "scale": "large",
+      "language": "spring",
+      "mode": "a2api-index-batch",
+      "repetition": 0,
+      "failures": [
+        "ANSWER_NOT_JSON",
+        "STATE_NOT_UPDATED",
+        "HOST:MODEL_TURN_LIMIT"
+      ]
+    },
+    {
+      "task": "D7",
+      "scale": "large",
+      "language": "go",
+      "mode": "a2api-index-batch",
+      "repetition": 0,
+      "failures": [
+        "ANSWER_NOT_JSON",
+        "STATE_NOT_UPDATED",
+        "HOST:MODEL_TURN_LIMIT"
+      ]
+    },
+    {
+      "task": "D7",
+      "scale": "large",
+      "language": "rust",
+      "mode": "a2api-index-batch",
+      "repetition": 0,
+      "failures": [
+        "ANSWER_NOT_JSON",
+        "STATE_NOT_UPDATED",
+        "HOST:MODEL_TURN_LIMIT"
+      ]
+    }
+  ]
+}

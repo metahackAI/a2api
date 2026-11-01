@@ -8,7 +8,7 @@ import unittest
 
 from a2api import ExecutionContext, HTTPDeployment, ToolSession, convert
 from a2api.importers import ToolCatalogImporter
-from a2api.tool_session import INDEX_HEAD, LOAD_NAME, render_result
+from a2api.tool_session import BATCH_NAME, INDEX_HEAD, LOAD_NAME, render_result, tool_bytes
 
 CALLER = ExecutionContext('alice', 'tenant-a', frozenset())
 
@@ -149,6 +149,59 @@ class IndexTests(unittest.TestCase):
             self.assertIn('track_shipment', names)
             self.assertLessEqual(len(names), 3)
             self.assertEqual((await session.call('track_shipment', {'delivery_id': 'dlv_1'}))['status'], 'succeeded')
+        asyncio.run(scenario())
+
+    def test_functions_left_out_by_the_budget_are_named_with_what_to_do(self):
+        async def scenario():
+            probe = ToolSession(self.app, CALLER)
+            await probe.index()
+            await probe.call(LOAD_NAME, {'names': ['get_order', 'track_shipment']})
+            session = ToolSession(self.app, CALLER, max_tool_bytes=tool_bytes(probe.tools()) + 10)
+            await session.index()
+            loaded = await session.call(LOAD_NAME, {'names': ['get_order', 'track_shipment', 'get_customer']})
+            self.assertEqual(loaded['loaded'], ['get_order', 'track_shipment'])
+            self.assertEqual(loaded['omitted'], [{'name': 'get_customer', 'reason': 'SCHEMA_BUDGET'}])
+            self.assertIn('load them again when you need them', json.loads(render_result(loaded))['note'])
+            session.tools()  # the next model request shows the loaded functions
+            later = await session.call(LOAD_NAME, {'names': ['get_customer']})  # now an older function leaves
+            self.assertEqual(later['loaded'], ['get_customer'])
+            self.assertEqual(len(later['evicted']), 1)
+        asyncio.run(scenario())
+
+    def test_load_accepts_a_heading_joined_to_a_name(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER)
+            await session.index(group=lambda entry: 'orders')
+            loaded = await session.call(LOAD_NAME, {'names': ['orders.get_order', 'orders › track_shipment', 'GET_CUSTOMER',
+                                                              'get_order']})
+            self.assertEqual(loaded['loaded'], ['get_order', 'track_shipment', 'get_customer'])
+            self.assertEqual(loaded['unknown'], [])
+        asyncio.run(scenario())
+
+    def test_batch_runs_independent_calls_in_one_step(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER, batch=True)
+            await session.index()
+            self.assertEqual([tool['function']['name'] for tool in session.tools()], [LOAD_NAME])  # nothing to batch yet
+            await session.call(LOAD_NAME, {'names': ['get_order', 'track_shipment']})
+            self.assertEqual([tool['function']['name'] for tool in session.tools()][:2], [LOAD_NAME, BATCH_NAME])
+            result = await session.call(BATCH_NAME, {'calls': [
+                {'name': 'get_order', 'arguments': {'order_id': 'ord_1'}},
+                {'name': 'track_shipment', 'arguments': {'parcel': 'x'}},
+                {'name': LOAD_NAME, 'arguments': {'names': ['get_customer']}},
+                {'name': 'cancel_order', 'arguments': {'order_id': 'ord_1'}}]}, request_id='call_7')
+            outcome = [(item['name'], item.get('status') or item['error']['code']) for item in result['batch']]
+            self.assertEqual(outcome, [('get_order', 'succeeded'), ('track_shipment', 'INVALID_INPUT'),
+                                       (LOAD_NAME, 'INVALID_INPUT'), ('cancel_order', 'NOT_LOADED')])
+            self.assertEqual([tool for tool, _ in Handler.seen], ['get_order'])
+            text = render_result(result, max_chars=800)
+            view = json.loads(text)
+            self.assertEqual([item['name'] for item in view['batch']], ['get_order', 'track_shipment', LOAD_NAME, 'cancel_order'])
+            self.assertEqual(view['batch'][0]['result']['status'], 'succeeded')
+            self.assertEqual((await session.call(BATCH_NAME, {'calls': []}))['error']['code'], 'INVALID_INPUT')
+            plain = ToolSession(self.app, CALLER)
+            await plain.index()
+            self.assertEqual((await plain.call(BATCH_NAME, {'calls': []}))['error']['code'], 'UNKNOWN_FUNCTION')
         asyncio.run(scenario())
 
     def test_relations_read_from_catalog_entries(self):

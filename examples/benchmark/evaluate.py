@@ -42,7 +42,9 @@ def chat(base_url, model, messages, tools, *, api_key=None, timeout=REQUEST_SECO
     headers = {'Content-Type': 'application/json'}
     if api_key:
         headers['Authorization'] = 'Bearer ' + api_key
-    payload = {'model': model, 'messages': messages, 'temperature': 0, 'max_tokens': max_tokens, 'stream': False}
+    payload = {'model': model, 'messages': messages, 'temperature': 0, 'stream': False}
+    if max_tokens is not None:  # None: no output cap (the provider's own limit)
+        payload['max_tokens'] = max_tokens
     if tools:
         payload.update(tools=tools, tool_choice='auto')
     request = Request(base_url.rstrip('/') + '/chat/completions', headers=headers, data=json.dumps(payload).encode())
@@ -122,7 +124,9 @@ async def run_task(executor, question, *, base_url, model, api_key=None, request
                     text, business = await executor.call(name, arguments)
                 run['toolCalls'].append({'name': name, 'arguments': arguments, 'resultBytes': len(text.encode()), 'result': text[:3000],
                                          'seconds': round(time.monotonic() - tick, 4), 'business': business})
-                if business:
+                if isinstance(business, list):  # a2api_batch: each call it made
+                    run['calls'].extend(entry for entry in business if entry)
+                elif business:
                     run['calls'].append(business)
                 messages.append({'role': 'tool', 'tool_call_id': call['id'], 'name': name, 'content': text})
         else:
@@ -144,12 +148,13 @@ def executor_for(mode, scale, spec, origin, app, ops, options):
         return SpecPrompt(scale, spec, origin)
     # 'a2api-plain' is the same host with hints='none' (no result-shape text), for presentation comparisons.
     # 'a2api-all' exposes the whole catalog whenever it fits max_tool_bytes (no pre-selection).
-    # 'a2api-index-summary/-graph/-names/-hybrid' use ToolSession.index() (grouped by resource) instead of auto().
+    # 'a2api-index-summary/-graph/-names/-hybrid/-batch' use ToolSession.index() (grouped by resource) instead of auto().
     hints = 'none' if mode == 'a2api-plain' else options.hints
     all_bytes = options.max_tool_bytes if mode == 'a2api-all' else None
     variant = {'a2api-index-summary': {'detail': 'summary', 'related': 0}, 'a2api-index-graph': {'detail': 'summary', 'related': 5},
                'a2api-index-names': {'detail': 'names', 'related': 5},
-               'a2api-index-hybrid': {'detail': 'names', 'related': 0, 'preselect': 8}}.get(mode)
+               'a2api-index-hybrid': {'detail': 'names', 'related': 0, 'preselect': 8},
+               'a2api-index-batch': {'detail': 'names', 'related': 0, 'batch': True}}.get(mode)
     index = None if variant is None else {**variant, 'group': lambda entry: ops.get(entry['id'], 'other').split('.')[0]}
     executor = A2API(app, ops, max_tool_bytes=options.max_tool_bytes, search_limit=options.search_limit, hints=hints,
                      all_bytes=all_bytes, index=index)
