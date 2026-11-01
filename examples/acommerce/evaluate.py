@@ -9,6 +9,12 @@ Modes (same model, system prompt, limits and scoring):
   acom-all      every A-Commerce tool as a function (raw catalog; may exceed the model context)
   a2api-acom    the A-Commerce catalog converted by a2api (ToolCatalogImporter) through ToolSession
   a2api-facade  the facade converted by a2api, with the host's legacy metadata (legacy_facade.py)
+  a2api-acom-index  the converted catalog as an index in the system prompt (name + first summary sentence,
+                    by domain); the model loads what it needs with a2api_load (ToolSession.index)
+  a2api-acom-graph  the index, and each result names functions that take IDs it returned (related=5)
+  a2api-acom-names  names only by domain, with related next steps
+  a2api-acom-names-norelated  names only by domain, no related next steps
+  a2api-acom-hybrid  names only by domain, and the host search's 8 candidates loaded up front (as auto())
 Writes are previewed into one change set per task (a person approves later); nothing is approved.
 """
 
@@ -32,7 +38,8 @@ sys.path.insert(0, str(HERE.parent / 'benchmark'))
 
 from a2api import ExecutionContext, HTTPDeployment, ToolSession, convert  # noqa: E402
 from a2api.importers import ToolCatalogImporter  # noqa: E402
-from a2api.tool_session import SEARCH_NAME  # noqa: E402
+from a2api.importers.catalog import snake  # noqa: E402
+from a2api.tool_session import LOAD_NAME, SEARCH_NAME  # noqa: E402
 from legacy_facade import VOCABULARY, error_detail, facade_options  # noqa: E402
 from evaluate import DEFAULT_BASE_URL, DEFAULT_MODEL, ModelError, chat, wait_for_model  # noqa: E402
 from scoring import score  # noqa: E402
@@ -49,6 +56,9 @@ Store time: Friday, November 6, 2026, 11:00 (America/New_York). Prices are in US
 - If something does not exist or a rule forbids it, say so plainly instead of guessing.
 - Answer the operator directly and briefly, with the key numbers.'''
 SEARCH_RULE = '\n- If a function you need is not in your tool list, use a2api_search to find it; selected functions become callable on the next step.'
+INDEX_VARIANTS = {'index': {'detail': 'summary', 'related': 0}, 'graph': {'detail': 'summary', 'related': 5},
+                  'names': {'detail': 'names', 'related': 5}, 'names-norelated': {'detail': 'names', 'related': 0},
+                  'hybrid': {'detail': 'names', 'related': 0, 'preselect': 8}}
 
 
 def compact(value):
@@ -115,32 +125,45 @@ class RawCatalog:
 
 
 class A2APIExecutor:
-    def __init__(self, mode, app, names, host, search_streak=None):
+    def __init__(self, mode, app, names, host, search_streak=None, index=None):
         self.mode, self.app, self.names, self.host = mode, app, names, host
         self.search_streak, self.session = search_streak, None
+        self.index, self.index_text = index, None  # ToolSession.index() options, or None for auto()
 
     async def setup(self, request):
         self.session = ToolSession(self.app, ExecutionContext('adm_sj', 'store_northwind', frozenset()),
                                    max_search_streak=self.search_streak)
+        if self.index is not None:
+            result = await self.session.index(request, **self.index)
+            self.index_text = result['text']
+            return {'strategy': 'index', 'functions': result['functions'], 'indexChars': len(result['text']),
+                    'hostCalls': self.session.stats}
         result = await self.session.auto(request)
         return {'strategy': result['strategy'], 'functions': len(self.session.tools()), 'hostCalls': self.session.stats}
 
     async def turn(self, line):
         """A later turn: the host searches the new request too (no model turn); earlier functions stay."""
+        if self.session.strategy == 'index':
+            await self.session.focus(line)  # ranks the related next steps for this request
+            return None
         if self.session.strategy != 'search':
             return None
         found = await self.session.select(' '.join(line.split())[:1000])
         return [item['name'] for item in found['selected']]
 
     def system(self):
+        if self.session.strategy == 'index':
+            return SYSTEM + '\n\n' + self.index_text
         return SYSTEM + (SEARCH_RULE if self.session.strategy != 'all' else '')
 
     def tools(self):
         return self.session.tools()
 
     async def call(self, name, arguments, call_id=None):
-        binding = None if name == SEARCH_NAME else self.session.binding(name)
-        payload = await self.session.call(name, arguments, request_id=call_id if binding else None)
+        business = name not in (SEARCH_NAME, LOAD_NAME)
+        payload = await self.session.call(name, arguments, request_id=call_id if business else None)
+        # Read after the call: a function called straight from the index is loaded by the call itself.
+        binding = self.session.binding(name) if business else None
         # a2api bounds the result structurally (largest arrays first) instead of cutting the JSON text.
         text = self.session.render(payload, max_chars=RESULT_CHARS)
         if binding is None:
@@ -166,7 +189,7 @@ def a2api_app(items, host, *, facade):
         request_values=values, error_detail=error_detail, timeout_ms=30000, deadline_ms=35000,
         max_response_bytes=4 * 1048576), vocabulary=vocabulary)
     names = {record.id: record.operation_id for record in source.iter_operations()}
-    return app, names
+    return app, names, source
 
 
 async def run_turns(executor, task, options):
@@ -291,8 +314,15 @@ async def evaluate(options):
                     facade = 'facade' in mode
                     items = manifests['facade' if facade else 'acom']
                     if mode.startswith('a2api'):
-                        app, names = a2api_app(items, host, facade=facade)
-                        executor = A2APIExecutor(mode, app, names, host, options.search_streak)
+                        app, names, source = a2api_app(items, host, facade=facade)
+                        variant = mode.split('-', 2)[2] if mode.count('-') >= 2 else None
+                        index = None
+                        if variant:
+                            domains = {f"{source.namespace}.{snake(item['tool'])}": item['address'].split('.')[0]
+                                       for item in items if 'address' in item}
+                            index = {**INDEX_VARIANTS[variant], 'relations': source.relations(),
+                                     'group': lambda entry, domains=domains: domains.get(entry['id'], 'other')}
+                        executor = A2APIExecutor(mode, app, names, host, options.search_streak, index)
                     else:
                         executor = RawCatalog(mode, items, host, facade)
                     run = await run_turns(executor, task, options)

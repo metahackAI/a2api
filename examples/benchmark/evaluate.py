@@ -144,10 +144,15 @@ def executor_for(mode, scale, spec, origin, app, ops, options):
         return SpecPrompt(scale, spec, origin)
     # 'a2api-plain' is the same host with hints='none' (no result-shape text), for presentation comparisons.
     # 'a2api-all' exposes the whole catalog whenever it fits max_tool_bytes (no pre-selection).
+    # 'a2api-index-summary/-graph/-names/-hybrid' use ToolSession.index() (grouped by resource) instead of auto().
     hints = 'none' if mode == 'a2api-plain' else options.hints
     all_bytes = options.max_tool_bytes if mode == 'a2api-all' else None
+    variant = {'a2api-index-summary': {'detail': 'summary', 'related': 0}, 'a2api-index-graph': {'detail': 'summary', 'related': 5},
+               'a2api-index-names': {'detail': 'names', 'related': 5},
+               'a2api-index-hybrid': {'detail': 'names', 'related': 0, 'preselect': 8}}.get(mode)
+    index = None if variant is None else {**variant, 'group': lambda entry: ops.get(entry['id'], 'other').split('.')[0]}
     executor = A2API(app, ops, max_tool_bytes=options.max_tool_bytes, search_limit=options.search_limit, hints=hints,
-                     all_bytes=all_bytes)
+                     all_bytes=all_bytes, index=index)
     executor.mode = mode
     return executor
 

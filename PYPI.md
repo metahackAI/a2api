@@ -82,7 +82,7 @@ result = await session.call(name, arguments)     # validated invoke, never retri
 text = session.render(result)                    # compact model-facing result with failure hints
 ```
 
-Small catalogs are exposed directly; large catalogs get one `a2api_search` tool plus the functions the host pre-selected from the question. Function parameters are the exact business input schema (HTTP `path/query/body` flattened when lossless).
+Small catalogs are exposed directly; large catalogs get one `a2api_search` tool plus the functions the host pre-selected from the question. (1.1) For large catalogs whose requests do not use the functions' words, `await session.index(question, detail='names')` returns an index of every function name for the system prompt; the model loads the functions it picks with `a2api_load` (on a 253-tool back office: median tokens per task −68% against search, with more tasks solved). Function parameters are the exact business input schema (HTTP `path/query/body` flattened when lossless).
 
 ## MCP
 

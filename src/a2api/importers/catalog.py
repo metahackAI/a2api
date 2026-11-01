@@ -104,6 +104,15 @@ class ToolCatalogImporter:
             data = json.loads(response.read())
         return cls(data, source_name=url.split('?')[0], **options)
 
+    def relations(self, *, consumes_key='consumes', produces_key='produces'):
+        """{id: {'consumes': [...], 'produces': [...]}}: the IDs each entry declares it takes and returns
+        (`[{"name": "order_id"}]` or `["order_id"]`), for ToolSession.index(related=...)."""
+        def names(value):
+            return [item.get('name') if isinstance(item, Mapping) else item for item in value or ()
+                    if isinstance(item, str) or (isinstance(item, Mapping) and isinstance(item.get('name'), str))]
+        return {item.id: {'consumes': names(item.entry.get(consumes_key)), 'produces': names(item.entry.get(produces_key))}
+                for item in self._records if isinstance(item, CatalogRecord)}
+
     def iter_operations(self, operation_ids: set[str] | None = None):
         found = {item.operation_id for item in self._records}
         if operation_ids is not None and set(operation_ids) - found:

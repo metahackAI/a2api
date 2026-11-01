@@ -23,6 +23,14 @@ text = session.render(payload)                  # compact text for the model
 
 `auto(question, max_functions=64, preselect=8, all_bytes=10000)`: a catalog whose whole function set fits `all_bytes` (about 20 functions) and `max_tool_bytes` (default 16000) is given whole and the search tool is left out (`strategy="all"`). Otherwise the host searches the question for up to `preselect` candidates and keeps `a2api_search` (`strategy="search"`). `prime([...])` prepares known IDs; `select(query)` is a host search without a model turn (useful at the start of a later conversation turn).
 
+(1.1) `index(question, detail='summary'|'names', group=None, related=0, relations=None, preselect=0)`: for large catalogs whose requests do not share words with function names. The host puts the returned `text` — every function's name (and with `detail='summary'` the first sentence of its summary), optionally under `group(entry)` headings — into the system prompt; it does not change during the session, so it stays in the cached prompt prefix. `tools()` then holds `a2api_load` and the loaded functions. The model loads what it chooses with `a2api_load({"names": [...]})`; unknown names come back with `suggest`. Calling an unloaded function straight from the index loads it: a read with valid arguments runs, a write answers `NOT_LOADED` without running. `related=N` adds to successful results up to N functions that take an ID the result returned (`relations` such as `ToolCatalogImporter.relations()`, or inputs named like IDs); `focus(text)` re-ranks them for each new user turn. `preselect=N` also loads the host search's candidates. Measured choices are in [the 1.1 results (Korean)](../39-improvement-results.ko.md) §3.8.
+
+```python
+built = await session.index(question, detail='names', group=lambda entry: domain_of[entry['id']])
+messages = [{'role': 'system', 'content': base_prompt + '\n\n' + built['text']}, ...]
+tools = session.tools()                          # a2api_load + loaded functions
+```
+
 ## Search tool
 
 Input `{"query": "...", "more": false}`. Selected functions become callable on the **next** model request. Results:

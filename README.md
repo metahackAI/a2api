@@ -34,7 +34,7 @@ pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go�
 | OpenAPI가 있는 모든 HTTP API | `OpenAPIImporter` → `convert` | [11](docs/11-in-memory-conversion.ko.md) |
 
 - **호출 프로토콜 `a2api-call/1.0`**: discover/describe/invoke와 6필드 descriptor, 구조화 오류([20](docs/20-call-protocol.ko.md)). MCP 도구는 규모와 무관하게 세 개다.
-- **모델 호스트 표현 `a2api-tools/1.0`**: `ToolSession.auto(질문)`이 작은 카탈로그는 모든 함수를, 큰 카탈로그는 질문으로 미리 찾은 후보와 검색 도구를 준다. 읽기 쉬운 함수 이름, 평탄한 HTTP 인자, compact 결과와 실패 안내를 제공한다([24](docs/24-selected-tools.ko.md)).
+- **모델 호스트 표현 `a2api-tools/1.0`**: `ToolSession.auto(질문)`이 작은 카탈로그는 모든 함수를, 큰 카탈로그는 질문으로 미리 찾은 후보와 검색 도구를 준다. 읽기 쉬운 함수 이름, 평탄한 HTTP 인자, compact 결과와 실패 안내를 제공한다([24](docs/24-selected-tools.ko.md)). (1.1) 질문이 함수 이름과 다른 말로 오는 큰 카탈로그에는 `ToolSession.index()`를 쓴다. 모든 함수 이름의 목차를 보여 주고, 모델이 고른 함수만 불러온다(a-commerce 253개 도구에서 검색 대비 작업당 토큰 중앙값 −68%, [39 문서 3.8](docs/39-improvement-results.ko.md)).
 - **공개 필드 선택**: `select`에 `items[].id`, `owner.login` 같은 경로를 지정해 내부 필드를 모델에 보내지 않는다. 원본 응답을 먼저 검증한다([11](docs/11-in-memory-conversion.ko.md)).
 - **실행 제한**: `HTTPDeployment(timeout_ms=..., deadline_ms=..., max_response_bytes=...)`. 자동 재시도는 없다.
 - **벤치마크**: 같은 API를 4개 언어 × 소/중/대규모(19/55/235 operation)로 생성해 `spec-tools`(명세의 모든 operation을 function으로), `spec-prompt`(명세 전체를 prompt로)와 a2api를 실제 모델로 비교한다([examples/benchmark](examples/benchmark/README.md)).

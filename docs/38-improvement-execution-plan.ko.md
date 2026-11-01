@@ -67,3 +67,4 @@
 | D | 완료 | a-commerce held_out(L1–L4, A1, A2) 각 2회. 자체 평가는 provider 장애로 두 번 중단돼 실행 로그로 집계. 판정 뒤 찾은 검색 밀어내기 결함을 고치고 사후 확인(판정 아님)을 따로 기록 |
 | E | 완료 | RealWorld dev·holdout(6방식), 4언어 벤치마크 dev 회귀, GitHub 변환 범위. 계획 변경: 공개 RealWorld 구현 4개(Spring·Gin·Axum·FastAPI)는 실행 환경 정책상 빌드·실행하지 않고 코드만 읽었다. 호출은 명세를 따르는 자체 서버(구현별 차이 재현)로 했다. Go Gin·FastAPI importer와 Spring·Rust 실제 코드 대응을 이 단계에서 구현 |
 | F | 완료(업로드 제외) | 멱등성 헤더, CI, 영어 문서, 결과 문서(39), 버전 1.1.0. `scripts/release.sh` 실행과 업로드는 사용자가 한다(이 환경에서 release 스크립트 실행이 거부됨) |
+| G(추가 지시) | 완료 | "API 전체를 보내지 말고 구조화(그래프)하거나 더 효율적인 방법으로, 느려도 정확하고 적은 토큰으로". 실패 기록 분석 뒤 목차 + 필요할 때 불러오기(`ToolSession.index`), 관계 다음 단계 안내, 목차 + 사전 선택을 구현해 a-commerce design·held_out(사후)·4언어 벤치마크로 비교. 결과와 채택/기각은 39 문서 3.8 |

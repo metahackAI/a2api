@@ -103,6 +103,30 @@ asyncio.run(main())
 
 `ConvertedAPI`와 앱 목록도 동일하게 받는다. `ToolSession.from_mcp(client)`는 연결된 공식 MCP client를 받으며 연결 수명은 호출자가 관리한다. 기본 `max_tool_bytes=16000`, `search_limit=3`은 호스트 설정이다. 실제 모델 token budget이 아니고 API 개수 전환 임계값도 아니다. `prime`은 정확한 ID로 첫 페이지에서 버전을 확인하고 전체 요청 집합이 예산에 들어야 한다. 실제 복수 버전은 오류이며 마지막 페이지의 한 버전을 임의로 고르지 않는다. 필요하면 검색/예산을 조정한다.
 
+### 큰 카탈로그: 목차 + 필요할 때 불러오기(`index`, 1.1)
+
+검색으로 후보를 고르는 대신 모델에게 **모든 함수의 목차**를 보여 주고, 모델이 고른 함수만 불러온다. 단어 검색은 대화형 질문에서 맞는 함수를 놓치기 쉽고, 카탈로그에 없는 기능을 모델이 계속 다시 검색하게 만든다. 목차를 보면 모델이 무엇이 있는지 알고 고른다.
+
+```python
+built = await session.index(question, detail='names', related=5,
+                            relations=source.relations(),          # ToolCatalogImporter가 읽은 consumes/produces
+                            group=lambda entry: domain_of[entry['id']])
+system_prompt = base_prompt + '\n\n' + built['text']             # 목차는 세션 동안 바뀌지 않음(캐시되는 앞부분)
+tools = session.tools()                                         # a2api_load + 불러온 함수
+await session.focus(next_user_turn)                              # 새 사용자 턴마다(관련 함수 순위)
+```
+
+- `detail='summary'`: 이름과 요약 첫 문장. `'names'`: 이름만(가장 작음). `group(entry)`가 주면 제목별로 묶는다. 모든 ID가 같은 namespace면 이름에서 뺀다(`acom.get_order` → `get_order`).
+- 모델은 `a2api_load({"names": [...]})`로 함수를 불러오고 다음 요청부터 호출한다. 목차에 없는 이름은 `unknown`과 비슷한 이름 `suggest`로 돌려준다.
+- 불러오지 않은 함수를 목차에서 바로 호출하면 그 함수를 불러온다. 읽기이고 인자가 schema에 맞으면 바로 실행하고, 쓰기는 실행하지 않고 `NOT_LOADED`로 답한다(모델이 인자 schema를 본 뒤 다시 호출).
+- `related=N`: 성공한 결과에 그 결과가 돌려준 ID를 받는 함수를 최대 N개 `next`로 붙인다. 관계는 `relations`(`{capability id: {'consumes': [...], 'produces': [...]}}`)에서, 없으면 ID 이름의 입력(`order_id`, `orderId`)에서 얻는다. 많은 함수가 받는 ID(예: `customer_id`)는 사용자 요청과 맞는 함수만 보여 준다.
+- `preselect=N`: 호스트 검색 후보도 미리 불러 둔다. a-commerce에서는 모델이 후보에 머물러 목차의 이점이 사라졌다. 권장하지 않는다.
+- wire(`discover`·`describe`·`invoke`)와 MCP 세 도구는 바뀌지 않는다. 목차는 `discover`로, 불러오기는 `describe`로 만든다.
+- 측정(39 문서 3.8)에 따른 선택 기준은 다음과 같다.
+  - 질문이 함수 이름과 다른 말로 오는 큰 카탈로그: `index(detail='names')`. a-commerce 253개에서 검색보다 더 풀고, 토큰은 같거나 적었다.
+  - 질문이 기능 이름을 그대로 쓰는 경우: `auto()`. 4언어 벤치마크에서 정확도가 같고 더 싸다.
+  - `related`는 효과가 측정되지 않아 기본 꺼짐이다.
+
 필드 기반 순위는 업데이트한 직접 앱 서버에서 제공한다. 호스트의 more 지원만으로 외부/기존 관리 Runtime 서버의 검색 알고리즘까지 바뀌는 것은 아니다. 인증 주체/tenant/scopes/server가 바뀌면 새 ToolSession을 사용한다.
 
 선택한 함수 호출에는 inputSchema의 업무 객체를 그대로 전달한다. 기존 OpenAPI의 `path/query/body`와 등록 함수의 평탄한 인자 차이도 그대로다. 임의 flatten이나 인자 보정을 하지 않는다. `tools()`와 `binding(name)`은 복사본이다. `binding`과 `stats`는 호스트의 로그/측정용이며 모델 메시지에 넣을 필요가 없다.

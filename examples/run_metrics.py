@@ -14,7 +14,7 @@ import json
 import math
 import statistics
 
-SEARCH = 'a2api_search'
+SEARCH, LOAD = 'a2api_search', 'a2api_load'
 
 
 def _q(values, q):
@@ -83,6 +83,7 @@ def mode_metrics(runs):
         'modelCallsPerRun': stats([len(run.get('steps', [])) for run in runs], 2),
         'toolCallsPerRun': stats([len(run.get('toolCalls', [])) for run in runs], 2),
         'searchCallsPerRun': stats([sum(call['name'] == SEARCH for call in run.get('toolCalls', [])) for run in runs], 2),
+        'loadCallsPerRun': stats([sum(call['name'] == LOAD for call in run.get('toolCalls', [])) for run in runs], 2),
         'businessCalls': {'total': len(calls_business), 'failed': sum(1 for _, ok in calls_business if not ok),
                           'failedRate': round(sum(1 for _, ok in calls_business if not ok) / len(calls_business), 3)
                           if calls_business else None},
@@ -112,7 +113,7 @@ def markdown(metrics):
                     f"{t['prompt'].get('mean', '—')} / {t['completion'].get('mean', '—')} | {t['firstPrompt'].get('median', '—')} | "
                     f"{t['largestPrompt'].get('median', '—')} | {m['toolDefinitionBytes']['firstRequest'].get('median', '—')} |")
     rows += ['', '| mode | seconds/run median (mean, p90) | model / tool seconds per run (mean) | seconds per model step (mean) | '
-             'ms per output token | model calls/run | tool calls/run | searches/run | business calls failed | result bytes/call (median) |',
+             'ms per output token | model calls/run | tool calls/run | searches / loads per run | business calls failed | result bytes/call (median) |',
              '|---|---|---|---|---|---|---|---|---|---|']
     for mode, m in metrics.items():
         s = m['secondsPerRun']
@@ -121,7 +122,8 @@ def markdown(metrics):
         rows.append(f"| {mode} | {s['total'].get('median', '—')} ({s['total'].get('mean', '—')}, {s['total'].get('p90', '—')}) | "
                     f"{s['model'].get('mean', '—')} / {s['tools'].get('mean', '—')} | {m['secondsPerModelStep'].get('mean', '—')} | "
                     f"{m['msPerCompletionToken'] or '—'} | {m['modelCallsPerRun'].get('mean', '—')} | {m['toolCallsPerRun'].get('mean', '—')} | "
-                    f"{m['searchCallsPerRun'].get('mean', '—')} | {failed} | {m['resultBytesPerCall'].get('median', '—')} |")
+                    f"{m['searchCallsPerRun'].get('mean', '—')} / {m['loadCallsPerRun'].get('mean', '—')} | {failed} | "
+                    f"{m['resultBytesPerCall'].get('median', '—')} |")
     return '\n'.join(rows)
 
 

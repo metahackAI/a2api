@@ -1,0 +1,18 @@
+{
+ "counted": "server tokenizer (vLLM /tokenize, nvidia/Muse-Glimmer-30B-NVFP4), add_special_tokens false, 2026-11-01",
+ "indexSummary": {
+  "chars": 29192,
+  "tokens": 6393
+ },
+ "indexNames": {
+  "chars": 4577,
+  "tokens": 1034
+ },
+ "loadToolTokens": 122,
+ "searchToolTokens": 135,
+ "allFunctionDefinitions": {
+  "bytes": 353398,
+  "tokens": 96581
+ },
+ "functions": 253
+}

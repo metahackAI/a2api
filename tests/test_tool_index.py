@@ -1,0 +1,161 @@
+"""ToolSession.index(): an index of every function, functions loaded on request, related next steps."""
+
+import asyncio
+import http.server
+import json
+import threading
+import unittest
+
+from a2api import ExecutionContext, HTTPDeployment, ToolSession, convert
+from a2api.importers import ToolCatalogImporter
+from a2api.tool_session import INDEX_HEAD, LOAD_NAME, render_result
+
+CALLER = ExecutionContext('alice', 'tenant-a', frozenset())
+
+
+def entry(tool, kind, summary, properties, required=(), consumes=(), produces=()):
+    return {'tool': tool, 'kind': kind, 'summary': summary, 'consumes': [{'name': n} for n in consumes],
+            'produces': [{'name': n} for n in produces],
+            'input_schema': {'type': 'object', 'additionalProperties': False, 'required': list(required),
+                             'properties': properties}}
+
+
+ID = {'type': 'string'}
+CATALOG = [
+    entry('list_orders', 'read', 'List recent orders. Newest first.', {'customer_id': ID}, produces=['order_id']),
+    entry('get_order', 'read', 'Read one order with its deliveries.', {'order_id': ID}, ['order_id'],
+          consumes=['order_id'], produces=['delivery_id', 'customer_id']),
+    entry('track_shipment', 'read', 'Where a delivery is now.', {'delivery_id': ID}, ['delivery_id'], consumes=['delivery_id']),
+    entry('cancel_order', 'write', 'Cancel an order that has not shipped.', {'order_id': ID}, ['order_id'], consumes=['order_id']),
+    entry('get_customer', 'read', 'Read one member.', {'customer_id': ID}, ['customer_id'], consumes=['customer_id']),
+]
+RESULTS = {
+    'list_orders': {'items': [{'id': 'ord_1', 'order_id': 'ord_1'}]},
+    'get_order': {'id': 'ord_1', 'customer_id': 'cus_1', 'deliveries': [{'delivery_id': 'dlv_1', 'state': 'stuck'}]},
+    'track_shipment': {'delivery_id': 'dlv_1', 'last_scan': 'Newark'},
+    'cancel_order': {'preview': True},
+    'get_customer': {'id': 'cus_1', 'name': 'Ann'},
+}
+
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    seen = []
+
+    def log_message(self, *args):
+        pass
+
+    def do_POST(self):
+        body = json.loads(self.rfile.read(int(self.headers['Content-Length'] or 0)) or b'{}')
+        tool = self.path.split('?')[0].rsplit('/', 1)[1]
+        Handler.seen.append((tool, body['input']))
+        raw = json.dumps(RESULTS[tool]).encode()
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
+
+class IndexTests(unittest.TestCase):
+    def setUp(self):
+        Handler.seen = []
+        self.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        origin = 'http://127.0.0.1:%d' % self.server.server_address[1]
+        self.source = ToolCatalogImporter(CATALOG, namespace='shop')
+        self.app = convert(self.source, deployment=HTTPDeployment(origin), operations={
+            item['tool']: {'effect': item['kind']} for item in CATALOG})
+
+    def tearDown(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+    def test_index_lists_every_function_without_binding_schemas(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER)
+            built = await session.index('where is my order', group=lambda item: 'orders' if 'order' in item['id'] else 'other')
+            self.assertEqual((built['strategy'], built['functions']), ('index', 5))
+            text = built['text']
+            self.assertTrue(text.startswith(INDEX_HEAD))
+            self.assertIn('## orders\ncancel_order [write]: Cancel an order that has not shipped.', text)
+            self.assertIn('list_orders: List recent orders.', text)  # first sentence only
+            self.assertNotIn('Newest first', text)
+            self.assertNotIn('shop_', text)  # the shared namespace is not repeated
+            self.assertEqual(session.stats['describe'], 0)
+            self.assertEqual([tool['function']['name'] for tool in session.tools()], [LOAD_NAME])
+            names = await ToolSession(self.app, CALLER).index(detail='names')
+            self.assertEqual(names['text'].splitlines()[1], 'cancel_order, get_customer, get_order, list_orders, track_shipment')
+        asyncio.run(scenario())
+
+    def test_load_then_call_and_unknown_names_get_suggestions(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER)
+            await session.index()
+            loaded = await session.call(LOAD_NAME, {'names': ['get_order', 'track_shipment', 'find_parcel']})
+            self.assertEqual(loaded['loaded'], ['get_order', 'track_shipment'])
+            self.assertEqual(loaded['unknown'], ['find_parcel'])
+            self.assertIn('Unknown names', json.loads(render_result(loaded))['note'])
+            self.assertEqual([tool['function']['name'] for tool in session.tools()], [LOAD_NAME, 'get_order', 'track_shipment'])
+            again = await session.call(LOAD_NAME, {'names': ['get_order']})
+            self.assertEqual(json.loads(render_result(again))['note'], 'These functions are already callable; call them.')
+            result = await session.call('get_order', {'order_id': 'ord_1'})
+            self.assertEqual(result['status'], 'succeeded')
+            self.assertNotIn('related', result)  # related next steps are off by default
+            missing = await session.call('find_parcel', {})
+            self.assertEqual(missing['error']['code'], 'UNKNOWN_FUNCTION')
+        asyncio.run(scenario())
+
+    def test_calling_from_the_index_runs_valid_reads_and_holds_writes(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER)
+            await session.index()
+            read = await session.call('get_order', {'order_id': 'ord_1'})
+            self.assertEqual(read['status'], 'succeeded')
+            invalid = await session.call('track_shipment', {'parcel': 'x'})
+            self.assertEqual(invalid['error']['code'], 'INVALID_INPUT')
+            write = await session.call('cancel_order', {'order_id': 'ord_1'})
+            self.assertEqual(write['error']['code'], 'NOT_LOADED')
+            self.assertEqual([tool for tool, _ in Handler.seen], ['get_order'])  # the change was not sent
+            self.assertEqual([tool['function']['name'] for tool in session.tools()],
+                             [LOAD_NAME, 'get_order', 'track_shipment', 'cancel_order'])
+            self.assertEqual((await session.call('cancel_order', {'order_id': 'ord_1'}))['status'], 'succeeded')
+        asyncio.run(scenario())
+
+    def test_related_names_functions_that_take_returned_ids(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER)
+            await session.index('where is the delivery of my order', related=3, relations=self.source.relations())
+            result = await session.call('get_order', {'order_id': 'ord_1'})
+            self.assertEqual(result['related'], {'delivery_id': ['track_shipment'], 'customer_id': ['get_customer']})
+            note = json.loads(render_result(result))['next']
+            self.assertTrue(note.startswith('Functions that take IDs from this result: '))
+            self.assertIn('track_shipment (delivery_id)', note)
+            # Inputs named like IDs link functions when the host gives no relations.
+            inferred = ToolSession(self.app, CALLER)
+            await inferred.index('cancel my order', related=5)
+            self.assertGreater(inferred.stats['describe'], 0)
+            listed = await inferred.call('list_orders', {})
+            self.assertEqual(set(listed['related']['order_id']), {'get_order', 'cancel_order'})
+            self.assertEqual(listed['related']['order_id'][0], 'cancel_order')  # ranked by the request
+        asyncio.run(scenario())
+
+    def test_preselect_loads_search_matches_next_to_the_index(self):
+        async def scenario():
+            session = ToolSession(self.app, CALLER)
+            built = await session.index('track the delivery shipment', detail='names', preselect=2)
+            self.assertIn('Functions already in your tool list are loaded', built['text'].splitlines()[0])
+            names = [tool['function']['name'] for tool in session.tools()]
+            self.assertEqual(names[0], LOAD_NAME)
+            self.assertIn('track_shipment', names)
+            self.assertLessEqual(len(names), 3)
+            self.assertEqual((await session.call('track_shipment', {'delivery_id': 'dlv_1'}))['status'], 'succeeded')
+        asyncio.run(scenario())
+
+    def test_relations_read_from_catalog_entries(self):
+        relations = self.source.relations()
+        self.assertEqual(relations['shop.get_order'], {'consumes': ['order_id'], 'produces': ['delivery_id', 'customer_id']})
+        self.assertEqual(relations['shop.list_orders']['consumes'], [])
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -36,6 +36,17 @@ SEARCH_TOOL = {'type': 'function', 'function': {
     'parameters': {'type': 'object', 'properties': {'query': {'type': 'string', 'maxLength': 1000},
                                                   'more': {'type': 'boolean', 'default': False}},
                    'required': ['query'], 'additionalProperties': False}}}
+LOAD_NAME = 'a2api_load'
+LOAD_TOOL = {'type': 'function', 'function': {
+    'name': LOAD_NAME,
+    'description': 'Make functions from the function index callable; their parameters are provided in the next model '
+                   'request. Load every function you plan to use in one call, by its name in the index.',
+    'parameters': {'type': 'object', 'properties': {'names': {'type': 'array', 'minItems': 1, 'maxItems': 10,
+                                                             'items': {'type': 'string', 'maxLength': 128}}},
+                   'required': ['names'], 'additionalProperties': False}}}
+INDEX_HEAD = ('Function index (every function of this service). Load the ones you need with a2api_load, then call '
+              'them. [write] marks a function that changes data. If no function fits the request, say so instead '
+              'of guessing.')
 
 
 GROUPS = ('path', 'query', 'headers', 'body')
@@ -56,7 +67,11 @@ _RESULT_HINTS = {
     'NOT_SELECTED': 'Call only functions currently provided; search if a function is missing.',
     'SCHEMA_MISMATCH': 'The service returned an unexpected result. Report the failure.',
     'SEARCH_LIMIT': 'Searching again will not find more. Use the functions you have, or tell the user what is missing.',
+    'NOT_LOADED': 'Its parameters are in your tool list now; call it again with them.',
+    'UNKNOWN_FUNCTION': 'Use a name from the function index, or tell the user what is missing.',
 }
+# Names of ID inputs/outputs that link functions (order_id, orderId, order_ids); a bare `id` is ambiguous.
+_ID_NAME = re.compile(r'[a-z][a-z0-9]*(?:_[a-z0-9]+)*_ids?|[a-z][a-zA-Z0-9]*Ids?')
 _DEFAULT_COMPLETENESS = {'complete': True, 'scope': 'single_api_response'}
 NO_NEW_MATCHES = ('No new functions: every match was already offered in this conversation. If they cannot answer, '
                   'tell the user what is missing instead of searching again.')
@@ -218,6 +233,13 @@ def render_result(payload: dict, *, max_chars: int | None = None) -> str:
         if payload.get('selected') and not payload.get('new', payload.get('added', [None])):
             # The model already has every match: say so, or it rephrases the same search again and again.
             view['note'] = NO_NEW_MATCHES
+    elif 'loaded' in payload:
+        view = {key: value for key, value in payload.items() if value not in ([], None)}
+        if payload.get('unknown'):
+            view['note'] = ('Unknown names are not in the function index; use names from the index'
+                            + (', such as those in suggest.' if payload.get('suggest') else '.'))
+        elif payload.get('already') and not payload.get('loaded'):
+            view['note'] = 'These functions are already callable; call them.'
     elif payload.get('status') == 'succeeded':
         view = {'status': 'succeeded', 'data': payload.get('data')}
         if payload.get('httpStatus') not in (None, 200):
@@ -227,6 +249,9 @@ def render_result(payload: dict, *, max_chars: int | None = None) -> str:
         if payload.get('repeated'):
             view['note'] = (f"Same call and result as {payload['repeated']} earlier time(s); you already have this data. "
                             'Use it, or answer the user.')
+        if payload.get('related'):
+            view['next'] = 'Functions that take IDs from this result: ' + '; '.join(
+                f"{', '.join(names)} ({key})" for key, names in payload['related'].items())
     else:
         problem = payload.get('error', {})
         error = {'code': problem.get('code'), 'detail': problem.get('detail')}
@@ -276,6 +301,41 @@ def _as_text(arguments: dict, textual: dict) -> dict:
             return str(value)
         return value
     return {name: text_form(name, value) for name, value in arguments.items()}
+
+
+def _id_key(name):
+    """`order_ids`/`orderIds` -> `order_id`/`orderId`; None for names that are not IDs."""
+    if not isinstance(name, str) or not _ID_NAME.fullmatch(name):
+        return None
+    return name[:-1] if name.endswith(('_ids', 'Ids')) else name
+
+
+def _returned_ids(value, found, budget=400):
+    """ID names with a value somewhere in a result (bounded walk)."""
+    stack = [value]
+    while stack and budget > 0:
+        node = stack.pop()
+        budget -= 1
+        if isinstance(node, dict):
+            for key, item in node.items():
+                if isinstance(item, (dict, list)):
+                    stack.append(item)
+                elif item not in (None, '') and _id_key(key):
+                    found.add(_id_key(key))
+                elif key == 'id' and item not in (None, ''):
+                    found.add('id')
+        elif isinstance(node, list):
+            stack.extend(node[:20])
+    return found
+
+
+def _first_sentence(text, limit=110):
+    text = ' '.join(str(text).split())
+    match = re.search(r'(?<=[.!?])\s', text)
+    text = text[:match.start()] if match else text
+    if len(text) > limit:
+        text = text[:limit].rsplit(' ', 1)[0] + '…'
+    return text
 
 
 class ToolSession:
@@ -331,6 +391,9 @@ class ToolSession:
         # Functions selected since the model last received the list: another search must not push
         # them out before the model has seen them (parallel searches otherwise evict each other).
         self._unseen = set()
+        # Strategy 'index': every function by name, loaded on request (see index()).
+        self._index, self._bound, self._strip = {}, {}, ''
+        self._related, self._consumers, self._produces, self._rank = 0, {}, {}, {}
 
     @classmethod
     async def from_mcp(cls, client, *, max_tool_bytes=16000, search_limit=5, naming='readable', flatten=True, hints='none',
@@ -355,15 +418,20 @@ class ToolSession:
 
     @property
     def strategy(self):
-        """'all' or 'search' after auto(); None when the host selects explicitly."""
+        """'all' or 'search' after auto(), 'index' after index(); None when the host selects explicitly."""
         return self._strategy
 
+    def _front(self):
+        return LOAD_TOOL if self._strategy == 'index' else SEARCH_TOOL
+
     def tools(self, *, include_search=None):
-        """Fresh model view. include_search=None omits search only after auto() chose 'all'."""
+        """Fresh model view. include_search=None omits search only after auto() chose 'all'.
+
+        After index(), the load function takes the place of search."""
         if include_search is None:
             include_search = self._strategy != 'all'
         self._unseen.clear()  # the model receives these definitions now
-        return deepcopy([*([SEARCH_TOOL] if include_search else []),
+        return deepcopy([*([self._front()] if include_search else []),
                          *(bound.tool for bound in self._active.values())])
 
     render = staticmethod(render_result)
@@ -390,6 +458,7 @@ class ToolSession:
         if self._catalog != catalog:
             self._active.clear()
             self._names.clear()
+            self._bound.clear()
             self._pages.clear()
             self._catalog = catalog
 
@@ -397,6 +466,7 @@ class ToolSession:
         self._active.clear()
         self._unseen.clear()
         self._names.clear()
+        self._bound.clear()
         self._catalog = None
         self._pages.clear()
 
@@ -408,10 +478,12 @@ class ToolSession:
         if self.naming == 'hash':
             name = 'a2api_call_' + digest[:24]
         else:
-            name = re.sub(r'[^A-Za-z0-9_]+', '_', item['id']).strip('_')[:48] or 'call'
+            # index() drops a namespace every ID shares: it would repeat on every index line.
+            identifier = item['id'][len(self._strip):] if item['id'].startswith(self._strip) else item['id']
+            name = re.sub(r'[^A-Za-z0-9_]+', '_', identifier).strip('_')[:48] or 'call'
             if not name[0].isalpha():
                 name = 'f_' + name[:46]
-            if name == SEARCH_NAME or name in self._names.values():
+            if name in (SEARCH_NAME, LOAD_NAME) or name in self._names.values():
                 name = name[:39] + '_' + digest[:8]
         self._names[token] = name
         return name
@@ -467,35 +539,42 @@ class ToolSession:
                 self._stats['reused'] += 1
             else:
                 bound = await self._bind(item, name)
-            # Functions keep their place in the list (a stable prompt prefix for server caches);
-            # recency only decides which function leaves when the budget is exceeded.
-            retained = OrderedDict(self._active)
-            retained.setdefault(name, bound)
-            self._tick += 1
-            self._used[name] = self._tick
-            removed = []
-            while tool_bytes([SEARCH_TOOL, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
-                candidates = [key for key in retained if key != name and key not in protected and key not in self._unseen]
-                victim = min(candidates, key=lambda key: self._used.get(key, 0)) if candidates else None
-                if victim is None:
-                    break
-                retained.pop(victim)
-                removed.append(victim)
-            if tool_bytes([SEARCH_TOOL, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
+            removed = self._admit(name, bound, protected)
+            if removed is None:
                 omitted.append({'id': item['id'], 'reason': 'SCHEMA_BUDGET'})
                 continue
-            if name not in self._active:
-                self._unseen.add(name)
-            self._active = retained
-            self._stats['evicted'] += len(removed)
             evicted.extend(removed)
-            protected.add(name)
             selected.append({'name': name, 'id': item['id']})
         page = self._pages.commit(prepared, found)
         added = [name for name in added if name in self._active]
         new = [item['name'] for item in selected if item['name'] not in self._offered]
         self._offered.update(item['name'] for item in selected)
         return {'selected': selected, 'added': added, 'new': new, 'omitted': omitted, 'evicted': evicted, **page}
+
+    def _admit(self, name, bound, protected):
+        """Make one bound function active within max_tool_bytes; returns the evicted names, or None
+        when it cannot fit. Functions keep their place in the list (a stable prompt prefix for
+        server caches); recency only decides which function leaves when the budget is exceeded."""
+        retained = OrderedDict(self._active)
+        retained.setdefault(name, bound)
+        self._tick += 1
+        self._used[name] = self._tick
+        removed, front = [], self._front()
+        while tool_bytes([front, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
+            candidates = [key for key in retained if key != name and key not in protected and key not in self._unseen]
+            victim = min(candidates, key=lambda key: self._used.get(key, 0)) if candidates else None
+            if victim is None:
+                break
+            retained.pop(victim)
+            removed.append(victim)
+        if tool_bytes([front, *(entry.tool for entry in retained.values())]) > self.max_tool_bytes:
+            return None
+        if name not in self._active:
+            self._unseen.add(name)
+        self._active = retained
+        self._stats['evicted'] += len(removed)
+        protected.add(name)
+        return removed
 
     async def select(self, query: str, *, more=False):
         """A host search: discover + descriptions without an intervening model turn."""
@@ -530,17 +609,7 @@ class ToolSession:
                 or type(preselect) is not int or not 1 <= preselect <= 20 or type(all_bytes) is not int or all_bytes < 0):
             raise ValueError('auto requires a question string, max_functions 1-512, preselect 1-20 and all_bytes >= 0.')
         async with self._lock:
-            entries, cursor, catalog = [], None, None
-            while True:
-                found = await self._request('discover', {'query': '', 'limit': 50, **({'cursor': cursor} if cursor else {})})
-                if catalog is not None and found['catalogVersion'] != catalog:
-                    self._clear()
-                    raise A2APIError('CONTRACT_DRIFT', 'Catalog changed while listing; call auto again.', status=409)
-                catalog = found['catalogVersion']
-                entries.extend(found['capabilities'])
-                cursor = found['nextCursor']
-                if cursor is None or len(entries) > max_functions:
-                    break
+            entries, cursor, catalog = await self._list(max_functions)
             self._adopt_catalog(catalog)
             if cursor is None and len(entries) <= max_functions:
                 bound = OrderedDict()
@@ -556,6 +625,161 @@ class ToolSession:
             preselected = await self._select(query, limit=preselect) if query else None
             return {'strategy': 'search', 'functions': len(self._active), 'preselected': preselected}
 
+    async def _list(self, max_functions):
+        """Every catalog entry (stops once more than max_functions were read); never executes."""
+        entries, cursor, catalog = [], None, None
+        while True:
+            found = await self._request('discover', {'query': '', 'limit': 50, **({'cursor': cursor} if cursor else {})})
+            if catalog is not None and found['catalogVersion'] != catalog:
+                self._clear()
+                raise A2APIError('CONTRACT_DRIFT', 'Catalog changed while listing; start again.', status=409)
+            catalog = found['catalogVersion']
+            entries.extend(found['capabilities'])
+            cursor = found['nextCursor']
+            if cursor is None or len(entries) > max_functions:
+                return entries, cursor, catalog
+
+    async def index(self, question: str = '', *, detail='summary', group=None, related=0, relations=None,
+                    preselect=0, max_functions=2000):
+        """Host strategy for catalogs too large to send whole: the model reads an index of every
+        function and loads only the ones it chooses.
+
+        Returns {'strategy': 'index', 'functions': n, 'text': ...}. The host puts `text` in the
+        system prompt (it never changes during the session, so it stays in the cached prompt
+        prefix); tools() then holds a2api_load and the loaded functions. detail='summary' lists each
+        name with the first sentence of its summary, 'names' only the names. group(entry) -> str
+        (entry: the discover item) sorts the index under headings.
+
+        related=N (0 disables) adds to a successful call's result up to N functions that take an ID
+        it returned, ranked by the user's request (see focus()). Links come from `relations`
+        ({capability id: {'consumes': [...], 'produces': [...]}}, e.g. ToolCatalogImporter.relations())
+        and, for functions it does not cover, from inputs named like IDs (order_id, orderId).
+
+        preselect=N (0 disables) also loads up to N functions the host search finds for the
+        question, as auto() does: when they fit, the model calls them without a load step, and the
+        index covers what the search missed. Never executes a business API.
+        """
+        if (not isinstance(question, str) or detail not in ('summary', 'names') or (group is not None and not callable(group))
+                or type(related) is not int or not 0 <= related <= 20 or (relations is not None and not isinstance(relations, dict))
+                or type(preselect) is not int or not 0 <= preselect <= 20
+                or type(max_functions) is not int or not 1 <= max_functions <= 10000):
+            raise ValueError('index requires a question string, detail summary or names, a callable group, '
+                             'related 0-20, a relations dict, preselect 0-20 and max_functions 1-10000.')
+        if tool_bytes([LOAD_TOOL]) > self.max_tool_bytes:
+            raise ValueError('max_tool_bytes must fit the complete load tool.')
+        async with self._lock:
+            entries, cursor, catalog = await self._list(max_functions)
+            if cursor is not None:
+                raise A2APIError('INDEX_TOO_LARGE', f'The catalog has more than {max_functions} functions.', status=413)
+            namespaces = {item['id'].split('.', 1)[0] for item in entries if '.' in item['id']}
+            strip = namespaces.pop() + '.' if len(namespaces) == 1 and all('.' in item['id'] for item in entries) else ''
+            if strip != self._strip:
+                self._clear()
+                self._strip = strip
+            self._adopt_catalog(catalog)
+            self._strategy = 'index'
+            self._index = {self._name(item): item for item in entries}
+            self._related, self._consumers, self._produces = related, {}, {}
+            if related:
+                relations = relations or {}
+                for name, item in self._index.items():
+                    declared = relations.get(item['id'])
+                    if declared is None:
+                        bound = self._bound.get(name) or await self._bind(item, name)
+                        self._bound[name] = bound
+                        consumes = bound.tool['function']['parameters'].get('properties', {})
+                        declared = {'consumes': list(consumes)}
+                    for key in filter(None, map(_id_key, declared.get('consumes', ()))):
+                        self._consumers.setdefault(key, []).append(name)
+                    self._produces[name] = [key for key in map(_id_key, declared.get('produces', ())) if key]
+                await self._focus(question)
+            groups = {}
+            for name, item in sorted(self._index.items()):
+                groups.setdefault(str(group(item)) if group else '', []).append((name, item))
+            lines = [INDEX_HEAD + (' Functions already in your tool list are loaded; call them directly.' if preselect else '')]
+            for heading, members in sorted(groups.items()):
+                if detail == 'names':
+                    lines.append((heading + ': ' if heading else '') + ', '.join(name for name, _ in members))
+                    continue
+                if heading:
+                    lines.append('## ' + heading)
+                lines.extend(f"{name}{' [write]' if item['effects'].get('kind') != 'read' else ''}: "
+                             f"{_first_sentence(item['summary'])}" for name, item in members)
+            text = '\n'.join(lines)
+            query = ' '.join(question.split())[:1000]
+            preselected = await self._select(query, limit=preselect) if preselect and query else None
+            return {'strategy': 'index', 'functions': len(self._index), 'text': text, 'preselected': preselected}
+
+    async def focus(self, question: str):
+        """The user's current request (each new user turn): ranks the related functions results name."""
+        if not isinstance(question, str):
+            raise ValueError('focus requires a question string.')
+        async with self._lock:
+            await self._focus(question)
+
+    async def _focus(self, question):
+        query = ' '.join(question.split())[:1000]
+        self._rank = {}
+        if not query or not self._related:
+            return
+        found = await self._request('discover', {'query': query, 'limit': 50})
+        if found['catalogVersion'] == self._catalog:
+            for position, item in enumerate(found['capabilities']):
+                self._rank.setdefault(self._name(item), position)
+
+    async def _load(self, names):
+        if self._catalog is None:
+            raise A2APIError('CONTRACT_DRIFT', 'The catalog changed; the host must build the index again.', status=409)
+        loaded, already, unknown, omitted, evicted, protected = [], [], [], [], [], set()
+        for name in dict.fromkeys(names):
+            item = self._index.get(name)
+            if item is None:
+                unknown.append(name)
+            elif name in self._active:
+                self._tick += 1
+                self._used[name] = self._tick
+                protected.add(name)
+                already.append(name)
+            else:
+                bound = self._bound.get(name) or await self._bind(item, name)
+                self._bound[name] = bound
+                removed = self._admit(name, bound, protected)
+                if removed is None:
+                    omitted.append({'name': name, 'reason': 'SCHEMA_BUDGET'})
+                    continue
+                evicted.extend(removed)
+                loaded.append(name)
+        self._offered.update(loaded)
+        result = {'loaded': loaded, 'already': already, 'unknown': unknown, 'omitted': omitted, 'evicted': evicted}
+        if unknown:
+            suggest = []
+            for name in unknown[:3]:
+                found = await self._request('discover', {'query': re.sub(r'[_\W]+', ' ', name)[:1000], 'limit': 3})
+                suggest.extend(self._name(item) for item in found['capabilities']
+                               if found['catalogVersion'] == self._catalog and self._name(item) in self._index)
+            result['suggest'] = [name for name in dict.fromkeys(suggest) if name not in self._active][:5]
+        return result
+
+    def _next_steps(self, name, data):
+        """{id name: [functions taking it]} for IDs a successful result returned; at most `related` functions.
+        An ID many functions take is shown only through functions that match the user's request."""
+        returned = _returned_ids(data, set())
+        if not returned:
+            return {}
+        returned |= set(self._produces.get(name, ()))
+        candidates = []
+        for key in returned:
+            takers = self._consumers.get(key, ())
+            for other in takers:
+                rank = self._rank.get(other)
+                if other != name and (rank is not None or len(takers) <= 3):
+                    candidates.append((rank if rank is not None else len(self._index), other, key))
+        related, chosen = {}, set()
+        for _, other, key in sorted(candidates):
+            if other not in chosen and len(chosen) < self._related:
+                chosen.add(other)
+                related.setdefault(key, []).append(other)
+        return related
     async def call(self, name: str, arguments: dict, *, request_id: str | None = None):
         """Return search results or the original validated invoke envelope; no retry.
 
@@ -564,7 +788,7 @@ class ToolSession:
         deployment sets idempotency_header. A failed call whose exact name and arguments already
         failed in this session carries `repeated` (earlier failures), shown to the model as a hint.
         """
-        if name == SEARCH_NAME:
+        if name in (SEARCH_NAME, LOAD_NAME):
             if self.max_search_streak is not None and self._streak >= self.max_search_streak:
                 return {'error': A2APIError('SEARCH_LIMIT', f'{self._streak} searches in a row found no function to call '
                                             'for this request.', status=429).problem()}
@@ -589,6 +813,10 @@ class ToolSession:
                 result = {**result, 'repeated': earlier}
         else:
             self._reads.clear()  # after a change, reading again is new information
+        if self._related and result.get('status') == 'succeeded' and not result.get('repeated'):
+            related = self._next_steps(name, result.get('data'))
+            if related:
+                result = {**result, 'related': related}
         return result
 
     async def _call(self, name, arguments, request_id):
@@ -601,7 +829,23 @@ class ToolSession:
                 if name == SEARCH_NAME:
                     validate_value(SEARCH_TOOL['function']['parameters'], arguments, code='INVALID_INPUT', status=400)
                     return await self._select(arguments['query'], more=arguments.get('more', False))
+                if name == LOAD_NAME and self._strategy == 'index':
+                    validate_value(LOAD_TOOL['function']['parameters'], arguments, code='INVALID_INPUT', status=400)
+                    return await self._load(arguments['names'])
                 bound = self._active.get(name)
+                if bound is None and self._strategy == 'index' and name in self._index and self._catalog is not None:
+                    # Called straight from the index: load it. A read whose arguments are valid runs
+                    # now; a change waits until the model has seen its parameters.
+                    bound = self._bound.get(name) or await self._bind(self._index[name], name)
+                    self._bound[name] = bound
+                    if self._admit(name, bound, set()) is None:
+                        raise A2APIError('SCHEMA_BUDGET', 'The function does not fit max_tool_bytes.', status=413)
+                    self._offered.add(name)
+                    if bound.descriptor['effects']['kind'] != 'read':
+                        raise A2APIError('NOT_LOADED', f'{name} was called before it was loaded, so nothing was done.',
+                                         status=409)
+                if bound is None and self._strategy == 'index':
+                    raise A2APIError('UNKNOWN_FUNCTION', f'There is no function {name} in the function index.', status=404)
                 if bound is None:
                     raise A2APIError('NOT_SELECTED', 'Function is not active in this session; search again.')
                 if bound.layout is None:
