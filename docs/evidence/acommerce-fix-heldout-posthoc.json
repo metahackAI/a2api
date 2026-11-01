@@ -1,0 +1,1620 @@
+{
+ "runs": [
+  "artifacts/acommerce/runs/ours-heldout-fix-posthoc-1.jsonl"
+ ],
+ "scoring": {
+  "a2api-acom": {
+   "byKind": {
+    "write": "0/2",
+    "write_approval": "2/6",
+    "read": "7/24"
+   },
+   "toolPrecision": {
+    "n": 28,
+    "mean": 0.66,
+    "median": 0.8,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "toolRecall": {
+    "n": 30,
+    "mean": 0.68,
+    "median": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   }
+  },
+  "a2api-acom-names-norelated": {
+   "byKind": {
+    "write": "0/2",
+    "write_approval": "0/6",
+    "read": "5/24"
+   },
+   "toolPrecision": {
+    "n": 32,
+    "mean": 0.75,
+    "median": 0.95,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "toolRecall": {
+    "n": 30,
+    "mean": 0.88,
+    "median": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   }
+  },
+  "a2api-acom-names-batch": {
+   "byKind": {
+    "write": "0/2",
+    "write_approval": "0/6",
+    "read": "5/24"
+   },
+   "toolPrecision": {
+    "n": 32,
+    "mean": 0.76,
+    "median": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "toolRecall": {
+    "n": 30,
+    "mean": 0.85,
+    "median": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   }
+  }
+ },
+ "perTask": {
+  "mk-pause-knit-until-monday|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 60843,
+   "seconds": 50.701,
+   "modelCalls": 6,
+   "toolCalls": 9,
+   "missing": [
+    "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+   ]
+  },
+  "mk-pause-knit-until-monday|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 16031,
+   "seconds": 23.002,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+   ]
+  },
+  "mk-pause-knit-until-monday|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 21838,
+   "seconds": 40.785,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+   ]
+  },
+  "mk-category-promotion|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 23837,
+   "seconds": 44.539,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (23 not shown)"
+   ]
+  },
+  "mk-category-promotion|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 24501,
+   "seconds": 50.093,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (6, 19, 23, 59 not shown)"
+   ]
+  },
+  "mk-category-promotion|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 34924,
+   "seconds": 38.803,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mk-winback|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 103805,
+   "seconds": 120.077,
+   "modelCalls": 11,
+   "toolCalls": 11,
+   "missing": [
+    "tool send_bulk",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-winback|a2api-acom|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 61067,
+   "seconds": 120.124,
+   "modelCalls": 6,
+   "toolCalls": 9,
+   "missing": [
+    "tool define_segment",
+    "tool send_bulk",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-winback|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 79989,
+   "seconds": 120.118,
+   "modelCalls": 10,
+   "toolCalls": 10,
+   "missing": [
+    "tool send_bulk",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-viewed-not-purchased|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 49888,
+   "seconds": 87.461,
+   "modelCalls": 5,
+   "toolCalls": 8,
+   "missing": []
+  },
+  "mk-viewed-not-purchased|a2api-acom-names-norelated|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 16725,
+   "seconds": 63.081,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mk-viewed-not-purchased|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 26968,
+   "seconds": 120.13,
+   "modelCalls": 6,
+   "toolCalls": 6,
+   "missing": [
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-broken-sizes-outerwear|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 103118,
+   "seconds": 104.221,
+   "modelCalls": 12,
+   "toolCalls": 17,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-broken-sizes-outerwear|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 79983,
+   "seconds": 120.101,
+   "modelCalls": 11,
+   "toolCalls": 11,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-broken-sizes-outerwear|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 126932,
+   "seconds": 75.643,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-how-many-left|a2api-acom-names-batch|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 15070,
+   "seconds": 14.189,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-how-many-left|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 29922,
+   "seconds": 18.973,
+   "modelCalls": 4,
+   "toolCalls": 5,
+   "missing": []
+  },
+  "md-how-many-left|a2api-acom-names-norelated|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 15511,
+   "seconds": 14.916,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-below-cost|a2api-acom|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 109332,
+   "seconds": 120.114,
+   "modelCalls": 9,
+   "toolCalls": 17,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-below-cost|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": "MODEL_HTTP_500",
+   "tokens": 84906,
+   "seconds": 31.06,
+   "modelCalls": 11,
+   "toolCalls": 11,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:MODEL_HTTP_500"
+   ]
+  },
+  "md-below-cost|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 94987,
+   "seconds": 120.128,
+   "modelCalls": 10,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-best-sellers-this-month|a2api-acom-names-norelated|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 87744,
+   "seconds": 107.139,
+   "modelCalls": 11,
+   "toolCalls": 10,
+   "missing": []
+  },
+  "md-best-sellers-this-month|a2api-acom-names-batch|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 13475,
+   "seconds": 42.694,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": []
+  },
+  "md-best-sellers-this-month|a2api-acom|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 126091,
+   "seconds": 120.105,
+   "modelCalls": 11,
+   "toolCalls": 22,
+   "missing": [
+    "tool get_sales_overview",
+    "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-out-of-stock-30-days|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 46068,
+   "seconds": 36.459,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "tool search_products",
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-out-of-stock-30-days|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 103960,
+   "seconds": 88.281,
+   "modelCalls": 12,
+   "toolCalls": 17,
+   "missing": [
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-out-of-stock-30-days|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 59998,
+   "seconds": 102.328,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-unfulfilled-3-days|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 100434,
+   "seconds": 58.265,
+   "modelCalls": 9,
+   "toolCalls": 10,
+   "missing": []
+  },
+  "ops-unfulfilled-3-days|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 97256,
+   "seconds": 101.507,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-unfulfilled-3-days|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 65281,
+   "seconds": 120.097,
+   "modelCalls": 10,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "ops-photo-request|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 9418,
+   "seconds": 18.703,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "change set item send_customer_message {'customer_id': 'cus_riley', 'kind': 'photo_request'}",
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-photo-request|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 9045,
+   "seconds": 16.844,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "change set item send_customer_message {'customer_id': 'cus_riley', 'kind': 'photo_request'}",
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-photo-request|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 8830,
+   "seconds": 17.565,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "missing": [
+    "change set item send_customer_message {'customer_id': 'cus_riley', 'kind': 'photo_request'}",
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 16330,
+   "seconds": 27.267,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 14991,
+   "seconds": 20.206,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "tool get_order",
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 8251,
+   "seconds": 15.496,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 50102,
+   "seconds": 43.635,
+   "modelCalls": 5,
+   "toolCalls": 6,
+   "missing": [
+    "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 28270,
+   "seconds": 29.494,
+   "modelCalls": 6,
+   "toolCalls": 5,
+   "missing": [
+    "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 12099,
+   "seconds": 25.58,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+   ]
+  },
+  "mgr-undo-banner|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 38703,
+   "seconds": 64.015,
+   "modelCalls": 8,
+   "toolCalls": 7,
+   "missing": [
+    "tool search_change_sets",
+    "called schedule_banner",
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7 not shown)"
+   ]
+  },
+  "mgr-undo-banner|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 64173,
+   "seconds": 120.084,
+   "modelCalls": 11,
+   "toolCalls": 11,
+   "missing": [
+    "tool search_change_sets",
+    "called schedule_banner",
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 10, 0, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mgr-undo-banner|a2api-acom|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 96090,
+   "seconds": 95.114,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "tool search_change_sets",
+    "called schedule_banner",
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 10, 0, 7, 23, 59 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "mgr-weekly-summary|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 37109,
+   "seconds": 96.281,
+   "modelCalls": 6,
+   "toolCalls": 5,
+   "missing": [
+    "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 7 not shown)"
+   ]
+  },
+  "mgr-weekly-summary|a2api-acom|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 47098,
+   "seconds": 68.358,
+   "modelCalls": 6,
+   "toolCalls": 8,
+   "missing": []
+  },
+  "mgr-weekly-summary|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 39783,
+   "seconds": 45.276,
+   "modelCalls": 7,
+   "toolCalls": 6,
+   "missing": [
+    "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (7 not shown)"
+   ]
+  },
+  "mgr-how-is-business|a2api-acom|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 14037,
+   "seconds": 12.917,
+   "modelCalls": 2,
+   "toolCalls": 3,
+   "missing": [
+    "tool get_sales_overview",
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+   ]
+  },
+  "mgr-how-is-business|a2api-acom-names-norelated|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 13097,
+   "seconds": 45.352,
+   "modelCalls": 3,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+   ]
+  },
+  "mgr-how-is-business|a2api-acom-names-batch|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 12371,
+   "seconds": 33.365,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+   ]
+  },
+  "mk-pause-knit-until-monday|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 15816,
+   "seconds": 18.833,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+   ]
+  },
+  "mk-pause-knit-until-monday|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 12726,
+   "seconds": 16.533,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+   ]
+  },
+  "mk-pause-knit-until-monday|a2api-acom|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 60844,
+   "seconds": 50.593,
+   "modelCalls": 6,
+   "toolCalls": 9,
+   "missing": [
+    "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+   ]
+  },
+  "mk-category-promotion|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 21160,
+   "seconds": 48.059,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (6, 19, 23, 59 not shown)"
+   ]
+  },
+  "mk-category-promotion|a2api-acom|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 34667,
+   "seconds": 29.48,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mk-category-promotion|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 23420,
+   "seconds": 34.936,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (19, 23, 59 not shown)"
+   ]
+  },
+  "mk-winback|a2api-acom|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 71921,
+   "seconds": 120.152,
+   "modelCalls": 7,
+   "toolCalls": 11,
+   "missing": [
+    "tool send_bulk",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-winback|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 29936,
+   "seconds": 120.088,
+   "modelCalls": 4,
+   "toolCalls": 4,
+   "missing": [
+    "tool define_segment",
+    "tool send_bulk",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-winback|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 52456,
+   "seconds": 120.088,
+   "modelCalls": 6,
+   "toolCalls": 6,
+   "missing": [
+    "tool define_segment",
+    "tool send_bulk",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-viewed-not-purchased|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 37628,
+   "seconds": 120.162,
+   "modelCalls": 7,
+   "toolCalls": 7,
+   "missing": [
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-viewed-not-purchased|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 30922,
+   "seconds": 120.096,
+   "modelCalls": 6,
+   "toolCalls": 6,
+   "missing": [
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mk-viewed-not-purchased|a2api-acom|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 48541,
+   "seconds": 62.869,
+   "modelCalls": 5,
+   "toolCalls": 10,
+   "missing": []
+  },
+  "md-broken-sizes-outerwear|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 71617,
+   "seconds": 120.082,
+   "modelCalls": 10,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-broken-sizes-outerwear|a2api-acom|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 126932,
+   "seconds": 75.64,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-broken-sizes-outerwear|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 87100,
+   "seconds": 89.586,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-how-many-left|a2api-acom|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 23697,
+   "seconds": 17.306,
+   "modelCalls": 4,
+   "toolCalls": 5,
+   "missing": []
+  },
+  "md-how-many-left|a2api-acom-names-norelated|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 14498,
+   "seconds": 13.251,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-how-many-left|a2api-acom-names-batch|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 15939,
+   "seconds": 12.905,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-below-cost|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 94197,
+   "seconds": 120.108,
+   "modelCalls": 10,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-below-cost|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 106130,
+   "seconds": 120.117,
+   "modelCalls": 11,
+   "toolCalls": 11,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-below-cost|a2api-acom|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 135756,
+   "seconds": 52.613,
+   "modelCalls": 12,
+   "toolCalls": 14,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-best-sellers-this-month|a2api-acom-names-batch|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 21587,
+   "seconds": 61.498,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-best-sellers-this-month|a2api-acom|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 126093,
+   "seconds": 120.099,
+   "modelCalls": 11,
+   "toolCalls": 22,
+   "missing": [
+    "tool get_sales_overview",
+    "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "md-best-sellers-this-month|a2api-acom-names-norelated|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 13507,
+   "seconds": 41.97,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": []
+  },
+  "md-out-of-stock-30-days|a2api-acom|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 103960,
+   "seconds": 87.37,
+   "modelCalls": 12,
+   "toolCalls": 17,
+   "missing": [
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-out-of-stock-30-days|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 59998,
+   "seconds": 101.698,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-out-of-stock-30-days|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 62556,
+   "seconds": 82.589,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-unfulfilled-3-days|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 70595,
+   "seconds": 105.986,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-unfulfilled-3-days|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 79362,
+   "seconds": 99.463,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-unfulfilled-3-days|a2api-acom|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 100434,
+   "seconds": 57.452,
+   "modelCalls": 9,
+   "toolCalls": 10,
+   "missing": []
+  },
+  "ops-photo-request|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 68638,
+   "seconds": 58.924,
+   "modelCalls": 12,
+   "toolCalls": 11,
+   "missing": [
+    "change set item send_customer_message {'customer_id': 'cus_riley', 'kind': 'photo_request'}",
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (236 not shown)"
+   ]
+  },
+  "ops-photo-request|a2api-acom|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 8759,
+   "seconds": 16.452,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "missing": [
+    "change set item send_customer_message {'customer_id': 'cus_riley', 'kind': 'photo_request'}",
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-photo-request|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 11552,
+   "seconds": 16.216,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "change set item send_customer_message {'customer_id': 'cus_riley', 'kind': 'photo_request'}",
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-acom|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 14991,
+   "seconds": 19.787,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "tool get_order",
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 8195,
+   "seconds": 14.579,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 16305,
+   "seconds": 26.748,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 12458,
+   "seconds": 26.999,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 15966,
+   "seconds": 35.133,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-acom|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 50102,
+   "seconds": 43.244,
+   "modelCalls": 5,
+   "toolCalls": 6,
+   "missing": [
+    "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+   ]
+  },
+  "mgr-undo-banner|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 49285,
+   "seconds": 120.095,
+   "modelCalls": 9,
+   "toolCalls": 9,
+   "missing": [
+    "tool search_change_sets",
+    "called schedule_banner",
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 10, 0, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mgr-undo-banner|a2api-acom|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 84900,
+   "seconds": 120.192,
+   "modelCalls": 10,
+   "toolCalls": 10,
+   "missing": [
+    "tool search_change_sets",
+    "called schedule_banner",
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 10, 0, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mgr-undo-banner|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": "TURN_TIMEOUT",
+   "tokens": 39812,
+   "seconds": 120.092,
+   "modelCalls": 7,
+   "toolCalls": 7,
+   "missing": [
+    "tool search_change_sets",
+    "called schedule_banner",
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 10, 0, 7, 23, 59 not shown)",
+    "HOST:TURN_TIMEOUT"
+   ]
+  },
+  "mgr-weekly-summary|a2api-acom|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 27788,
+   "seconds": 44.847,
+   "modelCalls": 4,
+   "toolCalls": 6,
+   "missing": [
+    "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 7 not shown)"
+   ]
+  },
+  "mgr-weekly-summary|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 41414,
+   "seconds": 103.973,
+   "modelCalls": 6,
+   "toolCalls": 8,
+   "missing": [
+    "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31 not shown)"
+   ]
+  },
+  "mgr-weekly-summary|a2api-acom-names-batch|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 22907,
+   "seconds": 82.681,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mgr-how-is-business|a2api-acom-names-norelated|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 28706,
+   "seconds": 68.697,
+   "modelCalls": 5,
+   "toolCalls": 6,
+   "missing": [
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (20 not shown)"
+   ]
+  },
+  "mgr-how-is-business|a2api-acom-names-batch|1": {
+   "done": false,
+   "hostError": "MODEL_HTTP_500",
+   "tokens": 8087,
+   "seconds": 25.822,
+   "modelCalls": 2,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)",
+    "HOST:MODEL_HTTP_500"
+   ]
+  },
+  "mgr-how-is-business|a2api-acom|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 14111,
+   "seconds": 14.03,
+   "modelCalls": 2,
+   "toolCalls": 3,
+   "missing": [
+    "tool get_sales_overview",
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+   ]
+  }
+ },
+ "metrics": {
+  "a2api-acom": {
+   "runs": 32,
+   "passed": 9,
+   "passRate": 0.281,
+   "passRateWithoutHostErrors": 0.45,
+   "hostErrors": {
+    "TURN_TIMEOUT": 6,
+    "MODEL_CALL_LIMIT": 6
+   },
+   "tokensPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 64626,
+     "median": 55472,
+     "p90": 126093,
+     "min": 8759,
+     "max": 135756
+    },
+    "prompt": {
+     "n": 32,
+     "mean": 61539,
+     "median": 51438,
+     "p90": 121287,
+     "min": 7825,
+     "max": 133008
+    },
+    "completion": {
+     "n": 32,
+     "mean": 3087,
+     "median": 2980,
+     "p90": 5226,
+     "min": 594,
+     "max": 6237
+    },
+    "firstPrompt": {
+     "n": 32,
+     "mean": 4018,
+     "median": 3806,
+     "p90": 5977,
+     "min": 2055,
+     "max": 6149
+    },
+    "largestPrompt": {
+     "n": 32,
+     "mean": 10656,
+     "median": 10941,
+     "p90": 14579,
+     "min": 4110,
+     "max": 16599
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 61.5,
+     "median": 55.0,
+     "p90": 120.1,
+     "min": 12.9,
+     "max": 120.2
+    },
+    "model": {
+     "n": 32,
+     "mean": 57.4,
+     "median": 54.6,
+     "p90": 103.1,
+     "min": 12.8,
+     "max": 115.1
+    },
+    "tools": {
+     "n": 32,
+     "mean": 0.2,
+     "median": 0.1,
+     "p90": 0.4,
+     "min": 0.0,
+     "max": 0.6
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 216,
+    "mean": 8.51,
+    "median": 7.42,
+    "p90": 16.15,
+    "min": 1.0,
+    "max": 46.05
+   },
+   "msPerCompletionToken": 18.6,
+   "modelCallsPerRun": {
+    "n": 32,
+    "mean": 6.75,
+    "median": 6.0,
+    "p90": 12.0,
+    "min": 2,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 32,
+    "mean": 8.91,
+    "median": 9.0,
+    "p90": 17.0,
+    "min": 1,
+    "max": 22
+   },
+   "searchCallsPerRun": {
+    "n": 32,
+    "mean": 5.16,
+    "median": 3.0,
+    "p90": 8.9,
+    "min": 0,
+    "max": 22
+   },
+   "loadCallsPerRun": {
+    "n": 32,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 120,
+    "failed": 0,
+    "failedRate": 0.0
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 32,
+     "mean": 12010,
+     "median": 11480,
+     "p90": 18476,
+     "min": 5340,
+     "max": 19182
+    },
+    "largest": {
+     "n": 32,
+     "mean": 25768,
+     "median": 29026,
+     "p90": 31946,
+     "min": 11106,
+     "max": 31963
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 285,
+    "mean": 824,
+    "median": 439,
+    "p90": 2722,
+    "min": 49,
+    "max": 5685
+   }
+  },
+  "a2api-acom-names-norelated": {
+   "runs": 32,
+   "passed": 5,
+   "passRate": 0.156,
+   "passRateWithoutHostErrors": 0.25,
+   "hostErrors": {
+    "TURN_TIMEOUT": 5,
+    "MODEL_CALL_LIMIT": 6,
+    "MODEL_HTTP_500": 1
+   },
+   "tokensPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 40983,
+     "median": 29321,
+     "p90": 87680,
+     "min": 8195,
+     "max": 103118
+    },
+    "prompt": {
+     "n": 32,
+     "mean": 37543,
+     "median": 25744,
+     "p90": 83211,
+     "min": 7345,
+     "max": 97079
+    },
+    "completion": {
+     "n": 32,
+     "mean": 3440,
+     "median": 3204,
+     "p90": 6032,
+     "min": 716,
+     "max": 6452
+    },
+    "firstPrompt": {
+     "n": 32,
+     "mean": 1981,
+     "median": 1982,
+     "p90": 1989,
+     "min": 1975,
+     "max": 1990
+    },
+    "largestPrompt": {
+     "n": 32,
+     "mean": 7003,
+     "median": 6019,
+     "p90": 12372,
+     "min": 2899,
+     "max": 16736
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 64.0,
+     "median": 54.2,
+     "p90": 120.1,
+     "min": 13.3,
+     "max": 120.2
+    },
+    "model": {
+     "n": 32,
+     "mean": 59.5,
+     "median": 54.1,
+     "p90": 103.8,
+     "min": 13.1,
+     "max": 107.1
+    },
+    "tools": {
+     "n": 32,
+     "mean": 0.2,
+     "median": 0.1,
+     "p90": 0.5,
+     "min": 0.0,
+     "max": 0.9
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 217,
+    "mean": 8.77,
+    "median": 6.64,
+    "p90": 17.9,
+    "min": 1.03,
+    "max": 38.5
+   },
+   "msPerCompletionToken": 17.3,
+   "modelCallsPerRun": {
+    "n": 32,
+    "mean": 6.78,
+    "median": 5.5,
+    "p90": 12.0,
+    "min": 3,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 32,
+    "mean": 6.53,
+    "median": 5.5,
+    "p90": 12.0,
+    "min": 2,
+    "max": 17
+   },
+   "searchCallsPerRun": {
+    "n": 32,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "loadCallsPerRun": {
+    "n": 32,
+    "mean": 1.38,
+    "median": 1.0,
+    "p90": 2.9,
+    "min": 1,
+    "max": 3
+   },
+   "businessCalls": {
+    "total": 165,
+    "failed": 0,
+    "failedRate": 0.0
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 32,
+     "mean": 441,
+     "median": 441,
+     "p90": 441,
+     "min": 441,
+     "max": 441
+    },
+    "largest": {
+     "n": 32,
+     "mean": 7193,
+     "median": 6360,
+     "p90": 9755,
+     "min": 1859,
+     "max": 20612
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 209,
+    "mean": 1371,
+    "median": 513,
+    "p90": 4464,
+    "min": 24,
+    "max": 5831
+   }
+  },
+  "a2api-acom-names-batch": {
+   "runs": 32,
+   "passed": 5,
+   "passRate": 0.156,
+   "passRateWithoutHostErrors": 0.294,
+   "hostErrors": {
+    "TURN_TIMEOUT": 11,
+    "MODEL_CALL_LIMIT": 3,
+    "MODEL_HTTP_500": 1
+   },
+   "tokensPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 40586,
+     "median": 25734,
+     "p90": 79921,
+     "min": 8087,
+     "max": 106130
+    },
+    "prompt": {
+     "n": 32,
+     "mean": 36943,
+     "median": 21976,
+     "p90": 73896,
+     "min": 6828,
+     "max": 101772
+    },
+    "completion": {
+     "n": 32,
+     "mean": 3643,
+     "median": 3494,
+     "p90": 6086,
+     "min": 688,
+     "max": 6818
+    },
+    "firstPrompt": {
+     "n": 32,
+     "mean": 1981,
+     "median": 1982,
+     "p90": 1989,
+     "min": 1975,
+     "max": 1990
+    },
+    "largestPrompt": {
+     "n": 32,
+     "mean": 6908,
+     "median": 6152,
+     "p90": 11244,
+     "min": 3246,
+     "max": 16900
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 70.5,
+     "median": 60.2,
+     "p90": 120.1,
+     "min": 12.9,
+     "max": 120.1
+    },
+    "model": {
+     "n": 32,
+     "mean": 63.0,
+     "median": 60.1,
+     "p90": 110.4,
+     "min": 12.8,
+     "max": 118.8
+    },
+    "tools": {
+     "n": 32,
+     "mean": 0.2,
+     "median": 0.1,
+     "p90": 0.4,
+     "min": 0.0,
+     "max": 1.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 217,
+    "mean": 9.29,
+    "median": 7.13,
+    "p90": 21.57,
+    "min": 0.93,
+    "max": 45.87
+   },
+   "msPerCompletionToken": 17.3,
+   "modelCallsPerRun": {
+    "n": 32,
+    "mean": 6.78,
+    "median": 5.5,
+    "p90": 11.9,
+    "min": 2,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 32,
+    "mean": 6.25,
+    "median": 4.5,
+    "p90": 11.0,
+    "min": 2,
+    "max": 12
+   },
+   "searchCallsPerRun": {
+    "n": 32,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "loadCallsPerRun": {
+    "n": 32,
+    "mean": 1.5,
+    "median": 1.0,
+    "p90": 2.9,
+    "min": 1,
+    "max": 4
+   },
+   "businessCalls": {
+    "total": 160,
+    "failed": 9,
+    "failedRate": 0.056
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 32,
+     "mean": 441,
+     "median": 441,
+     "p90": 441,
+     "min": 441,
+     "max": 441
+    },
+    "largest": {
+     "n": 32,
+     "mean": 7964,
+     "median": 7192,
+     "p90": 11206,
+     "min": 3104,
+     "max": 25719
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 200,
+    "mean": 1330,
+    "median": 332,
+    "p90": 4446,
+    "min": 24,
+    "max": 5831
+   }
+  }
+ }
+}
