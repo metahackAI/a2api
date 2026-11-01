@@ -1,5 +1,5 @@
 {
- "note": "a-commerce's own agent with the legacy facade: raw vs converted by a2api (examples/acommerce/a2api_gateway.py). Held_out a2api stopped after 30 runs on a provider crash (EngineCore 500, then 502); the two tasks it did not finish (mgr-weekly-summary, mgr-how-is-business) are left out of both sides in commonHeldOut.",
+ "note": "a-commerce's own agent with the legacy facade: raw vs converted by a2api (examples/acommerce/a2api_gateway.py). Held_out a2api stopped after 30 runs on a provider crash (EngineCore 500, then 502); the two tasks it did not finish (mgr-weekly-summary, mgr-how-is-business) are left out of both sides in commonHeldOut. The two unfinished tasks were run again on 2026-11-01 with the user's go-ahead; they ran without any model error, so the earlier provider errors were not caused by that request.",
  "runs": {
   "own-facade-design-raw": {
    "metrics": {
@@ -1409,6 +1409,93 @@
      "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
     }
    ]
+  },
+  "own-facade-heldout-a2api-rest": {
+   "metrics": {
+    "facade": {
+     "runs": 4,
+     "passed": 0,
+     "tokensPerRun": {
+      "n": 4,
+      "mean": 3132,
+      "median": 3042,
+      "p90": 3900,
+      "min": 2404,
+      "max": 4042
+     },
+     "secondsPerRun": {
+      "n": 4,
+      "mean": 6.5,
+      "median": 7.0,
+      "p90": 8.0,
+      "min": 3.7,
+      "max": 8.4
+     },
+     "modelCallsPerRun": {
+      "n": 4,
+      "mean": 3.5,
+      "median": 3.5,
+      "p90": 4.0,
+      "min": 3,
+      "max": 4
+     },
+     "toolCallsPerRun": {
+      "n": 4,
+      "mean": 1,
+      "median": 1.0,
+      "p90": 1.0,
+      "min": 1,
+      "max": 1
+     },
+     "failedToolCalls": "0/4"
+    }
+   },
+   "rows": [
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 2517,
+     "seconds": 7.0,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 3567,
+     "seconds": 7.0,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 2404,
+     "seconds": 3.7,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 4042,
+     "seconds": 8.4,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    }
+   ]
   }
  },
  "commonHeldOut": {
@@ -1427,6 +1514,24 @@
    "secondsMean": 9.7,
    "modelCallsMean": 3.18,
    "toolCallsMean": 1.71
+  }
+ },
+ "fullHeldOut": {
+  "raw": {
+   "runs": 32,
+   "passed": 4,
+   "secondsMedian": 10.3,
+   "secondsMean": 11.1,
+   "modelCallsMean": 4.06,
+   "toolCallsMean": 1.94
+  },
+  "a2api": {
+   "runs": 32,
+   "passed": 8,
+   "secondsMedian": 7.0,
+   "secondsMean": 9.3,
+   "modelCallsMean": 3.22,
+   "toolCallsMean": 1.62
   }
  }
 }
