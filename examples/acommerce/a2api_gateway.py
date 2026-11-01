@@ -27,6 +27,7 @@ import http.server
 import json
 import os
 from pathlib import Path
+import re
 import sys
 import threading
 from urllib.error import HTTPError, URLError
@@ -37,7 +38,7 @@ sys.path.insert(0, str(HERE))
 
 from a2api import ExecutionContext, HTTPDeployment, convert  # noqa: E402
 from a2api.importers import ToolCatalogImporter  # noqa: E402
-from legacy_facade import VOCABULARY, WORDS, error_detail, facade_options  # noqa: E402
+from legacy_facade import HANDLES, RENAME, VOCABULARY, WORDS, error_detail, facade_options  # noqa: E402
 
 CALLER = threading.local()
 CLASSES = {'INVALID_INPUT': 'invalid_input', 'UPSTREAM_VALIDATION_FAILED': 'invalid_input',
@@ -85,10 +86,29 @@ class Facade:
     def manifest(self):
         return {'items': self.entries, 'total': len(self.entries)}
 
+    def resolve(self, name, given):
+        """A number people see (`20402`, `#20402`) where the screen takes a key: look the key up with the
+        screen the HANDLES table names, and use it when exactly one row matches."""
+        names = {screen: tool for tool, screen in self.screens.items()}
+        for field, (screen, by, key) in HANDLES.get(self.screens[name], {}).items():
+            field, by, key = (RENAME.get(item, item) for item in (field, by, key))
+            value = given.get(field) if isinstance(given, dict) else None
+            if not isinstance(value, str) or not re.fullmatch(r'#?[0-9]+', value.strip()) or screen not in names:
+                continue
+            found = self.app.invoke(self.ids[names[screen]], {'body': {by: value.strip()}},
+                                    context=ExecutionContext('agent', 'store', frozenset()))
+            rows = next((item for item in (found.get('data') or {}).values() if isinstance(item, list)), []) \
+                if found['status'] == 'succeeded' and isinstance(found.get('data'), dict) else []
+            keys = {row.get(key) for row in rows if isinstance(row, dict) and row.get(key)}
+            if len(keys) == 1:
+                given = {**given, field: keys.pop()}
+        return given
+
     def call(self, name, payload):
         if name not in self.ids:
             return 404, {'error': {'code': 'unknown_tool', 'class': 'not_found', 'message': f'There is no tool {name}.'}}
         given = payload.get('input', {}) if isinstance(payload, dict) else {}
+        given = self.resolve(name, given)
         result = self.app.invoke(self.ids[name], {'body': given}, context=ExecutionContext('agent', 'store', frozenset()))
         if result['status'] == 'succeeded':
             return 200, result['data']

@@ -38,7 +38,10 @@ CASES = [
      {'ordStatCd': '20', 'ordDtmTo': '2026-11-02'}),
     ('get_order_detail_popup_init_data', 'getOrdDtlPopInitData', {'order_id': 'ord_27184'}, {'ordNo': 'ord_27184'}),
     ('get_order_detail_popup_init_data', 'getOrdDtlPopInitData', {'order_id': 'ord_20402'}, {'ordNo': 'ord_20402'}),
-    ('get_order_detail_popup_init_data', 'getOrdDtlPopInitData', {'order_id': '20402'}, {'ordNo': '20402'}),
+    # The order number people see: the gateway finds the key with the order grid (HANDLES); the screen
+    # itself answers 404 for a bare number.
+    ('get_order_detail_popup_init_data', 'getOrdDtlPopInitData', {'order_id': '#20402'}, {'ordNo': 'ord_20402'}),
+    ('get_order_detail_popup_init_data', 'getOrdDtlPopInitData', {'order_id': '999999'}, {'ordNo': '999999'}),
     ('get_product_detail_info', 'getPrdDtlInfo', {'product_id': 'prd_wool_overcoat'}, {'prdNo': 'prd_wool_overcoat'}),
     ('get_product_detail_info_v2', 'getPrdDtlInfoV2', {'product_id': 'prd_wool_overcoat'}, {'prdNo': 'prd_wool_overcoat'}),
     ('get_product_grid_list', 'getPrdGridList', {'keyword': 'coat', 'availability': 'in_stock', 'page_size': 3},

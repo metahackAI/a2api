@@ -295,7 +295,7 @@ app = convert(source, operations={n: {'effect': 'read' if k == 'read' else 'writ
               vocabulary=VOCABULARY, deployment=HTTPDeployment(origin, request_values=..., error_detail=...))
 ```
 
-- 이름 호출 경로(`call_path`), 본문 감싸기 이름(`envelope='input'`), 키 이름(`name_key`, `summary_key`, `input_key`)을 바꿀 수 있다. camelCase 이름은 ID에서 단어를 나눈다(`getClmGridList` → `claims.get_clm_grid_list`, 함수 이름 `claims_get_clm_grid_list`).
+- 이름 호출 경로(`call_path`), 본문 감싸기 이름(`envelope='input'`), 키 이름(`name_key`, `summary_key`, `input_key`)을 바꿀 수 있다. camelCase 이름은 ID에서 단어를 나눈다(`getClmGridList` → `claims.get_clm_grid_list`, 함수 이름 `claims_get_clm_grid_list`). `words={'clm': 'claim', 'cnt': 'count'}`를 주면 약어 부분을 풀어 쓴다(`getClmGridListCnt` → `claims.get_claim_grid_list_count`). 호출은 원래 이름으로 한다. 목록의 `consumes`/`produces`는 `source.relations()`로 읽어 `ToolSession.index(related=...)`에 줄 수 있다.
 - 입력 schema가 객체가 아닌 항목, 같은 이름은 `unsupported`로 보고한다.
 
 **레거시 표현 보완 — `vocabulary`**: 약어 필드(`clmStatCd`)와 코드값(`"R10"`)은 모델이 해석하기 어렵다. 소스의 코드표·필드 주석에서 읽을 수 있는 것만 적는다.

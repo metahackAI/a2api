@@ -1,0 +1,2609 @@
+{
+ "acommerceCommit": "d86a1ff (PR #103, 22 facade screens)",
+ "agent": "a-commerce's own agent (xtask eval --tool-set facade --repeat 2 --reset)",
+ "note": "a2api-lookup: the gateway also finds the order key for an order number (legacy_facade.HANDLES); a2api: without it",
+ "runs": {
+  "own22-design-raw": {
+   "report": "artifacts/acommerce/runs/own22-design-raw.md",
+   "metrics": {
+    "facade": {
+     "runs": 24,
+     "passed": 0,
+     "tokensPerRun": {
+      "n": 24,
+      "mean": 7190,
+      "median": 6676,
+      "p90": 11897,
+      "min": 2090,
+      "max": 17202
+     },
+     "secondsPerRun": {
+      "n": 24,
+      "mean": 13.5,
+      "median": 12.1,
+      "p90": 27.4,
+      "min": 3.3,
+      "max": 32.2
+     },
+     "modelCallsPerRun": {
+      "n": 24,
+      "mean": 4.29,
+      "median": 4.0,
+      "p90": 6.0,
+      "min": 1,
+      "max": 11
+     },
+     "toolCallsPerRun": {
+      "n": 24,
+      "mean": 2.38,
+      "median": 2.5,
+      "p90": 4.0,
+      "min": 1,
+      "max": 5
+     },
+     "failedToolCalls": "46/57"
+    }
+   },
+   "runs": [
+    {
+     "task": "b1-vip-weekend-sale",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 6,
+     "tokens": 12568,
+     "seconds": 29.1,
+     "missing": "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7, 4 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+    },
+    {
+     "task": "b1-vip-weekend-sale",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 2,
+     "modelCalls": 5,
+     "tokens": 10331,
+     "seconds": 23.5,
+     "missing": "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7, 4 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+    },
+    {
+     "task": "mk-whats-running-this-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 4,
+     "tokens": 6675,
+     "seconds": 14.5,
+     "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8, 15, 15, 80, 10 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+    },
+    {
+     "task": "mk-whats-running-this-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 4,
+     "tokens": 6676,
+     "seconds": 14.2,
+     "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8, 15, 15, 80, 10 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+    },
+    {
+     "task": "mk-hero-free-next-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 4347,
+     "seconds": 7.4,
+     "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+    },
+    {
+     "task": "mk-hero-free-next-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 7589,
+     "seconds": 12.4,
+     "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+    },
+    {
+     "task": "md-low-stock-before-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 4,
+     "tokens": 8938,
+     "seconds": 15.0,
+     "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (4, 7 not shown); fact \"Linen shirt is the one with a reorder task: it sells out in \" (4 not shown)"
+    },
+    {
+     "task": "md-low-stock-before-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 5,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6760,
+     "seconds": 11.7,
+     "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (4, 7 not shown); fact \"Linen shirt is the one with a reorder task: it sells out in \" (4 not shown)"
+    },
+    {
+     "task": "md-overcoat-runs-small",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 8925,
+     "seconds": 11.2,
+     "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"29 say true to size, 12 say a bit snug, none say it runs lar\" (29, 12 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+    },
+    {
+     "task": "md-overcoat-runs-small",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 8923,
+     "seconds": 11.0,
+     "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"29 say true to size, 12 say a bit snug, none say it runs lar\" (29, 12 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+    },
+    {
+     "task": "md-end-of-season-markdown",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 4,
+     "tokens": 5984,
+     "seconds": 18.9,
+     "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)"
+    },
+    {
+     "task": "md-end-of-season-markdown",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 2090,
+     "seconds": 13.9,
+     "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)"
+    },
+    {
+     "task": "b2-returns-over-200",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 11,
+     "tokens": 17173,
+     "seconds": 32.2,
+     "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (12, 9, 2463, 2, 20366, 20409, 1, 20290 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+    },
+    {
+     "task": "b2-returns-over-200",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 11,
+     "tokens": 17202,
+     "seconds": 31.8,
+     "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (12, 9, 2463, 2, 20366, 20409, 1, 20290 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+    },
+    {
+     "task": "ops-wismo-tracking-stuck",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 2118,
+     "seconds": 3.5,
+     "missing": "fact \"UPS 1ZNW271840001, the last scan is picked_up on Mon Nov 2\" (1znw271840001, 2 not shown); fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+    },
+    {
+     "task": "ops-wismo-tracking-stuck",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 2118,
+     "seconds": 3.3,
+     "missing": "fact \"UPS 1ZNW271840001, the last scan is picked_up on Mon Nov 2\" (1znw271840001, 2 not shown); fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+    },
+    {
+     "task": "ops-frequent-returner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6253,
+     "seconds": 10.0,
+     "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20431, 20311, 20324, 20298 not shown)"
+    },
+    {
+     "task": "ops-frequent-returner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 4110,
+     "seconds": 4.3,
+     "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20311, 20324, 20298 not shown)"
+    },
+    {
+     "task": "mgr-what-needs-me-today",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6303,
+     "seconds": 16.1,
+     "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039, 10, 0 not shown)"
+    },
+    {
+     "task": "mgr-what-needs-me-today",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 3,
+     "tokens": 5112,
+     "seconds": 13.0,
+     "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039, 10, 0 not shown)"
+    },
+    {
+     "task": "mgr-what-changed-this-morning",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 6,
+     "tokens": 8032,
+     "seconds": 8.1,
+     "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 4, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+    },
+    {
+     "task": "mgr-what-changed-this-morning",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 6,
+     "tokens": 8081,
+     "seconds": 7.9,
+     "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 4, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+    },
+    {
+     "task": "b3-why-sales-dropped",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3143,
+     "seconds": 6.0,
+     "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (22900, 4660, 20, 247 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+    },
+    {
+     "task": "b3-why-sales-dropped",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3113,
+     "seconds": 5.2,
+     "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (22900, 4660, 20, 247 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+    }
+   ],
+   "outage": []
+  },
+  "own22-design-a2api": {
+   "report": "artifacts/acommerce/runs/own22-design-a2api.md",
+   "metrics": {
+    "facade": {
+     "runs": 24,
+     "passed": 0,
+     "tokensPerRun": {
+      "n": 24,
+      "mean": 7166,
+      "median": 5950,
+      "p90": 13630,
+      "min": 3107,
+      "max": 17415
+     },
+     "secondsPerRun": {
+      "n": 24,
+      "mean": 12.7,
+      "median": 7.2,
+      "p90": 30.5,
+      "min": 4.8,
+      "max": 33.3
+     },
+     "modelCallsPerRun": {
+      "n": 24,
+      "mean": 4.04,
+      "median": 3.0,
+      "p90": 7.0,
+      "min": 2,
+      "max": 10
+     },
+     "toolCallsPerRun": {
+      "n": 24,
+      "mean": 1.96,
+      "median": 2.0,
+      "p90": 4.0,
+      "min": 1,
+      "max": 5
+     },
+     "failedToolCalls": "7/47"
+    }
+   },
+   "runs": [
+    {
+     "task": "b1-vip-weekend-sale",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 7,
+     "tokens": 12305,
+     "seconds": 28.7,
+     "missing": "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+    },
+    {
+     "task": "b1-vip-weekend-sale",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 7,
+     "tokens": 14198,
+     "seconds": 33.3,
+     "missing": "fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+    },
+    {
+     "task": "mk-whats-running-this-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3954,
+     "seconds": 6.5,
+     "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+    },
+    {
+     "task": "mk-whats-running-this-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 5725,
+     "seconds": 9.4,
+     "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+    },
+    {
+     "task": "mk-hero-free-next-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3428,
+     "seconds": 5.4,
+     "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+    },
+    {
+     "task": "mk-hero-free-next-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3345,
+     "seconds": 4.8,
+     "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+    },
+    {
+     "task": "md-low-stock-before-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 3542,
+     "seconds": 7.7,
+     "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (7 not shown)"
+    },
+    {
+     "task": "md-low-stock-before-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5868,
+     "seconds": 8.5,
+     "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (7 not shown)"
+    },
+    {
+     "task": "md-overcoat-runs-small",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 7088,
+     "seconds": 5.9,
+     "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+    },
+    {
+     "task": "md-overcoat-runs-small",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 7088,
+     "seconds": 5.0,
+     "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+    },
+    {
+     "task": "md-end-of-season-markdown",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 9457,
+     "seconds": 26.0,
+     "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)"
+    },
+    {
+     "task": "md-end-of-season-markdown",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 9398,
+     "seconds": 24.1,
+     "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)"
+    },
+    {
+     "task": "b2-returns-over-200",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 10,
+     "tokens": 17320,
+     "seconds": 32.3,
+     "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (9, 2463, 2, 20366, 20409, 1, 20290 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+    },
+    {
+     "task": "b2-returns-over-200",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 10,
+     "tokens": 17415,
+     "seconds": 31.3,
+     "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (9, 2463, 2, 20366, 20409, 1, 20290 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+    },
+    {
+     "task": "ops-wismo-tracking-stuck",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 3435,
+     "seconds": 6.6,
+     "missing": "fact \"UPS 1ZNW271840001, the last scan is picked_up on Mon Nov 2\" (1znw271840001, 2 not shown); fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+    },
+    {
+     "task": "ops-wismo-tracking-stuck",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 3613,
+     "seconds": 6.2,
+     "missing": "fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+    },
+    {
+     "task": "ops-frequent-returner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 5,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 10168,
+     "seconds": 13.6,
+     "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4, 90, 20311, 20324, 20298 not shown)"
+    },
+    {
+     "task": "ops-frequent-returner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 3753,
+     "seconds": 5.5,
+     "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20311, 20324, 20298 not shown)"
+    },
+    {
+     "task": "mgr-what-needs-me-today",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5851,
+     "seconds": 10.8,
+     "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 1039 not shown)"
+    },
+    {
+     "task": "mgr-what-needs-me-today",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6681,
+     "seconds": 8.7,
+     "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039 not shown)"
+    },
+    {
+     "task": "mgr-what-changed-this-morning",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6031,
+     "seconds": 6.3,
+     "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+    },
+    {
+     "task": "mgr-what-changed-this-morning",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6096,
+     "seconds": 6.5,
+     "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+    },
+    {
+     "task": "b3-why-sales-dropped",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3107,
+     "seconds": 5.6,
+     "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (4660, 20 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+    },
+    {
+     "task": "b3-why-sales-dropped",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3110,
+     "seconds": 5.2,
+     "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (4660, 20 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+    }
+   ],
+   "outage": []
+  },
+  "own22-design-a2api-lookup": {
+   "report": "artifacts/acommerce/runs/own22-design-a2api-lookup.md",
+   "metrics": {
+    "facade": {
+     "runs": 24,
+     "passed": 0,
+     "tokensPerRun": {
+      "n": 24,
+      "mean": 7035,
+      "median": 5705,
+      "p90": 15298,
+      "min": 2806,
+      "max": 18585
+     },
+     "secondsPerRun": {
+      "n": 24,
+      "mean": 12.2,
+      "median": 6.9,
+      "p90": 27.5,
+      "min": 4.7,
+      "max": 33.7
+     },
+     "modelCallsPerRun": {
+      "n": 24,
+      "mean": 3.92,
+      "median": 3.0,
+      "p90": 6.7,
+      "min": 2,
+      "max": 10
+     },
+     "toolCallsPerRun": {
+      "n": 24,
+      "mean": 1.75,
+      "median": 1.0,
+      "p90": 3.0,
+      "min": 1,
+      "max": 4
+     },
+     "failedToolCalls": "7/42"
+    }
+   },
+   "runs": [
+    {
+     "task": "b1-vip-weekend-sale",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 7,
+     "tokens": 14537,
+     "seconds": 28.2,
+     "missing": "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (40, 42, 7, 4 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+    },
+    {
+     "task": "b1-vip-weekend-sale",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 6,
+     "tokens": 16073,
+     "seconds": 24.6,
+     "missing": "fact \"40 of 42 summer outerwear products; chore coat (7) and rain \" (42 not shown); fact \"the overshirt is at 15% ($67.15) to stay above the price flo\" (67.15 not shown)"
+    },
+    {
+     "task": "mk-whats-running-this-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 4304,
+     "seconds": 9.5,
+     "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+    },
+    {
+     "task": "mk-whats-running-this-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 4280,
+     "seconds": 8.6,
+     "missing": "fact \"four promotions overlap Sat Nov 7 – Sun Nov 8: Autumn knitwe\" (7, 8 not shown); fact \"the knit sale covers 26 knitwear products\" (26 not shown)"
+    },
+    {
+     "task": "mk-hero-free-next-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3428,
+     "seconds": 5.3,
+     "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+    },
+    {
+     "task": "mk-hero-free-next-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3414,
+     "seconds": 4.7,
+     "missing": "fact \"next weekend is Sat Nov 14 – Sun Nov 15\" (14, 15 not shown); fact \"the home hero shows Fall layers to everyone with no end date\" (14, 15 not shown)"
+    },
+    {
+     "task": "md-low-stock-before-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5663,
+     "seconds": 7.3,
+     "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (4, 7 not shown); fact \"Linen shirt is the one with a reorder task: it sells out in \" (4 not shown)"
+    },
+    {
+     "task": "md-low-stock-before-weekend",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5747,
+     "seconds": 7.2,
+     "missing": "fact \"Light rain parka has 4 units left and Cotton chore coat has \" (7 not shown)"
+    },
+    {
+     "task": "md-overcoat-runs-small",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 7111,
+     "seconds": 6.3,
+     "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+    },
+    {
+     "task": "md-overcoat-runs-small",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 7139,
+     "seconds": 5.8,
+     "missing": "fact \"41 reviews, average 4.6\" (41, 4.6 not shown); fact \"the most common phrase is 'size up for a hoodie' (9 mentions\" (9 not shown)"
+    },
+    {
+     "task": "md-end-of-season-markdown",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 9451,
+     "seconds": 25.9,
+     "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)"
+    },
+    {
+     "task": "md-end-of-season-markdown",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 9450,
+     "seconds": 24.4,
+     "missing": "fact \"25% is over the 20% limit for everyone (the VIP limit of 30%\" (25, 20, 30 not shown); fact \"the agent offers 20%, or a 25% sale limited to VIP\" (20, 25 not shown)"
+    },
+    {
+     "task": "b2-returns-over-200",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 10,
+     "tokens": 15624,
+     "seconds": 33.7,
+     "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (9, 2463, 2, 20366, 20409, 1, 20290 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (20290, 39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (20431, 4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+    },
+    {
+     "task": "b2-returns-over-200",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 0,
+     "modelCalls": 10,
+     "tokens": 18585,
+     "seconds": 32.7,
+     "missing": "fact \"12 requests: refund 9 for $2,463.00, ask for photos on 2 (#2\" (9, 2463 not shown); fact \"#20290 Cashmere sweater was delivered 39 days ago, past the \" (39, 30 not shown); fact \"#20431 is refundable but its customer has 4 returns in 90 da\" (4, 90 not shown); fact \"the 3 messages cannot be taken back once sent\" (3 not shown)"
+    },
+    {
+     "task": "ops-wismo-tracking-stuck",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 3396,
+     "seconds": 6.6,
+     "missing": "fact \"UPS 1ZNW271840001, the last scan is picked_up on Mon Nov 2\" (1znw271840001, 2 not shown); fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+    },
+    {
+     "task": "ops-wismo-tracking-stuck",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 3583,
+     "seconds": 6.2,
+     "missing": "fact \"the promised delivery date is today, Fri Nov 6\" (6 not shown)"
+    },
+    {
+     "task": "ops-frequent-returner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 2806,
+     "seconds": 5.3,
+     "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20431, 20311, 20324, 20298 not shown)"
+    },
+    {
+     "task": "ops-frequent-returner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4134,
+     "seconds": 11.5,
+     "missing": "fact \"customer cus_4431 has 4 returns in the last 90 days: clm_204\" (4431, 4, 90, 20431, 20311, 20324, 20298 not shown)"
+    },
+    {
+     "task": "mgr-what-needs-me-today",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6702,
+     "seconds": 9.1,
+     "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039 not shown)"
+    },
+    {
+     "task": "mgr-what-needs-me-today",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5059,
+     "seconds": 5.9,
+     "missing": "fact \"one task needs you: the Linen shirt reorder draft (task_line\" (1041, 3, 240 not shown); fact \"two are still working: the over-$200 returns review (task_re\" (200, 1106 not shown); fact \"two finished this morning: below-cost prices raised to the f\" (1040, 7, 23, 59, 1039, 10, 0 not shown)"
+    },
+    {
+     "task": "mgr-what-changed-this-morning",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6031,
+     "seconds": 6.3,
+     "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+    },
+    {
+     "task": "mgr-what-changed-this-morning",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6096,
+     "seconds": 6.3,
+     "missing": "fact \"08:31 the watcher's change set raised 4 products to the pric\" (8, 31, 9, 8, 31, 30 not shown); fact \"09:35 adm_sj approved the home banner swap to Fall layers; s\" (9, 35, 9, 35, 9, 36 not shown)"
+    },
+    {
+     "task": "b3-why-sales-dropped",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3107,
+     "seconds": 5.6,
+     "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (4660, 20 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+    },
+    {
+     "task": "b3-why-sales-dropped",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3110,
+     "seconds": 5.4,
+     "missing": "fact \"Thu Nov 5: $18,240 against a Thursday average of $22,900 (-$\" (4660, 20 not shown); fact \"M and L sold out on the three best sellers (chore coat, rain\" (2700 not shown); fact \"the weekly email did not go out (Thu 08:00 list import faile\" (8, 0, 1300, 660 not shown)"
+    }
+   ],
+   "outage": []
+  },
+  "own22-heldout-raw": {
+   "report": "artifacts/acommerce/runs/own22-heldout-raw.md",
+   "metrics": {
+    "facade": {
+     "runs": 32,
+     "passed": 5,
+     "tokensPerRun": {
+      "n": 32,
+      "mean": 5665,
+      "median": 5698,
+      "p90": 8862,
+      "min": 2359,
+      "max": 10083
+     },
+     "secondsPerRun": {
+      "n": 32,
+      "mean": 10.7,
+      "median": 11.2,
+      "p90": 17.2,
+      "min": 3.2,
+      "max": 24.8
+     },
+     "modelCallsPerRun": {
+      "n": 32,
+      "mean": 3.41,
+      "median": 3.0,
+      "p90": 5.0,
+      "min": 2,
+      "max": 6
+     },
+     "toolCallsPerRun": {
+      "n": 32,
+      "mean": 1.97,
+      "median": 1.0,
+      "p90": 4.0,
+      "min": 1,
+      "max": 4
+     },
+     "failedToolCalls": "46/63"
+    }
+   },
+   "runs": [
+    {
+     "task": "mk-pause-knit-until-monday",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6012,
+     "seconds": 17.4,
+     "missing": "fact \"Autumn knitwear 15% (promo_autumn_knit, running until Nov 15\" (15, 15 not shown); fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+    },
+    {
+     "task": "mk-pause-knit-until-monday",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 10083,
+     "seconds": 21.4,
+     "missing": "fact \"Autumn knitwear 15% (promo_autumn_knit, running until Nov 15\" (15, 15 not shown); fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+    },
+    {
+     "task": "mk-category-promotion",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 7311,
+     "seconds": 24.8,
+     "missing": "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (2, 6, 19, 23, 59 not shown)"
+    },
+    {
+     "task": "mk-category-promotion",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 7299,
+     "seconds": 23.7,
+     "missing": "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (2, 6, 19, 23, 59 not shown)"
+    },
+    {
+     "task": "mk-winback",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 3951,
+     "seconds": 14.3,
+     "missing": ""
+    },
+    {
+     "task": "mk-winback",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 3971,
+     "seconds": 15.1,
+     "missing": ""
+    },
+    {
+     "task": "mk-viewed-not-purchased",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6202,
+     "seconds": 5.7,
+     "missing": ""
+    },
+    {
+     "task": "mk-viewed-not-purchased",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6115,
+     "seconds": 4.3,
+     "missing": ""
+    },
+    {
+     "task": "md-broken-sizes-outerwear",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 8947,
+     "seconds": 12.2,
+     "missing": "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)"
+    },
+    {
+     "task": "md-broken-sizes-outerwear",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 9029,
+     "seconds": 12.5,
+     "missing": "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)"
+    },
+    {
+     "task": "md-how-many-left",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6566,
+     "seconds": 11.2,
+     "missing": "fact \"4 in total: S 2, M 0, L 0, XL 2 (all Stone)\" (4, 2, 0, 0, 2 not shown); fact \"S and XL are at their safety stock of 2, so the parka is eff\" (2 not shown)"
+    },
+    {
+     "task": "md-how-many-left",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6600,
+     "seconds": 11.2,
+     "missing": "fact \"4 in total: S 2, M 0, L 0, XL 2 (all Stone)\" (4, 2, 0, 0, 2 not shown); fact \"S and XL are at their safety stock of 2, so the parka is eff\" (2 not shown)"
+    },
+    {
+     "task": "md-below-cost",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 8863,
+     "seconds": 11.3,
+     "missing": "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown); fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)"
+    },
+    {
+     "task": "md-below-cost",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 3,
+     "modelCalls": 5,
+     "tokens": 8853,
+     "seconds": 10.6,
+     "missing": "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown); fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)"
+    },
+    {
+     "task": "md-best-sellers-this-month",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5123,
+     "seconds": 4.7,
+     "missing": "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)"
+    },
+    {
+     "task": "md-best-sellers-this-month",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5124,
+     "seconds": 4.4,
+     "missing": "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)"
+    },
+    {
+     "task": "md-out-of-stock-30-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6931,
+     "seconds": 15.2,
+     "missing": "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)"
+    },
+    {
+     "task": "md-out-of-stock-30-days",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5367,
+     "seconds": 6.6,
+     "missing": ""
+    },
+    {
+     "task": "ops-unfulfilled-3-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 4,
+     "tokens": 8736,
+     "seconds": 12.8,
+     "missing": "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)"
+    },
+    {
+     "task": "ops-unfulfilled-3-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 3,
+     "modelCalls": 3,
+     "tokens": 6682,
+     "seconds": 12.1,
+     "missing": "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)"
+    },
+    {
+     "task": "ops-photo-request",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2359,
+     "seconds": 13.5,
+     "missing": "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+    },
+    {
+     "task": "ops-photo-request",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2481,
+     "seconds": 14.8,
+     "missing": "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+    },
+    {
+     "task": "ops-cancel-delivered",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2376,
+     "seconds": 3.4,
+     "missing": "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+    },
+    {
+     "task": "ops-cancel-delivered",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2376,
+     "seconds": 3.2,
+     "missing": "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+    },
+    {
+     "task": "ops-change-address-in-transit",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2411,
+     "seconds": 3.8,
+     "missing": "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+    },
+    {
+     "task": "ops-change-address-in-transit",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2411,
+     "seconds": 3.4,
+     "missing": "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+    },
+    {
+     "task": "mgr-undo-banner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5379,
+     "seconds": 7.0,
+     "missing": "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+    },
+    {
+     "task": "mgr-undo-banner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5385,
+     "seconds": 6.5,
+     "missing": "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 3486,
+     "seconds": 6.8,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 3447,
+     "seconds": 6.3,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 6,
+     "tokens": 6425,
+     "seconds": 13.0,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 20 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 5,
+     "tokens": 4978,
+     "seconds": 10.2,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    }
+   ],
+   "outage": []
+  },
+  "own22-heldout-a2api": {
+   "report": "artifacts/acommerce/runs/own22-heldout-a2api.md",
+   "metrics": {
+    "facade": {
+     "runs": 32,
+     "passed": 6,
+     "tokensPerRun": {
+      "n": 32,
+      "mean": 4929,
+      "median": 5416,
+      "p90": 6460,
+      "min": 2541,
+      "max": 8049
+     },
+     "secondsPerRun": {
+      "n": 32,
+      "mean": 8.8,
+      "median": 6.6,
+      "p90": 16.6,
+      "min": 3.4,
+      "max": 21.0
+     },
+     "modelCallsPerRun": {
+      "n": 32,
+      "mean": 3.06,
+      "median": 3.0,
+      "p90": 4.0,
+      "min": 1,
+      "max": 5
+     },
+     "toolCallsPerRun": {
+      "n": 32,
+      "mean": 1.41,
+      "median": 1.0,
+      "p90": 2.0,
+      "min": 1,
+      "max": 3
+     },
+     "failedToolCalls": "10/45"
+    }
+   },
+   "runs": [
+    {
+     "task": "mk-pause-knit-until-monday",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 1,
+     "modelCalls": 4,
+     "tokens": 7995,
+     "seconds": 20.6,
+     "missing": "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+    },
+    {
+     "task": "mk-pause-knit-until-monday",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 1,
+     "modelCalls": 4,
+     "tokens": 8049,
+     "seconds": 21.0,
+     "missing": "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+    },
+    {
+     "task": "mk-category-promotion",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 3076,
+     "seconds": 17.2,
+     "missing": "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (2, 6, 19, 23, 59 not shown)"
+    },
+    {
+     "task": "mk-category-promotion",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 2921,
+     "seconds": 14.1,
+     "missing": "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (2, 6, 19, 23, 59 not shown)"
+    },
+    {
+     "task": "mk-winback",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5992,
+     "seconds": 15.2,
+     "missing": ""
+    },
+    {
+     "task": "mk-winback",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 6027,
+     "seconds": 16.7,
+     "missing": ""
+    },
+    {
+     "task": "mk-viewed-not-purchased",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6460,
+     "seconds": 5.4,
+     "missing": ""
+    },
+    {
+     "task": "mk-viewed-not-purchased",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6460,
+     "seconds": 4.9,
+     "missing": ""
+    },
+    {
+     "task": "md-broken-sizes-outerwear",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3494,
+     "seconds": 4.5,
+     "missing": "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)"
+    },
+    {
+     "task": "md-broken-sizes-outerwear",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3486,
+     "seconds": 4.2,
+     "missing": "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)"
+    },
+    {
+     "task": "md-how-many-left",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 7011,
+     "seconds": 5.7,
+     "missing": "fact \"4 in total: S 2, M 0, L 0, XL 2 (all Stone)\" (0, 0 not shown)"
+    },
+    {
+     "task": "md-how-many-left",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4752,
+     "seconds": 4.5,
+     "missing": "fact \"4 in total: S 2, M 0, L 0, XL 2 (all Stone)\" (0, 0 not shown)"
+    },
+    {
+     "task": "md-below-cost",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 5837,
+     "seconds": 6.3,
+     "missing": "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown); fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)"
+    },
+    {
+     "task": "md-below-cost",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 5774,
+     "seconds": 5.5,
+     "missing": "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown); fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)"
+    },
+    {
+     "task": "md-best-sellers-this-month",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5445,
+     "seconds": 5.3,
+     "missing": "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)"
+    },
+    {
+     "task": "md-best-sellers-this-month",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5418,
+     "seconds": 4.5,
+     "missing": "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)"
+    },
+    {
+     "task": "md-out-of-stock-30-days",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5738,
+     "seconds": 8.2,
+     "missing": ""
+    },
+    {
+     "task": "md-out-of-stock-30-days",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5739,
+     "seconds": 7.8,
+     "missing": ""
+    },
+    {
+     "task": "ops-unfulfilled-3-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4545,
+     "seconds": 6.4,
+     "missing": "fact \"none: 412 orders are processing and the oldest was placed We\" (9 not shown)"
+    },
+    {
+     "task": "ops-unfulfilled-3-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4541,
+     "seconds": 5.5,
+     "missing": "fact \"none: 412 orders are processing and the oldest was placed We\" (9 not shown)"
+    },
+    {
+     "task": "ops-photo-request",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2541,
+     "seconds": 11.6,
+     "missing": "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+    },
+    {
+     "task": "ops-photo-request",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2568,
+     "seconds": 11.6,
+     "missing": "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+    },
+    {
+     "task": "ops-cancel-delivered",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 3,
+     "tokens": 3588,
+     "seconds": 5.3,
+     "missing": "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+    },
+    {
+     "task": "ops-cancel-delivered",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3881,
+     "seconds": 5.7,
+     "missing": "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+    },
+    {
+     "task": "ops-change-address-in-transit",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2624,
+     "seconds": 3.8,
+     "missing": "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+    },
+    {
+     "task": "ops-change-address-in-transit",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 2,
+     "tokens": 2625,
+     "seconds": 3.4,
+     "missing": "fact \"no: the order is already with UPS (in transit since Nov 2); \" (2 not shown)"
+    },
+    {
+     "task": "mgr-undo-banner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5850,
+     "seconds": 8.1,
+     "missing": "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+    },
+    {
+     "task": "mgr-undo-banner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5845,
+     "seconds": 6.9,
+     "missing": "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 5,
+     "tokens": 4907,
+     "seconds": 8.2,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 3538,
+     "seconds": 6.7,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 5,
+     "tokens": 5413,
+     "seconds": 10.2,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 5,
+     "tokens": 5583,
+     "seconds": 16.1,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    }
+   ],
+   "outage": []
+  },
+  "own22-heldout-a2api-lookup": {
+   "report": "artifacts/acommerce/runs/own22-heldout-a2api-lookup.md",
+   "metrics": {
+    "facade": {
+     "runs": 32,
+     "passed": 8,
+     "tokensPerRun": {
+      "n": 32,
+      "mean": 5173,
+      "median": 5414,
+      "p90": 6367,
+      "min": 2919,
+      "max": 11458
+     },
+     "secondsPerRun": {
+      "n": 32,
+      "mean": 9.2,
+      "median": 7.3,
+      "p90": 16.1,
+      "min": 3.9,
+      "max": 24.2
+     },
+     "modelCallsPerRun": {
+      "n": 32,
+      "mean": 3.22,
+      "median": 3.0,
+      "p90": 4.9,
+      "min": 1,
+      "max": 5
+     },
+     "toolCallsPerRun": {
+      "n": 32,
+      "mean": 1.44,
+      "median": 1.0,
+      "p90": 2.0,
+      "min": 1,
+      "max": 4
+     },
+     "failedToolCalls": "6/46"
+    }
+   },
+   "runs": [
+    {
+     "task": "mk-pause-knit-until-monday",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 3,
+     "failedToolCalls": 1,
+     "modelCalls": 4,
+     "tokens": 7922,
+     "seconds": 21.7,
+     "missing": "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+    },
+    {
+     "task": "mk-pause-knit-until-monday",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 2,
+     "modelCalls": 5,
+     "tokens": 11458,
+     "seconds": 24.2,
+     "missing": "fact \"pausing has no end time: the agent says someone has to resum\" (9 not shown)"
+    },
+    {
+     "task": "mk-category-promotion",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 3070,
+     "seconds": 17.5,
+     "missing": "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (2, 6, 19, 23, 59 not shown)"
+    },
+    {
+     "task": "mk-category-promotion",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 1,
+     "modelCalls": 1,
+     "tokens": 2919,
+     "seconds": 14.7,
+     "missing": "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (2, 6, 19, 23, 59 not shown)"
+    },
+    {
+     "task": "mk-winback",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5973,
+     "seconds": 15.6,
+     "missing": ""
+    },
+    {
+     "task": "mk-winback",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5983,
+     "seconds": 14.5,
+     "missing": ""
+    },
+    {
+     "task": "mk-viewed-not-purchased",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6367,
+     "seconds": 4.8,
+     "missing": ""
+    },
+    {
+     "task": "mk-viewed-not-purchased",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 6367,
+     "seconds": 3.9,
+     "missing": ""
+    },
+    {
+     "task": "md-broken-sizes-outerwear",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3494,
+     "seconds": 4.7,
+     "missing": "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)"
+    },
+    {
+     "task": "md-broken-sizes-outerwear",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3494,
+     "seconds": 4.2,
+     "missing": "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)"
+    },
+    {
+     "task": "md-how-many-left",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 7010,
+     "seconds": 5.7,
+     "missing": "fact \"4 in total: S 2, M 0, L 0, XL 2 (all Stone)\" (0, 0 not shown)"
+    },
+    {
+     "task": "md-how-many-left",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4752,
+     "seconds": 4.5,
+     "missing": "fact \"4 in total: S 2, M 0, L 0, XL 2 (all Stone)\" (0, 0 not shown)"
+    },
+    {
+     "task": "md-below-cost",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 5837,
+     "seconds": 6.6,
+     "missing": "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown); fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)"
+    },
+    {
+     "task": "md-below-cost",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 5774,
+     "seconds": 5.7,
+     "missing": "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown); fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)"
+    },
+    {
+     "task": "md-best-sellers-this-month",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5450,
+     "seconds": 5.3,
+     "missing": "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)"
+    },
+    {
+     "task": "md-best-sellers-this-month",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5415,
+     "seconds": 4.5,
+     "missing": "fact \"this month is Nov 1 – Nov 6 so far in store time; the agent \" (1, 6 not shown)"
+    },
+    {
+     "task": "md-out-of-stock-30-days",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5738,
+     "seconds": 8.3,
+     "missing": ""
+    },
+    {
+     "task": "md-out-of-stock-30-days",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5739,
+     "seconds": 7.8,
+     "missing": ""
+    },
+    {
+     "task": "ops-unfulfilled-3-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4587,
+     "seconds": 7.6,
+     "missing": "fact \"none: 412 orders are processing and the oldest was placed We\" (9 not shown)"
+    },
+    {
+     "task": "ops-unfulfilled-3-days",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 4,
+     "failedToolCalls": 0,
+     "modelCalls": 2,
+     "tokens": 4842,
+     "seconds": 9.0,
+     "missing": "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4 not shown)"
+    },
+    {
+     "task": "ops-photo-request",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3646,
+     "seconds": 13.4,
+     "missing": "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (236 not shown)"
+    },
+    {
+     "task": "ops-photo-request",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3653,
+     "seconds": 12.9,
+     "missing": "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (236 not shown)"
+    },
+    {
+     "task": "ops-cancel-delivered",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3736,
+     "seconds": 5.2,
+     "missing": "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+    },
+    {
+     "task": "ops-cancel-delivered",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3728,
+     "seconds": 4.7,
+     "missing": "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+    },
+    {
+     "task": "ops-change-address-in-transit",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3743,
+     "seconds": 5.8,
+     "missing": ""
+    },
+    {
+     "task": "ops-change-address-in-transit",
+     "mode": "facade",
+     "done": true,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 3705,
+     "seconds": 4.8,
+     "missing": ""
+    },
+    {
+     "task": "mgr-undo-banner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5850,
+     "seconds": 8.1,
+     "missing": "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+    },
+    {
+     "task": "mgr-undo-banner",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 3,
+     "tokens": 5845,
+     "seconds": 7.0,
+     "missing": "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 5,
+     "tokens": 4907,
+     "seconds": 8.2,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-weekly-summary",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 4,
+     "tokens": 3538,
+     "seconds": 6.7,
+     "missing": "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31, 6, 7 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 2,
+     "failedToolCalls": 1,
+     "modelCalls": 5,
+     "tokens": 5413,
+     "seconds": 10.3,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    },
+    {
+     "task": "mgr-how-is-business",
+     "mode": "facade",
+     "done": false,
+     "toolCalls": 1,
+     "failedToolCalls": 0,
+     "modelCalls": 5,
+     "tokens": 5583,
+     "seconds": 16.2,
+     "missing": "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+    }
+   ],
+   "outage": []
+  }
+ },
+ "gatewayVerify": {
+  "cases": [
+   {
+    "tool": "get_claim_grid_list",
+    "screen": "getClmGridList",
+    "input": {
+     "claim_status": "requested",
+     "min_claim_amount": 200,
+     "page_size": 5
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_claim_grid_list_count",
+    "screen": "getClmGridListCnt",
+    "input": {
+     "claim_status": "requested",
+     "min_claim_amount": 200
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_display_corner_list",
+    "screen": "getDispCornerList",
+    "input": {
+     "page_type": "main",
+     "starts_at": "2026-11-07T00:00",
+     "ends_at": "2026-11-08T23:59"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_member_grade_list",
+    "screen": "getMbrGrdList",
+    "input": {},
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_grid_list",
+    "screen": "getOrdGridList",
+    "input": {
+     "order_status": "processing",
+     "page_size": 5
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_grid_list",
+    "screen": "getOrdGridList",
+    "input": {
+     "keyword": "27184"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_grid_list_count",
+    "screen": "getOrdGridListCnt",
+    "input": {
+     "order_status": "processing"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_grid_list_count",
+    "screen": "getOrdGridListCnt",
+    "input": {
+     "order_status": "processing",
+     "ordered_to": "2026-11-02"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_detail_popup_init_data",
+    "screen": "getOrdDtlPopInitData",
+    "input": {
+     "order_id": "ord_27184"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_detail_popup_init_data",
+    "screen": "getOrdDtlPopInitData",
+    "input": {
+     "order_id": "ord_20402"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_detail_popup_init_data",
+    "screen": "getOrdDtlPopInitData",
+    "input": {
+     "order_id": "#20402"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_order_detail_popup_init_data",
+    "screen": "getOrdDtlPopInitData",
+    "input": {
+     "order_id": "999999"
+    },
+    "facadeStatus": 404,
+    "gatewayStatus": 404,
+    "sameResult": null,
+    "ok": true,
+    "gateway": {
+     "error": {
+      "code": "resource_not_found",
+      "class": "not_found",
+      "message": "The backend reported that the target does not exist. (HTTP 404) There is no order 999999."
+     }
+    },
+    "facade": {
+     "error": {
+      "code": "order_not_found",
+      "class": "not_found",
+      "message": "There is no order 999999.",
+      "next_tool": null
+     }
+    }
+   },
+   {
+    "tool": "get_product_detail_info",
+    "screen": "getPrdDtlInfo",
+    "input": {
+     "product_id": "prd_wool_overcoat"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_product_detail_info_v2",
+    "screen": "getPrdDtlInfoV2",
+    "input": {
+     "product_id": "prd_wool_overcoat"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_product_grid_list",
+    "screen": "getPrdGridList",
+    "input": {
+     "keyword": "coat",
+     "availability": "in_stock",
+     "page_size": 3
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_product_grid_list_count",
+    "screen": "getPrdGridListCnt",
+    "input": {
+     "max_stock": 10
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_promotion_grid_list",
+    "screen": "getPrmtGridList",
+    "input": {
+     "promotion_status": "running"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_promotion_grid_list_count",
+    "screen": "getPrmtGridListCnt",
+    "input": {
+     "promotion_status": "running"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_promotion_target_member_list",
+    "screen": "getPrmtTgtMbrList",
+    "input": {
+     "member_status": "active",
+     "page_size": 3
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_promotion_target_member_list_count",
+    "screen": "getPrmtTgtMbrListCnt",
+    "input": {
+     "member_status": "active"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_refund_popup_init_data",
+    "screen": "getRfndPopInitData",
+    "input": {
+     "claim_id": "clm_20333"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "get_sale_analysis_grid_list",
+    "screen": "getSaleAnlsGridList",
+    "input": {
+     "from_date": "2026-11-05",
+     "to_date": "2026-11-05",
+     "compare_to": "same_weekday_last_4_weeks"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "save_promotion_list",
+    "screen": "savePrmtList",
+    "input": {
+     "rows": [
+      {
+       "row_action": "update",
+       "promotion_id": "promo_autumn_knit",
+       "promotion_status": "paused"
+      }
+     ]
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "save_coupon_list",
+    "screen": "saveCpnList",
+    "input": {
+     "rows": [
+      {
+       "row_action": "insert",
+       "coupon_code": "CHECK10",
+       "promotion_id": "promo_autumn_knit",
+       "coupon_application": "code_entry",
+       "stacking": "no_other_coupons"
+      }
+     ]
+    },
+    "facadeStatus": 422,
+    "gatewayStatus": 422,
+    "sameResult": null,
+    "ok": true,
+    "gateway": {
+     "error": {
+      "code": "upstream_validation_failed",
+      "class": "invalid_input",
+      "message": "The backend rejected the request values. (HTTP 422) Row 1: `target_member_grade` is required."
+     }
+    },
+    "facade": {
+     "error": {
+      "code": "ERR_PARAM",
+      "class": "invalid_input",
+      "message": "Row 1: `tgtMbrGrdCd` is required.",
+      "next_tool": null
+     }
+    }
+   },
+   {
+    "tool": "save_coupon_list",
+    "screen": "saveCpnList",
+    "input": {
+     "rows": [
+      {
+       "row_action": "insert",
+       "coupon_code": "CHECK10",
+       "promotion_id": "promo_autumn_knit",
+       "target_member_grade": "G00",
+       "coupon_application": "code_entry",
+       "stacking": "no_other_coupons"
+      }
+     ]
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "save_display_banner_list",
+    "screen": "saveDispBnrList",
+    "input": {
+     "rows": [
+      {
+       "row_action": "insert",
+       "corner_id": "slot_home_hero",
+       "starts_at": "2026-11-14T00:00",
+       "ends_at": "2026-11-15T23:59",
+       "headline": "Check",
+       "eyebrow": "CHECK",
+       "button_label": "Shop",
+       "link_url": "/c/check",
+       "image_product_id": "prd_wool_overcoat"
+      }
+     ]
+    },
+    "facadeStatus": 422,
+    "gatewayStatus": 422,
+    "sameResult": null,
+    "ok": true,
+    "gateway": {
+     "error": {
+      "code": "upstream_validation_failed",
+      "class": "invalid_input",
+      "message": "The backend rejected the request values. (HTTP 422) Row 1: `target_member_grade` is required."
+     }
+    },
+    "facade": {
+     "error": {
+      "code": "ERR_PARAM",
+      "class": "invalid_input",
+      "message": "Row 1: `tgtMbrGrdCd` is required.",
+      "next_tool": null
+     }
+    }
+   },
+   {
+    "tool": "save_display_banner_list",
+    "screen": "saveDispBnrList",
+    "input": {
+     "rows": [
+      {
+       "row_action": "insert",
+       "corner_id": "slot_home_hero",
+       "target_member_grade": "G03",
+       "starts_at": "2026-11-14T00:00",
+       "ends_at": "2026-11-15T23:59",
+       "headline": "Check",
+       "eyebrow": "CHECK",
+       "button_label": "Shop",
+       "link_url": "/c/check",
+       "image_product_id": "prd_wool_overcoat"
+      }
+     ]
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "save_customer_message_send",
+    "screen": "saveCustMsgSend",
+    "input": {
+     "member_id": "cus_alex",
+     "message_type": "custom",
+     "channel": "email",
+     "subject": "Check",
+     "text": "A check message."
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   },
+   {
+    "tool": "save_refund_process",
+    "screen": "saveRfndProc",
+    "input": {
+     "claim_id": "clm_20333",
+     "refund_method": "original_payment"
+    },
+    "facadeStatus": 200,
+    "gatewayStatus": 200,
+    "sameResult": true,
+    "ok": true,
+    "gateway": null,
+    "facade": null
+   }
+  ],
+  "failures": 0
+ }
+}

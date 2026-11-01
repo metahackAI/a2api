@@ -111,9 +111,9 @@ DESCRIBE = {
     'pageSize': 'Rows per page, 1 to 100 (20 when not sent).',
     'rowStat': 'insert adds a row; update changes the status of an existing row; delete ends it.',
     'prmtStatCd': 'Promotion status. In a save row with row_action update: paused pauses it, ended ends it.',
-    # ord.rs: the popup reads get_order with ordNo as the order key; a bare order number is not found.
-    'ordNo': 'Order key such as ord_20402 (order_id in order and claim rows). A bare order number (20402) is not '
-             'found; search it with the order grid keyword.',
+    # ord.rs: the popup reads get_order with ordNo as the order key (a bare number is not found there;
+    # the gateway looks the number up, see HANDLES).
+    'ordNo': 'Order key such as ord_20402 (order_id in order and claim rows).',
     'ordDtmFrom': 'Orders placed on or after this day (YYYY-MM-DD, store time).',
     'ordDtmTo': 'Orders placed on or before this day (YYYY-MM-DD, store time).',
     'dlvStrtDtm': "When the parcel left: the carrier's first scan.",
@@ -167,6 +167,14 @@ SCREENS = {
 }
 
 VOCABULARY = {'rename': RENAME, 'codes': CODES, 'describe': DESCRIBE}
+
+# Fields that take a screen's key where people give the number they see: ord.rs reads get_order with
+# ordNo as the key (`20402` is not found), and the order grid's keyword finds an order by its number.
+# The gateway looks such a number up first: {screen: {field: (lookup screen, its search field, key field)}}.
+HANDLES = {
+    'getOrdDtlPopInitData': {'ordNo': ('getOrdGridList', 'srchKwd', 'ordNo')},
+    'saveCustMsgSend': {'ordNo': ('getOrdGridList', 'srchKwd', 'ordNo')},
+}
 
 # The abbreviations in the screen names, spelled out as the field names above spell them
 # (ToolCatalogImporter words): getOrdGridListCnt -> get_order_grid_list_count.

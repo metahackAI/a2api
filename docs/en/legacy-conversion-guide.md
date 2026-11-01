@@ -212,6 +212,8 @@ app = convert(source, operations={n: {'effect': 'read' if k == 'read' else 'writ
               vocabulary=VOCABULARY, deployment=HTTPDeployment(origin, request_values=..., error_detail=...))
 ```
 
+(1.1) `words={'clm': 'claim', 'cnt': 'count'}` spells out abbreviated name parts in the IDs (`getClmGridListCnt` → `claims.get_claim_grid_list_count`); calls still use the catalog name. `source.relations()` reads declared `consumes`/`produces` for `ToolSession.index(related=...)`.
+
 `call_path`, the body envelope (`envelope='input'`) and key names are configurable. camelCase names keep their words in IDs (`getClmGridList` → `claims.get_clm_grid_list`).
 
 **Vocabulary.** Abbreviated fields (`clmStatCd`) and code values (`"R10"`) are hard for a model. Write only what the source's code tables and field comments say:

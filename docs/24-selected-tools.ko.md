@@ -120,12 +120,15 @@ await session.focus(next_user_turn)                              # 새 사용자
 - 모델은 `a2api_load({"names": [...]})`로 함수를 불러오고 다음 요청부터 호출한다. 목차에 없는 이름은 `unknown`과 비슷한 이름 `suggest`로 돌려준다.
 - 불러오지 않은 함수를 목차에서 바로 호출하면 그 함수를 불러온다. 읽기이고 인자가 schema에 맞으면 바로 실행하고, 쓰기는 실행하지 않고 `NOT_LOADED`로 답한다(모델이 인자 schema를 본 뒤 다시 호출).
 - `related=N`: 성공한 결과에 그 결과가 돌려준 ID를 받는 함수를 최대 N개 `next`로 붙인다. 관계는 `relations`(`{capability id: {'consumes': [...], 'produces': [...]}}`)에서, 없으면 ID 이름의 입력(`order_id`, `orderId`)에서 얻는다. 많은 함수가 받는 ID(예: `customer_id`)는 사용자 요청과 맞는 함수만 보여 준다.
+- `ToolSession(..., batch=True)`: `a2api_batch({"calls": [{"name", "arguments"}, ...]})`로 서로 의존하지 않는 호출 여러 개(목록의 항목마다 한 번 등)를 한 모델 단계에 실행한다. 각 호출은 직접 호출과 똑같이 검사·실행되고 결과는 같은 순서로 돌아온다. 함수가 하나라도 불러와진 뒤부터 보인다(처음부터 보이면 어떤 함수를 불러올지가 바뀌었다, 39 문서 3.9).
+- 불러오기는 목차 제목이 붙은 이름(`orders › order: get_order`, `orders.get_order`)과 대소문자 차이를 해석한다. 예산에 걸려 빠진 함수는 결과가 다시 불러오라고 알린다. 목차를 쓸 때는 `max_tool_bytes`를 32000 정도로 둔다.
 - `preselect=N`: 호스트 검색 후보도 미리 불러 둔다. a-commerce에서는 모델이 후보에 머물러 목차의 이점이 사라졌다. 권장하지 않는다.
 - wire(`discover`·`describe`·`invoke`)와 MCP 세 도구는 바뀌지 않는다. 목차는 `discover`로, 불러오기는 `describe`로 만든다.
 - 측정(39 문서 3.8)에 따른 선택 기준은 다음과 같다.
   - 질문이 함수 이름과 다른 말로 오는 큰 카탈로그: `index(detail='names')`. a-commerce 253개에서 검색보다 더 풀고, 토큰은 같거나 적었다.
   - 질문이 기능 이름을 그대로 쓰는 경우: `auto()`. 4언어 벤치마크에서 정확도가 같고 더 싸다.
   - `related`는 효과가 측정되지 않아 기본 꺼짐이다.
+  - 한 요청에 여러 건을 처리하는 업무(반품 검토 등): `batch=True`. a-commerce design에서 목차만 11/24, 목차 + batch 14/24. 추론을 숨겨 쓰는 모델에는 출력 토큰 상한을 두지 않는다(상한이 추론에도 쓰여 답이 잘린다).
 
 필드 기반 순위는 업데이트한 직접 앱 서버에서 제공한다. 호스트의 more 지원만으로 외부/기존 관리 Runtime 서버의 검색 알고리즘까지 바뀌는 것은 아니다. 인증 주체/tenant/scopes/server가 바뀌면 새 ToolSession을 사용한다.
 
