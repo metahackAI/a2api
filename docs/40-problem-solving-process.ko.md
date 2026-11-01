@@ -199,7 +199,27 @@ batch를 불러온 뒤에 보이게 고친 뒤(✓):
 | a2api 변환 | 6/32 | 22% |
 | a2api 변환 + 주문 번호 조회 | 8/32 | 13% |
 
-자체 에이전트의 인자·결과까지 남긴 상세 기록은 a-commerce 평가기의 `--logs`로 다시 받는다(측정 중).
+**자체 에이전트 상세 기록**(11/02 04:12–04:23, a-commerce 평가기 `--logs`, held_out 각 2회)
+- 원본 파사드: 5/32, 실패한 화면 호출 43/60. [기록](traces/own22-heldout-raw-logs/README.md)
+- a2api 변환 + 번호 조회: 8/32, 실패한 화면 호출 5/45. [기록](traces/own22-heldout-a2api-lookup-logs/README.md)
+- 앞 측정(5 대 8)과 같다. 각 실행은 라우팅 → 도구 검색 후보 → 계획(도구·인자) → 호출과 결과 → 답·화면 블록 → 채점 순이다.
+
+`ops-change-address-in-transit` "customer on 27184 moved, can you change the shipping address?"
+
+원본 파사드(✗, [기록](traces/own22-heldout-raw-logs/ops-change-address-in-transit.md)):
+- 도구 검색 후보: `saveCustMsgSend, getClmGridList, getClmGridListCnt, getOrdDtlPopInitData, getOrdGridList`
+- 계획: `getOrdDtlPopInitData {"ordNo":"27184"}`
+- 호출 결과: 실패 `{"code":"order_not_found","message":"There is no order 27184."}` → 에이전트가 거기서 답함. 채점은 "in transit since Nov 2"의 2를 찾지 못함
+
+a2api 변환 + 번호 조회(✓, [기록](traces/own22-heldout-a2api-lookup-logs/ops-change-address-in-transit.md)):
+- 도구 검색 후보: `save_customer_message_send, get_order_detail_popup_init_data, …`
+- 계획: `get_order_detail_popup_init_data {"order_id":"27184"}`
+- 호출: 게이트웨이가 번호를 `ord_27184`로 찾아 넣음. 결과 `{"carrier":"UPS","order_id":"ord_27184","shipped_at":"2026-11-02T12:43:00-05:00","delivery_status":"in_transit",…}`
+- 답: "The order 27184 is in transit with UPS tracking 1ZNW271840001, shipped on Mon Nov 2. Because the parcel is already on the way, the shipping address can't be changed now. …" 통과
+
+`ops-photo-request` "ask the customer on 20366 for photos of the damage"([원본](traces/own22-heldout-raw-logs/ops-photo-request.md), [a2api](traces/own22-heldout-a2api-lookup-logs/ops-photo-request.md))
+- 원본: `getOrdDtlPopInitData {"ordNo":"20366"}`이 404로 실패했다.
+- a2api: 같은 호출이 성공해 주문(Light rain parka, 배송 완료)을 받았다. 하지만 채점의 "damaged-in-transit claim … x2 ($236.00)"를 답에 쓰지 않아 두 쪽 모두 ✗였다.
 
 ## 6단계 — 같은 검색 반복 감지
 
