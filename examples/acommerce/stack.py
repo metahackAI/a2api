@@ -63,7 +63,11 @@ def running():
                                    ('worker', ['acom-commerce', 'work'], WORKER),
                                    ('agent', ['acom-agent'], AGENT), ('gateway', ['acom-gateway'], GATEWAY)]:
             log = (LOGS / f'{name}.log').open('w')
-            children.append(subprocess.Popen([str(TARGET / args[0]), *args[1:]], cwd=REPO, env=variables,
+            # A2API_AGENT_COMMERCE_URL points only the agent at another commerce origin (the a2api
+            # gateway in a2api_gateway.py); every other service keeps the real one.
+            started = dict(variables, ACOM_COMMERCE_URL=os.environ['A2API_AGENT_COMMERCE_URL']) if (
+                name == 'agent' and os.environ.get('A2API_AGENT_COMMERCE_URL')) else variables
+            children.append(subprocess.Popen([str(TARGET / args[0]), *args[1:]], cwd=REPO, env=started,
                                              stdout=log, stderr=subprocess.STDOUT))
             deadline = time.monotonic() + 60
             while not healthy(origin):
