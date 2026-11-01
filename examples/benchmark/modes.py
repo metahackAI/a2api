@@ -3,6 +3,11 @@
 spec-tools  : every OpenAPI operation as one function tool, raw HTTP responses
 spec-prompt : the whole OpenAPI document in the system prompt + one generic http_request tool
 a2api       : ToolSession (a2api-tools) over the converted application of each language
+a2api-index-summary / -graph / -names : ToolSession.index(): an index of every function in the system
+              prompt (first summary sentence, or names only), functions loaded with a2api_load;
+              -graph and -names add related next steps (functions taking IDs a result returned);
+              -hybrid: names only plus the host search's candidates loaded up front; -batch: names only
+              plus a2api_batch (several independent calls in one step)
 """
 
 from __future__ import annotations
@@ -17,7 +22,7 @@ from urllib.parse import parse_qsl, quote, urlencode
 from urllib.request import Request, urlopen
 
 from a2api import ExecutionContext, ToolSession
-from a2api.tool_session import SEARCH_NAME
+from a2api.tool_session import BATCH_NAME, LOAD_NAME, SEARCH_NAME
 
 from domain import operations
 
@@ -180,19 +185,31 @@ class SpecPrompt(SpecTools):
 class A2API:
     mode = 'a2api'
 
-    def __init__(self, app, ops, *, max_tool_bytes=16000, search_limit=5, hints=None, all_bytes=None):
+    def __init__(self, app, ops, *, max_tool_bytes=16000, search_limit=5, hints=None, all_bytes=None, index=None):
         self.app, self.ops = app, ops
         self.max_tool_bytes, self.search_limit = max_tool_bytes, search_limit
         self.hints, self.all_bytes = hints, all_bytes
+        index = dict(index) if index is not None else None
+        self.batch = bool(index and index.pop('batch', False))
+        self.index, self.index_text = index, None  # ToolSession.index() options, or None for auto()
         self.session = None
 
     async def setup(self, question):
         options = {'hints': self.hints} if self.hints else {}
+        if self.batch:
+            options['batch'] = True
         self.session = ToolSession(self.app, CONTEXT, max_tool_bytes=self.max_tool_bytes, search_limit=self.search_limit, **options)
+        if self.index is not None:
+            result = await self.session.index(question, **self.index)
+            self.index_text = result['text']
+            return {'strategy': 'index', 'functions': result['functions'], 'indexChars': len(result['text']),
+                    'hostCalls': self.session.stats}
         result = await self.session.auto(question, **({'all_bytes': self.all_bytes} if self.all_bytes is not None else {}))
         return {'strategy': result['strategy'], 'functions': len(self.session.tools()), 'hostCalls': self.session.stats}
 
     def system(self):
+        if self.session.strategy == 'index':
+            return COMMON + '\n\n' + self.index_text
         # Mention the search tool only when the host actually provides it.
         return COMMON + (MODE_RULES['a2api'] if self.session.strategy != 'all' else '')
 
@@ -200,14 +217,21 @@ class A2API:
         return self.session.tools()
 
     async def call(self, name, arguments):
-        binding = None if name == SEARCH_NAME else self.session.binding(name)
+        if name == BATCH_NAME and self.batch:
+            payload = await self.session.call(name, arguments)
+            return self.session.render(payload), [self._business(item['name'], item) for item in payload.get('batch') or []]
         payload = await self.session.call(name, arguments)
-        text = self.session.render(payload)
+        return self.session.render(payload), (None if name in (SEARCH_NAME, LOAD_NAME) else self._business(name, payload))
+
+    def _business(self, name, payload):
+        """The business call record, or None when no function of that name is bound."""
+        # Read after the call: a function called straight from the index is loaded by the call itself.
+        binding = self.session.binding(name)
         if binding is None:
-            return text, None
+            return None
         ok = payload.get('status') == 'succeeded'
         status = payload.get('httpStatus', 200) if ok else payload.get('error', {}).get('status')
         # Input rejected before execution never reached the service.
         if payload.get('error', {}).get('code') == 'INVALID_INPUT' and 'status' not in payload:
-            return text, {'op': self.ops.get(binding['id'], 'unknown'), 'status': 'rejected', 'ok': False, 'executed': False}
-        return text, {'op': self.ops.get(binding['id'], 'unknown'), 'status': status, 'ok': ok}
+            return {'op': self.ops.get(binding['id'], 'unknown'), 'status': 'rejected', 'ok': False, 'executed': False}
+        return {'op': self.ops.get(binding['id'], 'unknown'), 'status': status, 'ok': ok}

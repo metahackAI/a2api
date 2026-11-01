@@ -5,7 +5,7 @@ from importlib.metadata import PackageNotFoundError, version as _version
 try:
     __version__ = _version('a2api')
 except PackageNotFoundError:  # running from a source tree without installation
-    __version__ = '1.0.0'
+    __version__ = '1.1.0'
 
 from .catalog import Catalog
 from .contracts import compile_contract, load_contract

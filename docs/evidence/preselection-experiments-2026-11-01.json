@@ -1,0 +1,83 @@
+{
+  "purpose": "docs/37 P3 (3-1 value-type signal, 3-2 multi-intent split): pre-selection recall measured offline on a-commerce design tasks (required tools offered by ToolSession.auto before the first model request); GitHub fixed offline queries as a regression guard. Held-out tasks were not used.",
+  "catalog": "a-commerce acom tools (253) converted with ToolCatalogImporter; max_tool_bytes 16000",
+  "measure": "examples/acommerce/recall.py --set design",
+  "variants": [
+    {
+      "name": "baseline (field-search/2, preselect 8)",
+      "firstTurnRecall": 0.571,
+      "allTurnsRecall": 0.619,
+      "githubTop3": "10/10"
+    },
+    {
+      "name": "English function-word stoplist",
+      "firstTurnRecall": 0.524,
+      "allTurnsRecall": 0.571,
+      "decision": "rejected"
+    },
+    {
+      "name": "instance signal (word before an id/number boosts identity/input matches)",
+      "firstTurnRecall": 0.571,
+      "allTurnsRecall": 0.619,
+      "githubTop3": "10/10",
+      "note": "get_order for 'order 27184' rank 79 -> 30; no recall change",
+      "decision": "rejected"
+    },
+    {
+      "name": "stoplist + instance signal",
+      "firstTurnRecall": 0.524,
+      "allTurnsRecall": 0.571,
+      "githubTop3": "10/10 (2 replay ranks moved by 1)",
+      "decision": "rejected"
+    },
+    {
+      "name": "clause split: whole top 8 + 1 per clause",
+      "firstTurnRecall": 0.571,
+      "functions": 8.0,
+      "decision": "rejected"
+    },
+    {
+      "name": "clause split: whole top 8 + 2 per clause",
+      "firstTurnRecall": 0.524,
+      "functions": 8.3,
+      "decision": "rejected"
+    },
+    {
+      "name": "clause split: whole top 6 + 1 per clause",
+      "firstTurnRecall": 0.476,
+      "functions": 6.2,
+      "decision": "rejected"
+    },
+    {
+      "name": "preselect 10 / 12 (no split)",
+      "firstTurnRecall": 0.571,
+      "functions": "9.6 / 11.0",
+      "decision": "no gain"
+    },
+    {
+      "name": "declared relations (catalog consumes/produces): each of the top 3 hits pulls in the best-ranked producer and consumer that matched",
+      "firstTurnRecall": 0.476,
+      "allTurnsRecall": 0.476,
+      "decision": "rejected"
+    },
+    {
+      "name": "relations, top 1 hit, producers and consumers",
+      "firstTurnRecall": 0.524,
+      "allTurnsRecall": 0.571,
+      "decision": "rejected"
+    },
+    {
+      "name": "relations, top 1 hit, producers only",
+      "firstTurnRecall": 0.571,
+      "allTurnsRecall": 0.619,
+      "decision": "no gain"
+    },
+    {
+      "name": "relations, top 2 / 3 hits, producers only",
+      "firstTurnRecall": "0.429 / 0.476",
+      "allTurnsRecall": "0.476 / 0.476",
+      "decision": "rejected"
+    }
+  ],
+  "finding": "Long conversational questions match many filler and generic words across 253 tools; coverage-first ranking then favors broad weak matches. Changing the word list reshuffles other tasks. Under the 16 KB schema budget the host keeps about 8 a-commerce functions whatever the preselect size. The model's own searches with short keywords recover part of the gap (see run results). The a-commerce agent's own tool search expands hits by declared consumes/produces slots; in a2api's ranking the top hits for these questions are often not the needed tools, so their neighbors displaced better candidates."
+}

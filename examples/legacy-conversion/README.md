@@ -13,6 +13,11 @@ python examples/legacy-conversion/code_only.py --language spring
 
 # 경로 B-2: HTTP 없이 Python 코드만 있을 때 — 기존 서비스를 감싼 read/write(async) 함수 등록
 python examples/legacy-conversion/python_functions.py
+
+# 경로 C: 도구 목록·이름 호출 서비스 — 목록 가져오기, 약어·코드값 vocabulary, 호스트 요청 값, 원 서버 오류 문장
+python examples/legacy-conversion/legacy_screens.py
 ```
 
-A·B-1은 해당 언어 툴체인(JDK 25 + Maven, Go 1.22+, Rust/Cargo)으로 생성된 서버를 빌드해 임시 포트에서 실행한다. 생성물이 없으면 `examples/benchmark/generate.py`를 자동으로 호출한다. B-2는 외부 의존성 없이 실행된다.
+A·B-1은 해당 언어 툴체인(JDK 25 + Maven, Go 1.22+, Rust/Cargo)으로 생성된 서버를 빌드해 임시 포트에서 실행한다. 생성물이 없으면 `examples/benchmark/generate.py`를 자동으로 호출한다. B-2·C는 외부 의존성 없이 실행된다(C는 같은 프로세스에 작은 레거시 서버를 띄운다).
+
+실제 공개 프로젝트(RealWorld의 Spring·Gin·Axum·FastAPI 구현)의 코드만 읽는 변환은 [`examples/realworld`](../realworld/README.md)에 있다.

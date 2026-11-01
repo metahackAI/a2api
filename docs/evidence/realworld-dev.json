@@ -1,0 +1,1393 @@
+{
+ "runs": [
+  "artifacts/realworld/runs/dev-1.jsonl"
+ ],
+ "perTask": {
+  "RD1|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5793,
+   "seconds": 10.028,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles ok"
+   ]
+  },
+  "RD1|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 6774,
+   "seconds": 13.617,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles ok"
+   ]
+  },
+  "RD1|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 6004,
+   "seconds": 10.148,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles ok"
+   ]
+  },
+  "RD1|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5565,
+   "seconds": 9.734,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles ok"
+   ]
+  },
+  "RD1|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5257,
+   "seconds": 8.176,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles ok"
+   ]
+  },
+  "RD1|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5780,
+   "seconds": 9.058,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles ok"
+   ]
+  },
+  "RD2|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 9693,
+   "seconds": 8.907,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles/{} ok",
+    "GET /articles/{}/comments ok"
+   ]
+  },
+  "RD2|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 10885,
+   "seconds": 10.261,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles ok",
+    "GET /articles/{}/comments ok"
+   ]
+  },
+  "RD2|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8260,
+   "seconds": 8.723,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles/{} ok",
+    "GET /articles/{}/comments ok"
+   ]
+  },
+  "RD2|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8009,
+   "seconds": 10.335,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles/{} ok",
+    "GET /articles/{}/comments ok"
+   ]
+  },
+  "RD2|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 10597,
+   "seconds": 9.777,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles ok",
+    "GET /articles/{}/comments ok"
+   ]
+  },
+  "RD2|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8530,
+   "seconds": 8.596,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles/{} ok",
+    "GET /articles/{}/comments ok"
+   ]
+  },
+  "RD3|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5285,
+   "seconds": 2.77,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /profiles/{}/follow ok"
+   ]
+  },
+  "RD3|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 4954,
+   "seconds": 3.893,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /profiles/{}/follow ok"
+   ]
+  },
+  "RD3|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 4884,
+   "seconds": 6.223,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /profiles/{}/follow ok"
+   ]
+  },
+  "RD3|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5243,
+   "seconds": 4.683,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /profiles/{}/follow ok"
+   ]
+  },
+  "RD3|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5394,
+   "seconds": 7.476,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /profiles/{}/follow ok"
+   ]
+  },
+  "RD3|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5907,
+   "seconds": 3.479,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /profiles/{}/follow ok"
+   ]
+  },
+  "RD4|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8476,
+   "seconds": 11.379,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles ok",
+    "POST /articles/{}/comments ok"
+   ]
+  },
+  "RD4|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8275,
+   "seconds": 12.485,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles ok",
+    "POST /articles/{}/comments ok"
+   ]
+  },
+  "RD4|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 11735,
+   "seconds": 13.488,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "POST /articles/{}/comments ok"
+   ]
+  },
+  "RD4|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 11861,
+   "seconds": 16.479,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "POST /articles/{}/comments ok"
+   ]
+  },
+  "RD4|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 9974,
+   "seconds": 11.68,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles ok",
+    "POST /articles/{}/comments ok"
+   ]
+  },
+  "RD4|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 9222,
+   "seconds": 12.299,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles ok",
+    "POST /articles/{}/comments ok"
+   ]
+  },
+  "RD5|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5352,
+   "seconds": 8.693,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/feed ok"
+   ]
+  },
+  "RD5|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5824,
+   "seconds": 8.766,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/feed ok"
+   ]
+  },
+  "RD5|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8610,
+   "seconds": 11.676,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /user ok",
+    "GET /articles/feed ok"
+   ]
+  },
+  "RD5|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 6565,
+   "seconds": 9.329,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/feed ok"
+   ]
+  },
+  "RD5|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5942,
+   "seconds": 8.209,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/feed ok"
+   ]
+  },
+  "RD5|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5507,
+   "seconds": 8.305,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/feed ok"
+   ]
+  },
+  "RD6|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 15052,
+   "seconds": 16.762,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "DELETE /articles/{} ok",
+    "GET /articles ok"
+   ]
+  },
+  "RD6|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 14603,
+   "seconds": 10.661,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "DELETE /articles/{} ok",
+    "GET /articles ok"
+   ]
+  },
+  "RD6|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 16619,
+   "seconds": 12.504,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "DELETE /articles/{} ok",
+    "GET /articles ok"
+   ]
+  },
+  "RD6|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 15578,
+   "seconds": 16.093,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "DELETE /articles/{} ok",
+    "GET /articles ok"
+   ]
+  },
+  "RD6|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 11356,
+   "seconds": 11.894,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "calls": [
+    "GET /articles ok",
+    "DELETE /articles/{} ok",
+    "GET /articles ok"
+   ]
+  },
+  "RD6|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 13713,
+   "seconds": 14.221,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "calls": [
+    "GET /user ok",
+    "GET /articles ok",
+    "DELETE /articles/{} ok",
+    "GET /articles ok"
+   ]
+  },
+  "RD7|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 8667,
+   "seconds": 16.788,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /user ok",
+    "POST /articles/{}/favorite x"
+   ]
+  },
+  "RD7|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 6694,
+   "seconds": 14.747,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /articles/{}/favorite x"
+   ]
+  },
+  "RD7|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 9252,
+   "seconds": 19.683,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "calls": [
+    "GET /articles/{} x",
+    "POST /articles/{}/favorite x"
+   ]
+  },
+  "RD7|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5822,
+   "seconds": 16.193,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "POST /articles/{}/favorite x"
+   ]
+  },
+  "RD7|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5455,
+   "seconds": 13.906,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/{} x"
+   ]
+  },
+  "RD7|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 5975,
+   "seconds": 15.221,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "calls": [
+    "GET /articles/{} x"
+   ]
+  },
+  "RD8|a2api-openapi|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 3030,
+   "seconds": 3.806,
+   "modelCalls": 1,
+   "toolCalls": 0,
+   "calls": []
+  },
+  "RD8|a2api-spring|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 2694,
+   "seconds": 2.976,
+   "modelCalls": 1,
+   "toolCalls": 0,
+   "calls": []
+  },
+  "RD8|a2api-go|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 2517,
+   "seconds": 3.267,
+   "modelCalls": 1,
+   "toolCalls": 0,
+   "calls": []
+  },
+  "RD8|a2api-rust|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 2381,
+   "seconds": 2.843,
+   "modelCalls": 1,
+   "toolCalls": 0,
+   "calls": []
+  },
+  "RD8|a2api-python|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 2683,
+   "seconds": 4.045,
+   "modelCalls": 1,
+   "toolCalls": 0,
+   "calls": []
+  },
+  "RD8|spec-tools|0": {
+   "passed": true,
+   "hostError": null,
+   "tokens": 2705,
+   "seconds": 4.596,
+   "modelCalls": 1,
+   "toolCalls": 0,
+   "calls": []
+  }
+ },
+ "metrics": {
+  "spec-tools": {
+   "runs": 8,
+   "passed": 8,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 8270,
+     "median": 8570,
+     "p90": 12684,
+     "min": 2705,
+     "max": 14603
+    },
+    "prompt": {
+     "n": 8,
+     "mean": 7642,
+     "median": 7794,
+     "p90": 11827,
+     "min": 2430,
+     "max": 14000
+    },
+    "completion": {
+     "n": 8,
+     "mean": 628,
+     "median": 584,
+     "p90": 978,
+     "min": 275,
+     "max": 1008
+    },
+    "firstPrompt": {
+     "n": 8,
+     "mean": 2452,
+     "median": 2458,
+     "p90": 2466,
+     "min": 2426,
+     "max": 2476
+    },
+    "largestPrompt": {
+     "n": 8,
+     "mean": 2799,
+     "median": 2826,
+     "p90": 3080,
+     "min": 2430,
+     "max": 3161
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 10.8,
+     "median": 10.3,
+     "p90": 16.6,
+     "min": 4.6,
+     "max": 16.8
+    },
+    "model": {
+     "n": 8,
+     "mean": 10.8,
+     "median": 10.3,
+     "p90": 16.6,
+     "min": 4.6,
+     "max": 16.8
+    },
+    "tools": {
+     "n": 8,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 23,
+    "mean": 3.75,
+    "median": 3.6,
+    "p90": 5.69,
+    "min": 0.91,
+    "max": 6.55
+   },
+   "msPerCompletionToken": 17.2,
+   "modelCallsPerRun": {
+    "n": 8,
+    "mean": 2.88,
+    "median": 3.0,
+    "p90": 4.3,
+    "min": 1,
+    "max": 5
+   },
+   "toolCallsPerRun": {
+    "n": 8,
+    "mean": 1.88,
+    "median": 2.0,
+    "p90": 3.3,
+    "min": 0,
+    "max": 4
+   },
+   "searchCallsPerRun": {
+    "n": 8,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 15,
+    "failed": 1,
+    "failedRate": 0.067
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 8,
+     "mean": 6689,
+     "median": 6689,
+     "p90": 6689,
+     "min": 6689,
+     "max": 6689
+    },
+    "largest": {
+     "n": 8,
+     "mean": 6689,
+     "median": 6689,
+     "p90": 6689,
+     "min": 6689,
+     "max": 6689
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 15,
+    "mean": 373,
+    "median": 229,
+    "p90": 797,
+    "min": 26,
+    "max": 805
+   }
+  },
+  "a2api-openapi": {
+   "runs": 8,
+   "passed": 8,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 8157,
+     "median": 6734,
+     "p90": 11967,
+     "min": 3030,
+     "max": 16619
+    },
+    "prompt": {
+     "n": 8,
+     "mean": 7595,
+     "median": 6006,
+     "p90": 11286,
+     "min": 2807,
+     "max": 15919
+    },
+    "completion": {
+     "n": 8,
+     "mean": 562,
+     "median": 607,
+     "p90": 815,
+     "min": 194,
+     "max": 886
+    },
+    "firstPrompt": {
+     "n": 8,
+     "mean": 2828,
+     "median": 2834,
+     "p90": 2843,
+     "min": 2803,
+     "max": 2853
+    },
+    "largestPrompt": {
+     "n": 8,
+     "mean": 3153,
+     "median": 3164,
+     "p90": 3399,
+     "min": 2807,
+     "max": 3547
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 9.8,
+     "median": 10.5,
+     "p90": 14.0,
+     "min": 3.5,
+     "max": 14.7
+    },
+    "model": {
+     "n": 8,
+     "mean": 9.7,
+     "median": 10.5,
+     "p90": 13.9,
+     "min": 3.4,
+     "max": 14.7
+    },
+    "tools": {
+     "n": 8,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 20,
+    "mean": 3.88,
+    "median": 3.06,
+    "p90": 6.47,
+    "min": 1.33,
+    "max": 10.49
+   },
+   "msPerCompletionToken": 17.3,
+   "modelCallsPerRun": {
+    "n": 8,
+    "mean": 2.5,
+    "median": 2.0,
+    "p90": 3.6,
+    "min": 1,
+    "max": 5
+   },
+   "toolCallsPerRun": {
+    "n": 8,
+    "mean": 1.5,
+    "median": 1.0,
+    "p90": 2.6,
+    "min": 0,
+    "max": 4
+   },
+   "searchCallsPerRun": {
+    "n": 8,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 12,
+    "failed": 1,
+    "failedRate": 0.083
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 8,
+     "mean": 7414,
+     "median": 7414,
+     "p90": 7414,
+     "min": 7414,
+     "max": 7414
+    },
+    "largest": {
+     "n": 8,
+     "mean": 7414,
+     "median": 7414,
+     "p90": 7414,
+     "min": 7414,
+     "max": 7414
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 12,
+    "mean": 457,
+    "median": 428,
+    "p90": 808,
+    "min": 51,
+    "max": 813
+   }
+  },
+  "a2api-spring": {
+   "runs": 8,
+   "passed": 8,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 8108,
+     "median": 7613,
+     "p90": 12293,
+     "min": 2694,
+     "max": 15578
+    },
+    "prompt": {
+     "n": 8,
+     "mean": 7519,
+     "median": 6774,
+     "p90": 11622,
+     "min": 2526,
+     "max": 14666
+    },
+    "completion": {
+     "n": 8,
+     "mean": 588,
+     "median": 566,
+     "p90": 990,
+     "min": 138,
+     "max": 1173
+    },
+    "firstPrompt": {
+     "n": 8,
+     "mean": 2548,
+     "median": 2554,
+     "p90": 2562,
+     "min": 2522,
+     "max": 2572
+    },
+    "largestPrompt": {
+     "n": 8,
+     "mean": 3027,
+     "median": 2892,
+     "p90": 3543,
+     "min": 2526,
+     "max": 4030
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 10.3,
+     "median": 10.2,
+     "p90": 17.2,
+     "min": 2.8,
+     "max": 19.7
+    },
+    "model": {
+     "n": 8,
+     "mean": 10.2,
+     "median": 10.1,
+     "p90": 17.1,
+     "min": 2.7,
+     "max": 19.6
+    },
+    "tools": {
+     "n": 8,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 21,
+    "mean": 3.89,
+    "median": 3.9,
+    "p90": 6.27,
+    "min": 1.13,
+    "max": 8.1
+   },
+   "msPerCompletionToken": 17.4,
+   "modelCallsPerRun": {
+    "n": 8,
+    "mean": 2.62,
+    "median": 2.5,
+    "p90": 3.6,
+    "min": 1,
+    "max": 5
+   },
+   "toolCallsPerRun": {
+    "n": 8,
+    "mean": 1.62,
+    "median": 1.5,
+    "p90": 2.6,
+    "min": 0,
+    "max": 4
+   },
+   "searchCallsPerRun": {
+    "n": 8,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 13,
+    "failed": 2,
+    "failedRate": 0.154
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 8,
+     "mean": 6319,
+     "median": 6319,
+     "p90": 6319,
+     "min": 6319,
+     "max": 6319
+    },
+    "largest": {
+     "n": 8,
+     "mean": 6319,
+     "median": 6319,
+     "p90": 6319,
+     "min": 6319,
+     "max": 6319
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 13,
+    "mean": 695,
+    "median": 422,
+    "p90": 812,
+    "min": 51,
+    "max": 3739
+   }
+  },
+  "a2api-go": {
+   "runs": 8,
+   "passed": 8,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 6557,
+     "median": 5694,
+     "p90": 9340,
+     "min": 2517,
+     "max": 11356
+    },
+    "prompt": {
+     "n": 8,
+     "mean": 6034,
+     "median": 5030,
+     "p90": 8683,
+     "min": 2329,
+     "max": 10684
+    },
+    "completion": {
+     "n": 8,
+     "mean": 523,
+     "median": 508,
+     "p90": 763,
+     "min": 188,
+     "max": 974
+    },
+    "firstPrompt": {
+     "n": 8,
+     "mean": 2350,
+     "median": 2356,
+     "p90": 2365,
+     "min": 2325,
+     "max": 2375
+    },
+    "largestPrompt": {
+     "n": 8,
+     "mean": 2649,
+     "median": 2666,
+     "p90": 2878,
+     "min": 2329,
+     "max": 2931
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 9.2,
+     "median": 9.2,
+     "p90": 13.2,
+     "min": 3.3,
+     "max": 16.2
+    },
+    "model": {
+     "n": 8,
+     "mean": 9.1,
+     "median": 9.2,
+     "p90": 13.1,
+     "min": 3.2,
+     "max": 16.1
+    },
+    "tools": {
+     "n": 8,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 19,
+    "mean": 3.84,
+    "median": 3.75,
+    "p90": 6.22,
+    "min": 0.93,
+    "max": 9.02
+   },
+   "msPerCompletionToken": 17.4,
+   "modelCallsPerRun": {
+    "n": 8,
+    "mean": 2.38,
+    "median": 2.0,
+    "p90": 3.3,
+    "min": 1,
+    "max": 4
+   },
+   "toolCallsPerRun": {
+    "n": 8,
+    "mean": 1.38,
+    "median": 1.0,
+    "p90": 2.3,
+    "min": 0,
+    "max": 3
+   },
+   "searchCallsPerRun": {
+    "n": 8,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 11,
+    "failed": 1,
+    "failedRate": 0.091
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 8,
+     "mean": 5804,
+     "median": 5804,
+     "p90": 5804,
+     "min": 5804,
+     "max": 5804
+    },
+    "largest": {
+     "n": 8,
+     "mean": 5804,
+     "median": 5804,
+     "p90": 5804,
+     "min": 5804,
+     "max": 5804
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 11,
+    "mean": 483,
+    "median": 432,
+    "p90": 805,
+    "min": 58,
+    "max": 809
+   }
+  },
+  "a2api-rust": {
+   "runs": 8,
+   "passed": 8,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 6666,
+     "median": 5404,
+     "p90": 9906,
+     "min": 2381,
+     "max": 13713
+    },
+    "prompt": {
+     "n": 8,
+     "mean": 6113,
+     "median": 4826,
+     "p90": 9161,
+     "min": 2216,
+     "max": 12914
+    },
+    "completion": {
+     "n": 8,
+     "mean": 552,
+     "median": 546,
+     "p90": 809,
+     "min": 165,
+     "max": 833
+    },
+    "firstPrompt": {
+     "n": 8,
+     "mean": 2238,
+     "median": 2244,
+     "p90": 2252,
+     "min": 2212,
+     "max": 2262
+    },
+    "largestPrompt": {
+     "n": 8,
+     "mean": 2559,
+     "median": 2574,
+     "p90": 2804,
+     "min": 2216,
+     "max": 2931
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 9.6,
+     "median": 9.5,
+     "p90": 14.0,
+     "min": 2.8,
+     "max": 14.2
+    },
+    "model": {
+     "n": 8,
+     "mean": 9.6,
+     "median": 9.5,
+     "p90": 13.9,
+     "min": 2.8,
+     "max": 14.2
+    },
+    "tools": {
+     "n": 8,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 20,
+    "mean": 3.82,
+    "median": 3.57,
+    "p90": 5.29,
+    "min": 1.12,
+    "max": 8.29
+   },
+   "msPerCompletionToken": 17.3,
+   "modelCallsPerRun": {
+    "n": 8,
+    "mean": 2.5,
+    "median": 2.0,
+    "p90": 3.6,
+    "min": 1,
+    "max": 5
+   },
+   "toolCallsPerRun": {
+    "n": 8,
+    "mean": 1.5,
+    "median": 1.0,
+    "p90": 2.6,
+    "min": 0,
+    "max": 4
+   },
+   "searchCallsPerRun": {
+    "n": 8,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 12,
+    "failed": 1,
+    "failedRate": 0.083
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 8,
+     "mean": 5577,
+     "median": 5577,
+     "p90": 5577,
+     "min": 5577,
+     "max": 5577
+    },
+    "largest": {
+     "n": 8,
+     "mean": 5577,
+     "median": 5577,
+     "p90": 5577,
+     "min": 5577,
+     "max": 5577
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 12,
+    "mean": 454,
+    "median": 428,
+    "p90": 808,
+    "min": 34,
+    "max": 813
+   }
+  },
+  "a2api-python": {
+   "runs": 8,
+   "passed": 8,
+   "passRate": 1.0,
+   "passRateWithoutHostErrors": 1.0,
+   "hostErrors": {},
+   "tokensPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 7861,
+     "median": 5900,
+     "p90": 12730,
+     "min": 2683,
+     "max": 15052
+    },
+    "prompt": {
+     "n": 8,
+     "mean": 7276,
+     "median": 5288,
+     "p90": 11908,
+     "min": 2444,
+     "max": 14096
+    },
+    "completion": {
+     "n": 8,
+     "mean": 585,
+     "median": 530,
+     "p90": 906,
+     "min": 239,
+     "max": 956
+    },
+    "firstPrompt": {
+     "n": 8,
+     "mean": 2466,
+     "median": 2472,
+     "p90": 2480,
+     "min": 2440,
+     "max": 2490
+    },
+    "largestPrompt": {
+     "n": 8,
+     "mean": 2925,
+     "median": 2808,
+     "p90": 3405,
+     "min": 2444,
+     "max": 3938
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 8,
+     "mean": 10.2,
+     "median": 9.4,
+     "p90": 15.7,
+     "min": 4.0,
+     "max": 16.8
+    },
+    "model": {
+     "n": 8,
+     "mean": 10.2,
+     "median": 9.4,
+     "p90": 15.6,
+     "min": 4.0,
+     "max": 16.7
+    },
+    "tools": {
+     "n": 8,
+     "mean": 0.0,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0,
+     "max": 0.0
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 21,
+    "mean": 3.87,
+    "median": 3.59,
+    "p90": 5.95,
+    "min": 1.12,
+    "max": 9.22
+   },
+   "msPerCompletionToken": 17.4,
+   "modelCallsPerRun": {
+    "n": 8,
+    "mean": 2.62,
+    "median": 2.0,
+    "p90": 4.3,
+    "min": 1,
+    "max": 5
+   },
+   "toolCallsPerRun": {
+    "n": 8,
+    "mean": 1.62,
+    "median": 1.0,
+    "p90": 3.3,
+    "min": 0,
+    "max": 4
+   },
+   "searchCallsPerRun": {
+    "n": 8,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 13,
+    "failed": 1,
+    "failedRate": 0.077
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 8,
+     "mean": 6184,
+     "median": 6184,
+     "p90": 6184,
+     "min": 6184,
+     "max": 6184
+    },
+    "largest": {
+     "n": 8,
+     "mean": 6184,
+     "median": 6184,
+     "p90": 6184,
+     "min": 6184,
+     "max": 6184
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 13,
+    "mean": 687,
+    "median": 422,
+    "p90": 812,
+    "min": 51,
+    "max": 3737
+   }
+  }
+ }
+}

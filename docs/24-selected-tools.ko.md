@@ -1,5 +1,12 @@
 # a2api-tools/1.0: 필요한 호출 계약만 모델에 제공하기
 
+> **1.1 호스트 동작(2026-11-01, [38](38-improvement-execution-plan.ko.md)·[39](39-improvement-results.ko.md) 문서)**: wire와 MCP 세 도구, 도구 이름·평탄화 규칙은 그대로다.
+> - **함수 목록 순서 고정**: 호출·재검색 뒤에도 이미 제공한 함수의 위치를 바꾸지 않는다(같은 작업의 다음 요청이 같은 prompt prefix를 쓰도록). 예산 초과 시 제거 대상은 최근 사용 순서로 고른다.
+> - **검색 결과의 `added`**: 이번 검색으로 새로 호출 가능해진 함수 이름. 일치한 함수가 모두 이미 제공된 것이면 모델용 결과에 "새 함수 없음 — 다시 검색하지 말고 부족한 것을 말하라"는 `note`가 붙는다.
+> - **반복 안내**: 같은 이름·인자로 이미 실패한 호출은 `repeated`(이전 실패 수)와 hint가, 마지막 쓰기 이후 같은 인자로 이미 성공한 조회는 `repeated`와 "이미 받은 데이터" note가 붙는다. 실행은 막지 않는다.
+> - **정수 ID**: 평탄화한 body의 string 필드에 정수가 오면 그 숫자 문자열로 바꾼다(path/query/header는 기존처럼 숫자·불리언을 텍스트로).
+> - `call(name, args, request_id=...)`: 모델의 tool call ID 등을 넘기면 `idempotency_header`를 설정한 쓰기 binding에서 원 서버로 전달한다.
+
 `auto()`의 전체 제공 기준은 `all_bytes=10000`(약 20개 함수)이다. dev에서 19개 함수 카탈로그는 전체 제공이 사전 선택보다 빨랐고(중앙값 7.9초 대 9.3초, spec-tools 9.3초) 토큰은 spec-tools보다 17% 적었다. 55개 카탈로그는 전체 제공이 빠르지 않아(10.5초 대 사전 선택 9.4초) 사전 선택을 유지한다([34 문서](34-completion-results.ko.md) 5절).
 
 `TOOL_PROFILE`은 `a2api-tools/1.0`이며 아래 0.4 변경을 확정한 것이다. 이후 추가: `auto(question, preselect=8)`은 호스트 사전 검색에서 모델 검색(`search_limit`, 기본 3)보다 넓은 후보를 준비하고, 평탄화한 path/query/header의 문자열 인자에 들어온 JSON 숫자·불리언은 텍스트로 바꿔 전달한다(body는 그대로). 함수 설명 기본값(`hints="none"`)은 요약과 쓰기 함수의 `[write]` 표시뿐이다. holdout 판정 이후 4개 언어 dev 360 run에서 반환 이름 목록(`hints="shape"`, `Returns {items:[{id,status}],total}`)보다 정확도는 같고(120/120) 작업당 토큰이 8.5% 적어 기본값으로 정했다([34 문서](34-completion-results.ko.md) 5절). `shape`는 선택으로 남기고, `hints="typed"`가 0.3 형식과 원래 입력 schema를 유지한다. 검색 index는 `field-search/2`(비ASCII 단어 뒤 짧은 조사·어미 허용)다.
@@ -95,6 +102,33 @@ asyncio.run(main())
 ```
 
 `ConvertedAPI`와 앱 목록도 동일하게 받는다. `ToolSession.from_mcp(client)`는 연결된 공식 MCP client를 받으며 연결 수명은 호출자가 관리한다. 기본 `max_tool_bytes=16000`, `search_limit=3`은 호스트 설정이다. 실제 모델 token budget이 아니고 API 개수 전환 임계값도 아니다. `prime`은 정확한 ID로 첫 페이지에서 버전을 확인하고 전체 요청 집합이 예산에 들어야 한다. 실제 복수 버전은 오류이며 마지막 페이지의 한 버전을 임의로 고르지 않는다. 필요하면 검색/예산을 조정한다.
+
+### 큰 카탈로그: 목차 + 필요할 때 불러오기(`index`, 1.1)
+
+검색으로 후보를 고르는 대신 모델에게 **모든 함수의 목차**를 보여 주고, 모델이 고른 함수만 불러온다. 단어 검색은 대화형 질문에서 맞는 함수를 놓치기 쉽고, 카탈로그에 없는 기능을 모델이 계속 다시 검색하게 만든다. 목차를 보면 모델이 무엇이 있는지 알고 고른다.
+
+```python
+built = await session.index(question, detail='names', related=5,
+                            relations=source.relations(),          # ToolCatalogImporter가 읽은 consumes/produces
+                            group=lambda entry: domain_of[entry['id']])
+system_prompt = base_prompt + '\n\n' + built['text']             # 목차는 세션 동안 바뀌지 않음(캐시되는 앞부분)
+tools = session.tools()                                         # a2api_load + 불러온 함수
+await session.focus(next_user_turn)                              # 새 사용자 턴마다(관련 함수 순위)
+```
+
+- `detail='summary'`: 이름과 요약 첫 문장. `'names'`: 이름만(가장 작음). `group(entry)`가 주면 제목별로 묶는다. 모든 ID가 같은 namespace면 이름에서 뺀다(`acom.get_order` → `get_order`).
+- 모델은 `a2api_load({"names": [...]})`로 함수를 불러오고 다음 요청부터 호출한다. 목차에 없는 이름은 `unknown`과 비슷한 이름 `suggest`로 돌려준다.
+- 불러오지 않은 함수를 목차에서 바로 호출하면 그 함수를 불러온다. 읽기이고 인자가 schema에 맞으면 바로 실행하고, 쓰기는 실행하지 않고 `NOT_LOADED`로 답한다(모델이 인자 schema를 본 뒤 다시 호출).
+- `related=N`: 성공한 결과에 그 결과가 돌려준 ID를 받는 함수를 최대 N개 `next`로 붙인다. 관계는 `relations`(`{capability id: {'consumes': [...], 'produces': [...]}}`)에서, 없으면 ID 이름의 입력(`order_id`, `orderId`)에서 얻는다. 많은 함수가 받는 ID(예: `customer_id`)는 사용자 요청과 맞는 함수만 보여 준다.
+- `ToolSession(..., batch=True)`: `a2api_batch({"calls": [{"name", "arguments"}, ...]})`로 서로 의존하지 않는 호출 여러 개(목록의 항목마다 한 번 등)를 한 모델 단계에 실행한다. 각 호출은 직접 호출과 똑같이 검사·실행되고 결과는 같은 순서로 돌아온다. 함수가 하나라도 불러와진 뒤부터 보인다(처음부터 보이면 어떤 함수를 불러올지가 바뀌었다, 39 문서 3.9).
+- 불러오기는 목차 제목이 붙은 이름(`orders › order: get_order`, `orders.get_order`)과 대소문자 차이를 해석한다. 예산에 걸려 빠진 함수는 결과가 다시 불러오라고 알린다. 목차를 쓸 때는 `max_tool_bytes`를 32000 정도로 둔다.
+- `preselect=N`: 호스트 검색 후보도 미리 불러 둔다. a-commerce에서는 모델이 후보에 머물러 목차의 이점이 사라졌다. 권장하지 않는다.
+- wire(`discover`·`describe`·`invoke`)와 MCP 세 도구는 바뀌지 않는다. 목차는 `discover`로, 불러오기는 `describe`로 만든다.
+- 측정(39 문서 3.8)에 따른 선택 기준은 다음과 같다.
+  - 질문이 함수 이름과 다른 말로 오는 큰 카탈로그: `index(detail='names')`. a-commerce 253개에서 검색보다 더 풀고, 토큰은 같거나 적었다.
+  - 질문이 기능 이름을 그대로 쓰는 경우: `auto()`. 4언어 벤치마크에서 정확도가 같고 더 싸다.
+  - `related`는 효과가 측정되지 않아 기본 꺼짐이다.
+  - 한 요청에 여러 건을 처리하는 업무(반품 검토 등): `batch=True`. a-commerce design에서 목차만 11/24, 목차 + batch 13–14/24. held_out 사후 확인에서는 통과율 차이를 보이지 못했다(39 문서 3.9). 일관된 이점은 토큰과 함수 선택이다. 추론을 숨겨 쓰는 모델에는 출력 토큰 상한을 두지 않는다(상한이 추론에도 쓰여 답이 잘린다).
 
 필드 기반 순위는 업데이트한 직접 앱 서버에서 제공한다. 호스트의 more 지원만으로 외부/기존 관리 Runtime 서버의 검색 알고리즘까지 바뀌는 것은 아니다. 인증 주체/tenant/scopes/server가 바뀌면 새 ToolSession을 사용한다.
 

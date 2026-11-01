@@ -1,7 +1,7 @@
 {
-  "elapsedSeconds": 10.408,
-  "peakRssKiB": 140060,
-  "generatedManifestBytes": 21694938,
-  "python": "3.12.14",
+  "elapsedSeconds": 7.53,
+  "peakRssKiB": 153800,
+  "generatedManifestBytes": 21740318,
+  "python": "3.14.4",
   "measurement": "JSON/gzip load, conversion, contract validation and file writes; Linux peak RSS"
 }

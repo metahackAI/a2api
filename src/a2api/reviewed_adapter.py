@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import re
 from typing import Callable, Mapping
 
 from .errors import A2APIError, contract_error
@@ -25,6 +26,14 @@ class HTTPDeployment:
     timeout_ms: int = 1500
     deadline_ms: int = 5000
     max_response_bytes: int = 1_048_576
+    # Host-owned query/body values per call: (context, call) -> {"query": {...}, "body": {...}}.
+    # `call` names the operation: {"operationId", "method", "path"}. Never part of model input.
+    request_values: Callable[[ExecutionContext, Mapping], Mapping] | None = field(default=None, repr=False)
+    # Host opt-in: (status, parsed JSON body or None) -> a short message safe to show the caller.
+    # Backend error bodies are otherwise never forwarded.
+    error_detail: Callable[[int, object], str | None] | None = field(default=None, repr=False)
+    # Host opt-in: header that carries the caller's requestId on writes (e.g. "Idempotency-Key").
+    idempotency_header: str | None = None
 
     def __post_init__(self) -> None:
         for name, upper in (('timeout_ms', 600_000), ('deadline_ms', 600_000), ('max_response_bytes', 64 * 1_048_576)):
@@ -33,6 +42,13 @@ class HTTPDeployment:
                 raise A2APIError('INVALID_DEPLOYMENT', name + ' must be a positive integer within the supported limit.')
         if self.timeout_ms > self.deadline_ms:
             raise A2APIError('INVALID_DEPLOYMENT', 'timeout_ms must not exceed deadline_ms.')
+        if self.request_values is not None and not callable(self.request_values):
+            raise A2APIError('INVALID_DEPLOYMENT', 'request_values must be callable.')
+        if self.error_detail is not None and not callable(self.error_detail):
+            raise A2APIError('INVALID_DEPLOYMENT', 'error_detail must be callable.')
+        if self.idempotency_header is not None and (not isinstance(self.idempotency_header, str)
+                or not re.fullmatch(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+", self.idempotency_header)):
+            raise A2APIError('INVALID_DEPLOYMENT', 'idempotency_header must be an HTTP header name.')
 
 
 @dataclass(frozen=True)

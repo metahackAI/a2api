@@ -18,21 +18,23 @@
 
 ```bash
 pip install a2api                    # 핵심: convert / Application / ToolSession / 프로토콜 schema
-pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer
+pip install "a2api[mcp,openapi,source]"   # MCP stdio, YAML OpenAPI, Spring·Go·Rust 소스 importer(FastAPI는 추가 의존성 없음)
 ```
 
-**기존(레거시) API를 전환하는 단계별 방법은 [레거시 API 전환 가이드](docs/36-legacy-conversion-guide.ko.md)에 있다** — OpenAPI와 코드가 모두 있을 때, 코드만 있을 때(Spring·Go·Rust·Python·그 밖의 언어), 실행 예제는 [`examples/legacy-conversion`](examples/legacy-conversion/README.md). 다음 개선 계획은 [37 문서](docs/37-next-improvement-plan.ko.md).
+**기존(레거시) API를 전환하는 단계별 방법은 [레거시 API 전환 가이드](docs/36-legacy-conversion-guide.ko.md)에 있다**(영어: [docs/en](docs/en/README.md)) — OpenAPI와 코드가 모두 있을 때, 코드만 있을 때(Spring·Go net/http·Gin·Rust Axum·Python FastAPI·그 밖의 언어), 실행 중인 서비스의 도구 목록과 레거시 약어·코드값(vocabulary). 실행 예제는 [`examples/legacy-conversion`](examples/legacy-conversion/README.md), 실제 공개 프로젝트 변환은 [`examples/realworld`](examples/realworld/README.md). 1.1 개선과 실측(a-commerce·RealWorld)은 [38](docs/38-improvement-execution-plan.ko.md)·[39](docs/39-improvement-results.ko.md) 문서.
 
 | 구현 언어 | a2api 연결 방법 | 문서 |
 |---|---|---|
 | Python | `@capability(effect="read"/"write")`로 동기·`async` 함수 등록 → `Application` | [12](docs/12-python-functions.ko.md) |
 | Java/Spring MVC | `SpringSourceImporter` → `convert(..., deployment=HTTPDeployment(...))` | [18](docs/18-source-importers.ko.md) |
-| Go net/http | `GoSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md) |
-| Rust Axum | `RustSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md) |
+| Go net/http·Gin | `GoSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md), [36](docs/36-legacy-conversion-guide.ko.md) |
+| Rust Axum | `RustSourceImporter` → `convert` | [18](docs/18-source-importers.ko.md), [36](docs/36-legacy-conversion-guide.ko.md) |
+| Python FastAPI(코드) | `FastAPISourceImporter` → `convert` | [36](docs/36-legacy-conversion-guide.ko.md) |
+| 실행 중인 도구 목록(`GET /tools` + 이름 호출) | `ToolCatalogImporter` → `convert(..., vocabulary=...)` | [36](docs/36-legacy-conversion-guide.ko.md) 5-1절 |
 | OpenAPI가 있는 모든 HTTP API | `OpenAPIImporter` → `convert` | [11](docs/11-in-memory-conversion.ko.md) |
 
 - **호출 프로토콜 `a2api-call/1.0`**: discover/describe/invoke와 6필드 descriptor, 구조화 오류([20](docs/20-call-protocol.ko.md)). MCP 도구는 규모와 무관하게 세 개다.
-- **모델 호스트 표현 `a2api-tools/1.0`**: `ToolSession.auto(질문)`이 작은 카탈로그는 모든 함수를, 큰 카탈로그는 질문으로 미리 찾은 후보와 검색 도구를 준다. 읽기 쉬운 함수 이름, 평탄한 HTTP 인자, compact 결과와 실패 안내를 제공한다([24](docs/24-selected-tools.ko.md)).
+- **모델 호스트 표현 `a2api-tools/1.0`**: `ToolSession.auto(질문)`이 작은 카탈로그는 모든 함수를, 큰 카탈로그는 질문으로 미리 찾은 후보와 검색 도구를 준다. 읽기 쉬운 함수 이름, 평탄한 HTTP 인자, compact 결과와 실패 안내를 제공한다([24](docs/24-selected-tools.ko.md)). (1.1) 질문이 함수 이름과 다른 말로 오는 큰 카탈로그에는 `ToolSession.index()`를 쓴다. 모든 함수 이름의 목차를 보여 주고, 모델이 고른 함수만 불러온다(a-commerce 253개 도구에서 검색 대비 작업당 토큰 중앙값 −68%, [39 문서 3.8](docs/39-improvement-results.ko.md)).
 - **공개 필드 선택**: `select`에 `items[].id`, `owner.login` 같은 경로를 지정해 내부 필드를 모델에 보내지 않는다. 원본 응답을 먼저 검증한다([11](docs/11-in-memory-conversion.ko.md)).
 - **실행 제한**: `HTTPDeployment(timeout_ms=..., deadline_ms=..., max_response_bytes=...)`. 자동 재시도는 없다.
 - **벤치마크**: 같은 API를 4개 언어 × 소/중/대규모(19/55/235 operation)로 생성해 `spec-tools`(명세의 모든 operation을 function으로), `spec-prompt`(명세 전체를 prompt로)와 a2api를 실제 모델로 비교한다([examples/benchmark](examples/benchmark/README.md)).

@@ -268,6 +268,29 @@ class OpenAPIImporter:
                 raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Array items must be scalar values.', location)
         return types
 
+    @staticmethod
+    def _omit_null(parameter, where, pointer, diagnostics):
+        """An optional query/header parameter that may be null is sent by omitting it."""
+        schema = parameter.get('schema')
+        if not isinstance(schema, dict) or '$ref' in schema:
+            return parameter
+        stripped = None
+        if schema.get('nullable') is True:
+            stripped = {key: value for key, value in schema.items() if key != 'nullable'}
+        elif isinstance(schema.get('type'), list) and 'null' in schema['type']:
+            rest = [kind for kind in schema['type'] if kind != 'null']
+            stripped = {**schema, 'type': rest[0] if len(rest) == 1 else rest}
+        elif isinstance(schema.get('anyOf'), list) and {'type': 'null'} in schema['anyOf']:
+            rest = [branch for branch in schema['anyOf'] if branch != {'type': 'null'}]
+            stripped = ({key: value for key, value in schema.items() if key != 'anyOf'} | rest[0]) if len(rest) == 1 else {**schema, 'anyOf': rest}
+        if stripped is None:
+            return parameter
+        if where not in ('query', 'header') or parameter.get('required', False):
+            raise ImportIssue('UNSUPPORTED_PARAMETER_SCHEMA', 'Nullable parameter serialization is not defined by this profile.', pointer)
+        diagnostics.append({'code': 'NULL_PARAMETER_OMITTED', 'location': pointer,
+                            'detail': 'null is sent by leaving this optional parameter out.'})
+        return {**parameter, 'schema': stripped}
+
     def _parameters(self, item: dict, operation: dict, location: str):
         parameters = {}
         for parent, source_location in ((item, location.rsplit('/', 1)[0]), (operation, location)):
@@ -340,6 +363,7 @@ class OpenAPIImporter:
                 raise ImportIssue('INVALID_PARAMETER', 'Parameter required must be a boolean.', pointer)
             if where == 'path' and parameter.get('required') is not True:
                 raise ImportIssue('INVALID_PATH_PARAMETER', 'Path parameters must be required.', pointer)
+            parameter = self._omit_null(parameter, where, pointer, diagnostics)
             types = self._parameter_types(parameter['schema'], pointer + '/schema')
             if where == 'path' and ('array' in types or parameter.get('style', 'simple') != 'simple' or parameter.get('explode', False)):
                 raise ImportIssue('UNSUPPORTED_PATH_SERIALIZATION', 'Path serialization supports simple scalar values only.', pointer)
