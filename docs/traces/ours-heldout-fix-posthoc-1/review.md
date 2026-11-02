@@ -2,7 +2,7 @@
 
 판정 기준 함수 정의: `ours-heldout-fix-posthoc-1.functions.json`(실행 때 모델이 본 것)
 
-단계: A0 API에 해당 기능 없음 · A 필요한 함수를 받지 못함 · B 받았지만 부르지 않음 · C 불렀지만 성공 못 함 · D 한도·오류로 중단 · E-write 쓰기 입력·change set · E-format 숫자는 있으나 표기 · E-content 답 내용 누락
+단계: A0 API에 해당 기능 없음 · A 필요한 함수를 받지 못함 · B 받았지만 부르지 않음 · C 불렀지만 성공 못 함 · D-before 필요한 함수를 부르기 전 한도·오류로 중단 · D-after 필요한 함수는 모두 성공했는데 답하기 전 한도로 중단 · E-write 쓰기 입력·change set · E-format 숫자는 있으나 표기 · E-content 답 내용 누락
 
 ## 필요한 함수: 확보 → 호출 → 성공
 
@@ -14,11 +14,11 @@
 
 ## 실패한 실행이 처음 막힌 단계
 
-| 방식 | passed | A0 | A | B | C | D | E-write | E-format | E-content |
-|---|---|---|---|---|---|---|---|---|---|
-| a2api-acom | 9 | 0 | 4 | 2 | 0 | 10 | 2 | 0 | 5 |
-| a2api-acom-names-norelated | 5 | 0 | 4 | 0 | 0 | 9 | 2 | 2 | 10 |
-| a2api-acom-names-batch | 5 | 0 | 4 | 0 | 0 | 11 | 2 | 0 | 10 |
+| 방식 | passed | A0 | A | B | C | D-before | D-after | E-write | E-format | E-content |
+|---|---|---|---|---|---|---|---|---|---|---|
+| a2api-acom | 9 | 0 | 4 | 2 | 0 | 4 | 6 | 2 | 0 | 5 |
+| a2api-acom-names-norelated | 5 | 0 | 4 | 0 | 0 | 0 | 9 | 2 | 2 | 10 |
+| a2api-acom-names-batch | 5 | 0 | 4 | 0 | 0 | 1 | 10 | 2 | 0 | 10 |
 
 ## 실패한 업무 호출의 원인
 

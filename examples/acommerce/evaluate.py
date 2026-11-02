@@ -48,7 +48,7 @@ from a2api.importers.catalog import snake  # noqa: E402
 from a2api.tool_session import BATCH_NAME, LOAD_NAME, SEARCH_NAME  # noqa: E402
 from legacy_facade import VOCABULARY, WORDS, error_detail, facade_options  # noqa: E402
 from evaluate import (DEFAULT_BASE_URL, DEFAULT_MODEL, ModelError, assistant_message, chat, model_arguments,  # noqa: E402
-                      model_header, sampling, wait_for_model)
+                      model_header, sampling, trim_reasoning, wait_for_model)
 from scoring import score  # noqa: E402
 from stack import COMMERCE, REPO, call, token  # noqa: E402
 
@@ -226,10 +226,6 @@ async def run_turns(executor, task, options):
         for number, line in enumerate(task['turns']):
             if number:
                 run.setdefault('turnSelections', []).append(await executor.turn(line))
-            if options.reasoning_history == 'turn':
-                # The model's earlier reasoning goes back within a user turn (its tool loop), not across turns.
-                for earlier in messages:
-                    earlier.pop('reasoning_content', None)
             messages.append({'role': 'user', 'content': line})
             turn_started, tool_calls = time.monotonic(), 0
             for _ in range(LIMITS['model_calls']):
@@ -238,6 +234,9 @@ async def run_turns(executor, task, options):
                     raise ModelError('TURN_TIMEOUT')
                 tick = time.monotonic()
                 try:
+                    # The model's earlier reasoning goes back within the user turn (its tool loop), for the
+                    # last --reasoning-keep steps by default; never across turns.
+                    trim_reasoning(messages, options.reasoning_history, options.reasoning_keep)
                     offered = executor.tools()
                     response = await asyncio.to_thread(chat, options.base_url, options.model, messages, offered,
                                                        timeout=min(120, remaining), max_tokens=options.max_tokens or None,
@@ -329,6 +328,11 @@ async def evaluate(options):
         raise SystemExit('Choose a new output path; earlier runs are never overwritten.')
     options.output.parent.mkdir(parents=True, exist_ok=True)
     tasks = [t for t in load_tasks(options.set) if not options.only or t['id'] in options.only.split(',')]
+    # Runs an earlier, interrupted pass already recorded (passed or failed) are never repeated, except a run
+    # the provider never answered at all (an outage, not the model's result).
+    done_before = {(run['task'], run['mode'], run.get('repetition', 0))
+                   for earlier in options.resume_from for run in (json.loads(line) for line in earlier.read_text().splitlines())
+                   if run.get('type') == 'run' and not (run.get('hostError') and run.get('modelRequests') == 0)}
     modes = options.modes.split(',')
     agent_token, admin_token = token('admin', agent=True), token('admin')
     manifests = {}
@@ -340,6 +344,7 @@ async def evaluate(options):
     header = {'type': 'header', 'startedAt': datetime.now(timezone.utc).isoformat(), 'model': options.model,
               'set': options.set, 'modes': modes, 'tasks': [t['id'] for t in tasks], 'limits': LIMITS,
               'searchStreak': options.search_streak, **model_header(options),
+              'resumedFrom': [str(path) for path in options.resume_from],
               'maxToolBytes': options.max_tool_bytes, 'indexGroup': options.index_group,
               'resultChars': RESULT_CHARS, 'gitCommit': git('rev-parse', 'HEAD'), 'catalog': {k: len(v) for k, v in manifests.items()},
               'acommerceCommit': subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=REPO, capture_output=True, text=True).stdout.strip()}
@@ -357,6 +362,8 @@ async def evaluate(options):
             for index, task in enumerate(tasks):
                 order = modes[(index + repetition) % len(modes):] + modes[:(index + repetition) % len(modes)]
                 for mode in order:
+                    if (task['id'], mode, repetition) in done_before:
+                        continue
                     await asyncio.to_thread(wait_for_model, options.base_url, options.model)
                     prepare(task, admin_token)
                     host = Host(agent_token, task)
@@ -416,7 +423,13 @@ def main():
     parser.add_argument('--index-group', choices=['domain', 'resource'], default='resource',
                         help='index headings: catalog domain, or domain.resource')
     parser.add_argument('--output', type=Path, required=True)
-    asyncio.run(evaluate(parser.parse_args()))
+    parser.add_argument('--resume-from', type=Path, action='append', default=[],
+                        help='earlier JSONL of the same pass; its runs are skipped, never repeated')
+    parser.add_argument('--turn-seconds', type=int, default=LIMITS['seconds'],
+                        help='time limit per user turn; raise it only to match a slower model server')
+    options = parser.parse_args()
+    LIMITS['seconds'] = options.turn_seconds
+    asyncio.run(evaluate(options))
 
 
 if __name__ == '__main__':

@@ -4,9 +4,10 @@ python examples/acommerce/call_review.py artifacts/acommerce/runs/<runs>.jsonl [
 
 For each run, the first stage that went wrong:
   A  a function the task needs was never given to the model (A0: the API has no such function at all)
-  B  it was given but never called (D when a limit or error ended the run first)
+  B  it was given but never called (D-before when a limit or error ended the run first)
   C  it was called but never succeeded (the failed calls are attributed below)
-  D  the run hit a limit (model calls, time, provider) before answering
+  D-before  a limit (model calls, time, provider) ended the run before a needed function was called
+  D-after   every needed function had succeeded, and a limit ended the run before the model answered
   E  every needed function succeeded but the answer was judged wrong: the change set or write inputs
      (E-write), numbers the reply has in another form (E-format), or facts the reply leaves out (E-content)
 
@@ -332,13 +333,13 @@ def review_run(run, task, catalog, fmap):
             for unit in per_unit:
                 if not unit['called']:
                     # Given, but the run stopped (a limit, the provider, context) before calling it.
-                    stage = stage or ('D' if run.get('hostError') else 'B')
+                    stage = stage or ('D-before' if run.get('hostError') else 'B')
         if not stage:
             for unit in per_unit:
                 if not unit['succeeded']:
                     stage = stage or 'C'
         if not stage and run.get('hostError'):
-            stage = 'D'
+            stage = 'D-after'
         if not stage:
             missing = run.get('missing') or []
             if any(m.startswith(('change set', 'called ')) for m in missing):
@@ -390,7 +391,7 @@ def summary(reviews):
     return rows
 
 
-STAGES = ['passed', 'A0', 'A', 'B', 'C', 'D', 'E-write', 'E-format', 'E-content']
+STAGES = ['passed', 'A0', 'A', 'B', 'C', 'D-before', 'D-after', 'E-write', 'E-format', 'E-content']
 ATTRS = ['model:schema', 'model:function', 'model:ungrounded', 'model:described', 'source:undocumented', 'business', 'unclear']
 
 
@@ -398,7 +399,8 @@ def markdown(rows, reviews, title):
     pct = lambda a, b: f'{a}/{b} ({a / b:.0%})' if b else '—'
     lines = [f'# 호출 단계 리뷰 — {title}', '',
              '단계: A0 API에 해당 기능 없음 · A 필요한 함수를 받지 못함 · B 받았지만 부르지 않음 · C 불렀지만 성공 못 함 · '
-             'D 한도·오류로 중단 · E-write 쓰기 입력·change set · E-format 숫자는 있으나 표기 · E-content 답 내용 누락', '',
+             'D-before 필요한 함수를 부르기 전 한도·오류로 중단 · D-after 필요한 함수는 모두 성공했는데 답하기 전 한도로 중단 · '
+             'E-write 쓰기 입력·change set · E-format 숫자는 있으나 표기 · E-content 답 내용 누락', '',
              '## 필요한 함수: 확보 → 호출 → 성공', '',
              '| 방식 | 통과 | 필요한 함수(API에 있음/전체) | 모델에게 줌 | 불렀음 | 성공 | 확보 기록 |', '|---|---|---|---|---|---|---|']
     for r in rows:
