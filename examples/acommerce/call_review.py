@@ -137,7 +137,10 @@ def calls_of(run, catalog):
             # Records keep the first 3,000 characters: read each item's status where it is still there;
             # items past the cut are unknown and not counted.
             found = BATCH_ITEM.findall(call.get('result') or '')
-            for index, item in enumerate((call.get('arguments') or {}).get('calls') or []):
+            items = (call.get('arguments') or {}).get('calls') if isinstance(call.get('arguments'), dict) else None
+            for index, item in enumerate(items if isinstance(items, list) else []):
+                if not isinstance(item, dict) or not isinstance(item.get('name'), str):
+                    continue  # a malformed batch item; a2api refused the whole batch before running it
                 if index < len(found):
                     status, code, detail = found[index][1], found[index][2] or None, found[index][3] or None
                     ok = status == 'succeeded'
@@ -185,7 +188,12 @@ def documented(function, field_names, rule):
     schema = function.get('parameters') or {}
     flat = {path.split('.')[-1].replace('[]', ''): strip_null(child) for path, child in fields(schema).items()}
     needed = {path.split('.')[-1].replace('[]', '') for path in required_paths(schema)}
+    summary = function.get('description') or ''
     for name in field_names:
+        # The function's own description can state it ("Each row needs corner_id, … button_label").
+        if rule == 'required' and re.search(r'\b(?:needs?|required)\b', summary, re.I) and re.search(
+                r'(?<![\w])' + re.escape(name) + r'(?![\w])', summary):
+            return True
         child = flat.get(name)
         if child is None:
             continue

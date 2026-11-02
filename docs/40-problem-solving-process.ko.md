@@ -281,6 +281,28 @@ design의 반복은 대부분 다른 유형이었다.
 
 **판단**: 반복 감지는 `ToolSession(variant_note=N)` 옵션으로 남기되 기본은 꺼 둔다. 이 모델에서는 결과에 붙는 안내만으로 탐색을 끝내게 할 수 없었다. 남은 방법은 호스트가 탐색을 멈추게 하는 쪽이다. 예를 들어 한도에 가까워지면 도구 없이 답만 요청한다. 하지만 이것은 도구 표현이 아니라 에이전트 루프의 결정이다(a-commerce 자체 에이전트는 계획기와 답 단계로 이를 나눈다).
 
+## 7단계 — 모델 호출 설정과 단계별 평가(11/02)
+
+**문제**: 사용자 분석은 다음과 같았다.
+- 모델이 "이제 답할 수 있다"·"이 데이터로는 답할 수 없다"를 판단해 탐색을 끝내는 능력이 불안정하다.
+- 호출 설정이 모델 카드와 다르다.
+- 평가에서 "API를 잘 가져왔는지"와 "입력이 틀렸다면 모델 탓인지 변환 탓인지"를 나눠 봐야 한다.
+
+**바꾼 것**
+- 모델 카드 설정(샘플링 1.0·0.95·64, 추론 강도 high, 같은 턴 추론 재전달, 요청당 8,192토큰)
+- 단계마다 모델에게 준 함수 기록
+- `call_review.py`(처음 막힌 단계와 실패 호출의 원인), `conversion_fidelity.py`(변환 정보 손실), `function_snapshot.py`(실행 때 함수 정의)
+
+**호출 흐름 예**(a2api 변환 파사드에서 변환 누락을 찾은 경우, [기록](traces/ours-held_out-settings-1/mgr-undo-banner.md))
+- `facade_save_display_banner_list {"rows":[{"row_action":"insert","corner_id":"slot_home_hero","target_member_grade":"G00","starts_at":"2026-11-06T11:00:00-05:00",…}]}` ← 422 "Row 1: `button_label` is required."
+- 원본 schema는 `rowStat`만 필수로 표시하고, 변환 설명에도 이 규칙이 없었다. 리뷰는 이를 `source:undocumented`로 분류했다.
+- 화면 코드(`disp.rs`의 `need(...)`)에서 insert 행의 필수 항목을 읽어 설명에 보탰다. 다시 잰 held_out에서 이 원인의 실패는 0이었다([리뷰](traces/ours-held_out-facade2-1/review.md)).
+
+**결과**는 [41 문서](41-call-stage-review.ko.md)에 있다.
+- 설정 효과는 design에서 컸고, held_out에서는 통과가 그대로였다.
+- A-Commerce 도구 경로에서 입력 문제로 실패한 실행은 0이다.
+- 레거시 파사드는 변환으로 held_out 3 → 12/32가 됐다.
+
 ## 지금까지의 결론
 
 - **a2api가 맡는 단계**(함수 찾기, 인자 형식, 결과 전달, 레거시 이름·코드 변환)의 실패는 거의 사라졌다.

@@ -1,0 +1,508 @@
+{
+ "runs": [
+  "artifacts/acommerce/runs/ours-held_out-facade2-1.jsonl"
+ ],
+ "scoring": {
+  "a2api-facade-all": {
+   "byKind": {
+    "write": "2/2",
+    "write_approval": "0/6",
+    "read": "10/24"
+   },
+   "toolPrecision": {
+    "n": 0
+   },
+   "toolRecall": {
+    "n": 0
+   }
+  }
+ },
+ "perTask": {
+  "mk-pause-knit-until-monday|a2api-facade-all|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 22638,
+   "seconds": 18.478,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": []
+  },
+  "mk-category-promotion|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 55908,
+   "seconds": 68.946,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": [
+    "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (6, 19, 23 not shown)"
+   ]
+  },
+  "mk-winback|a2api-facade-all|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 123203,
+   "seconds": 84.707,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "mk-viewed-not-purchased|a2api-facade-all|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 31451,
+   "seconds": 27.814,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-broken-sizes-outerwear|a2api-facade-all|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 143613,
+   "seconds": 47.342,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-how-many-left|a2api-facade-all|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 24188,
+   "seconds": 9.931,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": []
+  },
+  "md-below-cost|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 88756,
+   "seconds": 53.195,
+   "modelCalls": 8,
+   "toolCalls": 7,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23 not shown)"
+   ]
+  },
+  "md-best-sellers-this-month|a2api-facade-all|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 42698,
+   "seconds": 36.119,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": []
+  },
+  "md-out-of-stock-30-days|a2api-facade-all|0": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 99317,
+   "seconds": 44.463,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"the store keeps current stock only, not since when a size ha\" (30 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-unfulfilled-3-days|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 116206,
+   "seconds": 64.599,
+   "modelCalls": 12,
+   "toolCalls": 11,
+   "missing": [
+    "fact \"none: 412 orders are processing and the oldest was placed We\" (4, 9 not shown)"
+   ]
+  },
+  "ops-photo-request|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 21724,
+   "seconds": 13.977,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 29635,
+   "seconds": 17.079,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-facade-all|0": {
+   "done": true,
+   "hostError": null,
+   "tokens": 40667,
+   "seconds": 33.413,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": []
+  },
+  "mgr-undo-banner|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 34682,
+   "seconds": 51.252,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+   ]
+  },
+  "mgr-weekly-summary|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 32104,
+   "seconds": 30.93,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"the window is stated (Sat Oct 31 – Fri Nov 6 so far, or the \" (31 not shown)"
+   ]
+  },
+  "mgr-how-is-business|a2api-facade-all|0": {
+   "done": false,
+   "hostError": null,
+   "tokens": 22335,
+   "seconds": 20.849,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+   ]
+  },
+  "mk-pause-knit-until-monday|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 29908,
+   "seconds": 18.31,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mk-category-promotion|a2api-facade-all|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 148204,
+   "seconds": 101.129,
+   "modelCalls": 11,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"2 weeks from today is Fri Nov 6 – Thu Nov 19 23:59 store tim\" (19, 23 not shown)"
+   ]
+  },
+  "mk-winback|a2api-facade-all|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 121306,
+   "seconds": 87.301,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "mk-viewed-not-purchased|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 39374,
+   "seconds": 31.571,
+   "modelCalls": 5,
+   "toolCalls": 4,
+   "missing": []
+  },
+  "md-broken-sizes-outerwear|a2api-facade-all|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 154276,
+   "seconds": 59.274,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"5 of the 62 outerwear products have a sold-out size\" (5, 62 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-how-many-left|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 23550,
+   "seconds": 10.006,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": []
+  },
+  "md-below-cost|a2api-facade-all|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 155445,
+   "seconds": 67.852,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"none: no offer is under the price floor (cost x 1.15)\" (1.15 not shown)",
+    "fact \"4 were this morning; the watcher raised them to the floor at\" (4, 8, 31, 1040, 7, 23, 59 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "md-best-sellers-this-month|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 32506,
+   "seconds": 33.024,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "md-out-of-stock-30-days|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 105075,
+   "seconds": 47.222,
+   "modelCalls": 12,
+   "toolCalls": 11,
+   "missing": []
+  },
+  "ops-unfulfilled-3-days|a2api-facade-all|1": {
+   "done": false,
+   "hostError": "MODEL_CALL_LIMIT",
+   "tokens": 126187,
+   "seconds": 71.053,
+   "modelCalls": 12,
+   "toolCalls": 12,
+   "missing": [
+    "fact \"none: 412 orders are processing and the oldest was placed We\" (412, 4, 0, 9 not shown)",
+    "HOST:MODEL_CALL_LIMIT"
+   ]
+  },
+  "ops-photo-request|a2api-facade-all|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 22355,
+   "seconds": 17.702,
+   "modelCalls": 3,
+   "toolCalls": 2,
+   "missing": [
+    "fact \"#20366 is a damaged-in-transit claim on Light rain parka x2 \" (2, 236 not shown)"
+   ]
+  },
+  "ops-cancel-delivered|a2api-facade-all|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 14360,
+   "seconds": 12.636,
+   "modelCalls": 2,
+   "toolCalls": 1,
+   "missing": [
+    "fact \"a return request for it is already waiting (#20402 in the ov\" (200 not shown)"
+   ]
+  },
+  "ops-change-address-in-transit|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 29796,
+   "seconds": 25.049,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mgr-undo-banner|a2api-facade-all|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 120665,
+   "seconds": 111.346,
+   "modelCalls": 11,
+   "toolCalls": 10,
+   "missing": [
+    "fact \"the swap is cs_1039, live since 10:00; it can be undone unti\" (1039, 7, 23 not shown)"
+   ]
+  },
+  "mgr-weekly-summary|a2api-facade-all|1": {
+   "done": true,
+   "hostError": null,
+   "tokens": 32169,
+   "seconds": 32.92,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": []
+  },
+  "mgr-how-is-business|a2api-facade-all|1": {
+   "done": false,
+   "hostError": null,
+   "tokens": 30828,
+   "seconds": 28.82,
+   "modelCalls": 4,
+   "toolCalls": 3,
+   "missing": [
+    "fact \"yesterday (Thu Nov 5) was $18,240, 20% under the Thursday av\" (5, 18240, 20 not shown)"
+   ]
+  }
+ },
+ "metrics": {
+  "a2api-facade-all": {
+   "runs": 32,
+   "passed": 12,
+   "passRate": 0.375,
+   "passRateWithoutHostErrors": 0.48,
+   "hostErrors": {
+    "MODEL_CALL_LIMIT": 7
+   },
+   "tokensPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 66098,
+     "median": 37028,
+     "p90": 141870,
+     "min": 14360,
+     "max": 155445
+    },
+    "prompt": {
+     "n": 32,
+     "mean": 63607,
+     "median": 34638,
+     "p90": 139126,
+     "min": 13617,
+     "max": 151655
+    },
+    "completion": {
+     "n": 32,
+     "mean": 2491,
+     "median": 1970,
+     "p90": 4777,
+     "min": 532,
+     "max": 6626
+    },
+    "firstPrompt": {
+     "n": 32,
+     "mean": 6556,
+     "median": 6556,
+     "p90": 6564,
+     "min": 6550,
+     "max": 6565
+    },
+    "largestPrompt": {
+     "n": 32,
+     "mean": 10610,
+     "median": 8748,
+     "p90": 16309,
+     "min": 7058,
+     "max": 19699
+    }
+   },
+   "secondsPerRun": {
+    "total": {
+     "n": 32,
+     "mean": 43.1,
+     "median": 33.2,
+     "p90": 83.3,
+     "min": 9.9,
+     "max": 111.3
+    },
+    "model": {
+     "n": 32,
+     "mean": 42.9,
+     "median": 33.1,
+     "p90": 83.1,
+     "min": 9.7,
+     "max": 111.0
+    },
+    "tools": {
+     "n": 32,
+     "mean": 0.1,
+     "median": 0.1,
+     "p90": 0.4,
+     "min": 0.0,
+     "max": 0.5
+    }
+   },
+   "secondsPerModelStep": {
+    "n": 214,
+    "mean": 6.41,
+    "median": 4.53,
+    "p90": 13.4,
+    "min": 1.23,
+    "max": 28.45
+   },
+   "msPerCompletionToken": 17.2,
+   "modelCallsPerRun": {
+    "n": 32,
+    "mean": 6.69,
+    "median": 4.5,
+    "p90": 12.0,
+    "min": 2,
+    "max": 12
+   },
+   "toolCallsPerRun": {
+    "n": 32,
+    "mean": 5.91,
+    "median": 3.5,
+    "p90": 12.0,
+    "min": 1,
+    "max": 12
+   },
+   "searchCallsPerRun": {
+    "n": 32,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "loadCallsPerRun": {
+    "n": 32,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "businessCalls": {
+    "total": 189,
+    "failed": 6,
+    "failedRate": 0.032
+   },
+   "toolDefinitionBytes": {
+    "firstRequest": {
+     "n": 32,
+     "mean": 20091,
+     "median": 20091,
+     "p90": 20091,
+     "min": 20091,
+     "max": 20091
+    },
+    "largest": {
+     "n": 32,
+     "mean": 20091,
+     "median": 20091,
+     "p90": 20091,
+     "min": 20091,
+     "max": 20091
+    }
+   },
+   "resultBytesPerCall": {
+    "n": 189,
+    "mean": 1121,
+    "median": 257,
+    "p90": 4392,
+    "min": 41,
+    "max": 5752
+   }
+  }
+ }
+}

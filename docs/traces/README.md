@@ -56,4 +56,13 @@ a-commerce 과업을 우리 하네스(`examples/acommerce/evaluate.py`)로 실�
 | 6 | [ours-heldout-guard-posthoc-1](ours-heldout-guard-posthoc-1/README.md) | 11/02 06:08 | held_out | 128 | 29 | 반복 감지 사후 확인(네 방식) |
 | 6 | [ours-design-12-slow-provider](ours-design-12-slow-provider/README.md) | 11/02 00:46 | design | 60 | 10 | **결과에서 제외**: 모델 서버 저하(출력 토큰당 89–153ms, 평소 17ms)로 대부분 시간 초과. 중단 |
 
+| 7 | [ours-design-settings-1](ours-design-settings-1/README.md) | 11/02 10:08 | design | 96 | 33 | 모델 카드 설정: 검색 / 목차 + batch / 원본 파사드 전부 / a2api 변환 파사드 전부. [리뷰](ours-design-settings-1/review.md) |
+| 7 | [ours-held_out-settings-1](ours-held_out-settings-1/README.md) | 11/02 12:00 | held_out | 128 | 29 | 같은 네 방식(클레임 키 설명 보충 뒤). [리뷰](ours-held_out-settings-1/review.md) |
+| 7 | [ours-design-settings-nohistory-1](ours-design-settings-nohistory-1/README.md) | 11/02 14:22 | design | 48 | 19 | 샘플링만(추론 재전달 없음). [리뷰](ours-design-settings-nohistory-1/review.md) |
+| 7 | [ours-design-facade2-1](ours-design-facade2-1/README.md) | 11/02 15:09 | design | 24 | 4 | 변환 보충 뒤 a2api 파사드. [리뷰](ours-design-facade2-1/review.md) |
+| 7 | [ours-held_out-facade2-1](ours-held_out-facade2-1/README.md) | 11/02 15:37 | held_out | 32 | 12 | 변환 보충 뒤 a2api 파사드. [리뷰](ours-held_out-facade2-1/review.md) |
+| 7 | [ours-held_out-settings-nohistory-1](ours-held_out-settings-nohistory-1/README.md) | 11/02 16:07 | held_out | 64 | 12 | 샘플링만(추론 재전달 없음). [리뷰](ours-held_out-settings-nohistory-1/review.md) |
+
+`review.md`는 `call_review.py`가 만든 단계별 리뷰다(처음 막힌 단계, 실패 호출의 원인, 기대와 다른 쓰기 입력).
+
 자체 에이전트 페이지(`own_traces.py`)는 라우팅, 도구 검색 후보, 계획, 호출과 결과, 답, 화면 블록을 보인다. 그보다 앞선 자체 에이전트 실행(3.7절, 10/31–11/01)은 `--logs` 없이 돌려 보고서의 도구 이름만 남았다.

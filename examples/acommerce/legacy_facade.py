@@ -142,15 +142,23 @@ SCREENS = {
     'getPrmtGridList': ('Search promotions (sales, discounts) by status, name, target grade and active period; '
                         'one page of rows.', ['promotion', 'sale', 'discount', 'campaign', 'running']),
     'getPrmtGridListCnt': ('Count the promotions a promotion search would return.', ['promotion', 'count']),
+    # prmt.rs `prmt_call`: the fields each row action needs (`need(...)`); the schema marks only rowStat.
     'savePrmtList': ('Save promotion rows at once: insert creates a percent-off sale price promotion for a category '
                      'or products (types item_price_everyone or item_price_one_grade); update pauses or ends one; '
-                     'delete ends one. Runs immediately.', ['promotion', 'sale', 'discount', 'markdown', 'pause', 'end']),
-    'saveCpnList': ('Create coupons (insert rows only) for a promotion and member grade. Runs immediately.',
+                     'delete ends one. An insert row needs promotion_name, promotion_type, starts_at, ends_at, '
+                     'percent_off, applies_to and category_id (category) or product_ids (products), and '
+                     'target_member_grade for item_price_one_grade (not G00); an update row needs promotion_id and '
+                     'promotion_status paused or ended; a delete row needs promotion_id. Runs immediately.',
+                     ['promotion', 'sale', 'discount', 'markdown', 'pause', 'end']),
+    'saveCpnList': ('Create coupons (insert rows only) for a promotion and member grade. Each row needs coupon_code, '
+                    'promotion_id, target_member_grade and coupon_application. Runs immediately.',
                     ['coupon', 'code', 'voucher']),
     'getDispCornerList': ('List the display corners (slots) of a page type and their scheduled banners in a period.',
                           ['banner', 'hero', 'display', 'homepage', 'slot']),
-    'saveDispBnrList': ('Schedule banners into display corners (insert rows only). Runs immediately.',
-                        ['banner', 'hero', 'display', 'schedule']),
+    # disp.rs `banner_call`: the fields an insert row needs; found missing by the call review (41 문서 5절).
+    'saveDispBnrList': ('Schedule banners into display corners (insert rows only). Each row needs corner_id, '
+                        'target_member_grade, starts_at, ends_at, headline, button_label, link_url, and '
+                        'image_product_id or image_id. Runs immediately.', ['banner', 'hero', 'display', 'schedule']),
     'getClmGridList': ('Search return claims by status, reason and minimum amount; one page of rows (no total).',
                        ['return', 'claim', 'refund', 'request']),
     'getClmGridListCnt': ('Count the claims a claim search would return.', ['return', 'claim', 'count']),
