@@ -52,6 +52,8 @@ a-commerce 과업을 우리 하네스(`examples/acommerce/evaluate.py`)로 실�
 
 | 5 | [own22-heldout-raw-logs](own22-heldout-raw-logs/README.md) | 11/02 04:12 | held_out | 32 | 5 | a-commerce 자체 에이전트 + 원본 파사드 22개(a-commerce `d86a1ff`, 평가기 `--logs`) |
 | 5 | [own22-heldout-a2api-lookup-logs](own22-heldout-a2api-lookup-logs/README.md) | 11/02 04:18 | held_out | 32 | 8 | 자체 에이전트 + a2api 게이트웨이(주문 번호 조회 포함) |
+| 6 | [ours-design-12b](ours-design-12b/README.md) | 11/02 04:24 | design | 96 | 36 | 검색 / 검색 + 반복 감지 / 목차 + batch / 목차 + batch + 반복 감지. 단계별 모델 판단 포함 |
+| 6 | [ours-heldout-guard-posthoc-1](ours-heldout-guard-posthoc-1/README.md) | 11/02 06:08 | held_out | 128 | 29 | 반복 감지 사후 확인(네 방식) |
 | 6 | [ours-design-12-slow-provider](ours-design-12-slow-provider/README.md) | 11/02 00:46 | design | 60 | 10 | **결과에서 제외**: 모델 서버 저하(출력 토큰당 89–153ms, 평소 17ms)로 대부분 시간 초과. 중단 |
 
 자체 에이전트 페이지(`own_traces.py`)는 라우팅, 도구 검색 후보, 계획, 호출과 결과, 답, 화면 블록을 보인다. 그보다 앞선 자체 에이전트 실행(3.7절, 10/31–11/01)은 `--logs` 없이 돌려 보고서의 도구 이름만 남았다.

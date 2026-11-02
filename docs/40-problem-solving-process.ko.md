@@ -238,4 +238,55 @@ a2api 변환 + 번호 조회(✓, [기록](traces/own22-heldout-a2api-lookup-log
 - `a2api_batch`(`search_products {"max_inventory_level":10,…}`, `suggest_reorder` × 2) ← Cotton chore coat 재고 7 …
 - 안내가 붙은 결과 뒤에도 `suggest_reorder {"product_id":"prd_denim_jacket"}`을 더 불렀고 120초 한도에 걸렸다.
 
-**design 측정**: (측정 중)
+**design 측정**
+- 첫 측정(00:46–02:56)은 모델 서버가 출력 토큰당 89–153ms(평소 17ms)로 느려져, 대부분 120초 한도에 걸렸다.
+- 그래서 중단하고 [기록](traces/ours-design-12-slow-provider/README.md)만 남겼다. 서버가 3회 연속 30ms 미만으로 돌아온 뒤(04:24) 다시 쟀다([기록](traces/ours-design-12b/README.md), [evidence](evidence/acommerce-guard-design.json)).
+
+| 방식 | 통과 | 작업당 토큰 중앙값 | 안내(실행 수 / 횟수) |
+|---|---|---|---|
+| 검색 | 5/24 | 37,532 | — |
+| 검색 + 반복 감지 | 6/24 | 40,880 | 1 / 1 |
+| 목차 + batch | 13/24 | 35,457 | — |
+| 목차 + batch + 반복 감지 | 12/24 | 38,462 | 4 / 6 |
+
+안내 횟수는 기록된 호출로 감지 로직을 다시 돌려 셌다(`examples/acommerce/replay_guard.py`). 실행 기록은 결과를 3,000자까지만 저장해, 결과 끝에 붙는 안내가 긴 결과에서는 기록에 보이지 않는다.
+
+**안내가 48실행 중 5실행에서만 나와 design으로는 효과를 판단할 수 없다.** 같은 방법으로 이전 held_out 기록(반복 감지 없음, 4단계)을 다시 돌리면, 안내가 나왔을 실행이 방식별로 6–10/32다. 반복 감지가 겨냥한 행동은 held_out에 훨씬 많다.
+
+design의 반복은 대부분 다른 유형이었다.
+- 항목마다 다른 ID로 하는 조회: [md-low-stock-before-weekend](traces/ours-design-12b/md-low-stock-before-weekend.md) 1회차의 `a2api_batch`(`suggest_reorder` × 제품 4개) → `get_inventory {"product_id":"prd_rain_parka"}`, `{"product_id":"prd_chore_coat"}`, … 제품마다 하나씩
+- 같은 batch를 그대로 다시 보냄: 같은 회차에서 `suggest_reorder` 4개 batch를 두 번 연속 보냈다. 기존 "같은 호출·같은 결과" 안내가 붙었는데도 그랬다.
+- 반복 감지가 겨냥한 "같은 대상에 조건만 바꾼 재조회"는 같은 과업 2회차에서 나왔다: `search_products {"max_inventory_level":20}` → `{…10}` → `{…5}`. 안내가 붙은 뒤에도 모델은 `fields`를 바꾼 조회와 `suggest_reorder` batch를 이어 가다 시간 한도에 걸렸다.
+
+**held_out 사후 확인**(11/02 06:08–09:04, 16과업 × 2회. [기록](traces/ours-heldout-guard-posthoc-1/README.md), [evidence](evidence/acommerce-guard-heldout-posthoc.json))
+
+| 방식 | 통과 | 작업당 토큰 중앙값 | 안내(실행 수 / 횟수) | 호출 한도 / 시간 한도 |
+|---|---|---|---|---|
+| 검색 | 8/32 | 47,820 | — | 8 / 7 |
+| 검색 + 반복 감지 | 7/32 | 44,610 | 5 / 10 | 3 / 7 |
+| 목차 + batch | 7/32 | 23,669 | — | 4 / 10 |
+| 목차 + batch + 반복 감지 | 7/32 | 24,718 | 9 / 28 | 6 / 7 |
+
+**안내는 나왔지만 통과는 바뀌지 않았다.** 대표 기록: [md-out-of-stock-30-days](traces/ours-heldout-guard-posthoc-1/md-out-of-stock-30-days.md) "Find all products that have been out of stock for more than 30 days"(목차 + batch + 반복 감지, 1회차). 정답은 "상점은 현재 재고만 저장해 30일 조건은 답할 수 없다"이다.
+1. `search_products {"availability":["out_of_stock"],"limit":100}` ← 0건
+2. `search_products {"limit":100}` ← 4,313B
+3. `get_inventory {"product_id":"prd_wool_overcoat"}`
+4. `search_products {"availability":["discontinued"],"limit":100}` ← 안내 "If these results cannot answer the request, the data is not kept in this form: answer with what you found and say what cannot be answered."
+5. `search_products {"max_inventory_level":0,"limit":100}` ← 안내
+6. 모델은 답하는 대신 다른 함수로 옮겼다: `a2api_load {"names":["get_action_log","search_action_log"]}`
+7. `search_action_log {"instrument":"set_variant_stock"}` → `{"limit":100}` → `{"instrument":"set_variant_stock"}` → `{"instrument":"set_safety_stock"}` ← 안내
+8. 모델 호출 한도 12회 → E
+
+모델은 안내를 받으면 같은 함수의 재조회를 멈추고 다른 함수로 같은 탐색을 이어 갔다. "없다"고 답하는 결론으로 가지 않았다.
+
+**판단**: 반복 감지는 `ToolSession(variant_note=N)` 옵션으로 남기되 기본은 꺼 둔다. 이 모델에서는 결과에 붙는 안내만으로 탐색을 끝내게 할 수 없었다. 남은 방법은 호스트가 탐색을 멈추게 하는 쪽이다. 예를 들어 한도에 가까워지면 도구 없이 답만 요청한다. 하지만 이것은 도구 표현이 아니라 에이전트 루프의 결정이다(a-commerce 자체 에이전트는 계획기와 답 단계로 이를 나눈다).
+
+## 지금까지의 결론
+
+- **a2api가 맡는 단계**(함수 찾기, 인자 형식, 결과 전달, 레거시 이름·코드 변환)의 실패는 거의 사라졌다.
+  - 목차 방식의 필요한 함수 재현율은 0.77–0.93이다.
+  - 업무 호출 실패는 0–11%다.
+  - 파사드 게이트웨이는 원본과 결과가 같으면서 실패한 화면 호출을 72%에서 11%로 줄였다.
+- **held_out 통과율은 방식 간에 구별되지 않는다.** 사후 확인 세 번의 합은 검색 22/96, 목차 계열 19/96이다(5+9+8, 7+5+7). 목차 계열은 토큰을 절반 정도 쓴다(작업당 중앙값 23.7k–29.3k 대 47.8k–77.9k).
+- **남은 실패**는 이 모델의 행동이다. 세부를 빠뜨린 답, "없다"로 끝내지 못하는 탐색, 긴 숨은 추론으로 인한 시간 초과, 과업 해석이 그것이다. 그리고 채점이 마지막 답의 숫자 표기만 본다.
+- **자체 에이전트**(계획·답 단계 분리, 화면 블록)에 a2api 변환 파사드를 붙이면 held_out 8/32, 원본 파사드는 5/32다.
