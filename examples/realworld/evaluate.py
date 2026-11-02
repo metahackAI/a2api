@@ -33,7 +33,7 @@ from a2api.tool_session import SEARCH_NAME  # noqa: E402
 from compare import norm  # noqa: E402
 from conduit import serve  # noqa: E402
 from conduit_tasks import TASKS, answer_json, changes, fingerprint  # noqa: E402
-from evaluate import DEFAULT_BASE_URL, DEFAULT_MODEL, compact, run_task, wait_for_model  # noqa: E402
+from evaluate import DEFAULT_BASE_URL, DEFAULT_MODEL, compact, model_arguments, model_header, run_task, wait_for_model  # noqa: E402
 
 CONTEXT = ExecutionContext('jake', 'conduit', frozenset())
 TOKEN = {'Authorization': 'Token token-jake'}
@@ -254,6 +254,7 @@ async def evaluate(options):
             sink.write(json.dumps(record, ensure_ascii=False, default=list) + '\n')
             sink.flush()
         write({'type': 'header', 'startedAt': datetime.now(timezone.utc).isoformat(), 'model': options.model, 'split': options.split,
+               **model_header(options),
                'modes': modes, 'tasks': [t['id'] for t in tasks], 'fingerprint': fingerprint(options.split), 'gitCommit': git('rev-parse', 'HEAD')})
         for repetition in range(options.repeat):
             for index, task in enumerate(tasks):
@@ -269,7 +270,8 @@ async def evaluate(options):
                         app, routes = application(mode, options.root, origin)
                         executor = A2API(mode, app, routes)
                     before = state(origin)
-                    run = await run_task(executor, task['question'], base_url=options.base_url, model=options.model, request=task['request'])
+                    run = await run_task(executor, task['question'], base_url=options.base_url, model=options.model, request=task['request'],
+                                         options=options)
                     after = state(origin)
                     context = SimpleNamespace(json=answer_json(run['answer']), answer=run['answer'], diff=changes(before, after),
                                               calls=[c for c in run['calls'] if c.get('executed', True)])
@@ -290,6 +292,7 @@ def main():
     parser.add_argument('root', type=Path, nargs='?')
     parser.add_argument('--base-url', default=os.environ.get('A2API_MODEL_BASE_URL', DEFAULT_BASE_URL))
     parser.add_argument('--model', default=os.environ.get('A2API_MODEL', DEFAULT_MODEL))
+    model_arguments(parser)
     parser.add_argument('--split', choices=['dev', 'holdout'], default='dev')
     parser.add_argument('--modes', default='spec-tools,a2api-openapi,a2api-spring,a2api-go,a2api-rust,a2api-python')
     parser.add_argument('--only', default='')

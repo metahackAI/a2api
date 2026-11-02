@@ -102,9 +102,13 @@ GRADE = 'Member grade code: G00 is every shopper, then G01, G02… by tier rank 
 DESCRIBE = {
     'tgtMbrGrdCd': GRADE, 'mbrGrdCd': GRADE, 'aplyMbrGrdCd': 'Price for this member grade. ' + GRADE,
     'clmAmtFrom': 'Claims of at least this amount (store currency).',
-    'aplyDtm': 'Prices as of this date-time.',
-    'srchStrtDtm': 'Promotions active at any time from this date-time.',
-    'srchEndDtm': 'Promotions active at any time until this date-time.',
+    'aplyDtm': 'Prices as of this date-time (store time, such as 2026-11-07T00:00).',
+    'srchStrtDtm': 'Promotions active at any time from this date-time (store time, such as 2026-11-07T00:00).',
+    'srchEndDtm': 'Promotions active at any time until this date-time (store time, such as 2026-11-08T23:59).',
+    # The screens parse date-times as ISO (`2026-11-07 00:00:00` is refused: "expected 2026-11-07T00:00 or
+    # RFC 3339"); found missing by the call review (41 문서 5절).
+    'strtDtm': 'Start date-time (store time, such as 2026-11-07T00:00).',
+    'endDtm': 'End date-time (store time, such as 2026-11-08T23:59).',
     'dcRt': 'Percent off.',
     # screens/mod.rs Paging::new: page numbers start at 1; at most 100 rows a page, 20 when not sent.
     'pageNo': 'Page number, from 1.',
@@ -114,6 +118,9 @@ DESCRIBE = {
     # ord.rs: the popup reads get_order with ordNo as the order key (a bare number is not found there;
     # the gateway looks the number up, see HANDLES).
     'ordNo': 'Order key such as ord_20402 (order_id in order and claim rows).',
+    # rfnd.rs reads the claim with clmNo as the claim key (the claim grid's clmNo); found missing by
+    # the call review (41 문서 4.1): models put the order number there.
+    'clmNo': 'Claim key such as clm_20402 (claim_id in claim grid rows).',
     'ordDtmFrom': 'Orders placed on or after this day (YYYY-MM-DD, store time).',
     'ordDtmTo': 'Orders placed on or before this day (YYYY-MM-DD, store time).',
     'dlvStrtDtm': "When the parcel left: the carrier's first scan.",
@@ -135,15 +142,23 @@ SCREENS = {
     'getPrmtGridList': ('Search promotions (sales, discounts) by status, name, target grade and active period; '
                         'one page of rows.', ['promotion', 'sale', 'discount', 'campaign', 'running']),
     'getPrmtGridListCnt': ('Count the promotions a promotion search would return.', ['promotion', 'count']),
+    # prmt.rs `prmt_call`: the fields each row action needs (`need(...)`); the schema marks only rowStat.
     'savePrmtList': ('Save promotion rows at once: insert creates a percent-off sale price promotion for a category '
                      'or products (types item_price_everyone or item_price_one_grade); update pauses or ends one; '
-                     'delete ends one. Runs immediately.', ['promotion', 'sale', 'discount', 'markdown', 'pause', 'end']),
-    'saveCpnList': ('Create coupons (insert rows only) for a promotion and member grade. Runs immediately.',
+                     'delete ends one. An insert row needs promotion_name, promotion_type, starts_at, ends_at, '
+                     'percent_off, applies_to and category_id (category) or product_ids (products), and '
+                     'target_member_grade for item_price_one_grade (not G00); an update row needs promotion_id and '
+                     'promotion_status paused or ended; a delete row needs promotion_id. Runs immediately.',
+                     ['promotion', 'sale', 'discount', 'markdown', 'pause', 'end']),
+    'saveCpnList': ('Create coupons (insert rows only) for a promotion and member grade. Each row needs coupon_code, '
+                    'promotion_id, target_member_grade and coupon_application. Runs immediately.',
                     ['coupon', 'code', 'voucher']),
     'getDispCornerList': ('List the display corners (slots) of a page type and their scheduled banners in a period.',
                           ['banner', 'hero', 'display', 'homepage', 'slot']),
-    'saveDispBnrList': ('Schedule banners into display corners (insert rows only). Runs immediately.',
-                        ['banner', 'hero', 'display', 'schedule']),
+    # disp.rs `banner_call`: the fields an insert row needs; found missing by the call review (41 문서 5절).
+    'saveDispBnrList': ('Schedule banners into display corners (insert rows only). Each row needs corner_id, '
+                        'target_member_grade, starts_at, ends_at, headline, button_label, link_url, and '
+                        'image_product_id or image_id. Runs immediately.', ['banner', 'hero', 'display', 'schedule']),
     'getClmGridList': ('Search return claims by status, reason and minimum amount; one page of rows (no total).',
                        ['return', 'claim', 'refund', 'request']),
     'getClmGridListCnt': ('Count the claims a claim search would return.', ['return', 'claim', 'count']),
