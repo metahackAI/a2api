@@ -32,17 +32,58 @@ from tasks import assess, fingerprint, tasks  # noqa: E402
 DEFAULT_BASE_URL = 'https://qwen-api-xgen.x2bee.com/v1'
 DEFAULT_MODEL = 'nvidia/Muse-Glimmer-30B-NVFP4'
 MAX_TURNS, TASK_SECONDS, REQUEST_SECONDS = 12, 180, 120
+# The model card's settings for nvidia/Muse-Glimmer-30B-NVFP4: temperature 1.0, top_p 0.95, top_k 64,
+# thinking on, high reasoning strength (the chat template's `reasoning_strength`: low, medium, high, xhigh).
+# Runs before 2026-11-02 used temperature 0 and the template default (high).
+RECOMMENDED = {'temperature': 1.0, 'top_p': 0.95, 'top_k': 64, 'reasoning_strength': 'high'}
+# Per model request; the hidden reasoning counts too. Largest step seen without a cap: 3,843 tokens.
+MAX_TOKENS = 8192
 
 
 class ModelError(Exception):
     pass
 
 
-def chat(base_url, model, messages, tools, *, api_key=None, timeout=REQUEST_SECONDS, max_tokens=2048):
+def model_arguments(parser):
+    """CLI options for the model request; defaults are the model card's settings."""
+    parser.add_argument('--temperature', type=float, default=RECOMMENDED['temperature'])
+    parser.add_argument('--top-p', type=float, default=RECOMMENDED['top_p'])
+    parser.add_argument('--top-k', type=int, default=RECOMMENDED['top_k'])
+    parser.add_argument('--reasoning-strength', choices=['low', 'medium', 'high', 'xhigh'], default=RECOMMENDED['reasoning_strength'])
+    parser.add_argument('--reasoning-history', choices=['turn', 'all', 'none'], default='turn',
+                        help='earlier reasoning sent back with assistant messages: within the current user turn (default), '
+                             'always, or never (runs before 2026-11-02)')
+    parser.add_argument('--max-tokens', type=int, default=MAX_TOKENS, help='output cap per model request; 0 = none')
+
+
+def sampling(options):
+    """Request fields for the model settings in options (see model_arguments)."""
+    return {'temperature': options.temperature, 'top_p': options.top_p, 'top_k': options.top_k,
+            'chat_template_kwargs': {'reasoning_strength': options.reasoning_strength}}
+
+
+def model_header(options):
+    return {'sampling': sampling(options), 'reasoningHistory': options.reasoning_history, 'maxTokens': options.max_tokens or None}
+
+
+def assistant_message(message, keep_reasoning):
+    """The assistant turn to send back: content, tool calls and (the chat template renders it) its reasoning."""
+    assistant = {'role': 'assistant', 'content': message.get('content') or ''}
+    if message.get('tool_calls'):
+        assistant['tool_calls'] = message['tool_calls']
+    reasoning = message.get('reasoning') or message.get('reasoning_content')
+    if keep_reasoning and reasoning:
+        assistant['reasoning_content'] = reasoning
+    return assistant
+
+
+def chat(base_url, model, messages, tools, *, api_key=None, timeout=REQUEST_SECONDS, max_tokens=MAX_TOKENS, sampling=None):
     headers = {'Content-Type': 'application/json'}
     if api_key:
         headers['Authorization'] = 'Bearer ' + api_key
-    payload = {'model': model, 'messages': messages, 'temperature': 0, 'stream': False}
+    settings = sampling if sampling is not None else {**{k: v for k, v in RECOMMENDED.items() if k != 'reasoning_strength'},
+                                                     'chat_template_kwargs': {'reasoning_strength': RECOMMENDED['reasoning_strength']}}
+    payload = {'model': model, 'messages': messages, 'stream': False, **settings}
     if max_tokens is not None:  # None: no output cap (the provider's own limit)
         payload['max_tokens'] = max_tokens
     if tools:
@@ -74,7 +115,7 @@ def wait_for_model(base_url, model, api_key=None, *, limit=1800):
             time.sleep(30)
 
 
-async def run_task(executor, question, *, base_url, model, api_key=None, request=None):
+async def run_task(executor, question, *, base_url, model, api_key=None, request=None, options=None):
     run = {'steps': [], 'toolCalls': [], 'calls': [], 'answer': '', 'usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}}
     started = time.monotonic()
     try:
@@ -92,21 +133,23 @@ async def run_task(executor, question, *, base_url, model, api_key=None, request
                 raise ModelError('TASK_TIMEOUT')
             tick = time.monotonic()
             response = await asyncio.to_thread(chat, base_url, model, messages, tools, api_key=api_key,
-                                               timeout=min(REQUEST_SECONDS, remaining))
+                                               timeout=min(REQUEST_SECONDS, remaining),
+                                               max_tokens=(options.max_tokens or None) if options else MAX_TOKENS,
+                                               sampling=sampling(options) if options else None)
             choice = response['choices'][0]
             message = choice['message']
             usage = response.get('usage') or {}
             run['steps'].append({'seconds': round(time.monotonic() - tick, 3), 'finish': choice.get('finish_reason'),
-                                 'usage': usage, 'toolBytes': len(compact(tools).encode()) if tools else 0})
+                                 'usage': usage, 'toolBytes': len(compact(tools).encode()) if tools else 0,
+                                 'offered': [tool['function']['name'] for tool in tools or []],
+                                 'reasoning': (message.get('reasoning') or message.get('reasoning_content') or '')[:3000]})
             for key in run['usage']:
                 run['usage'][key] += usage.get(key) or 0
             if choice.get('finish_reason') == 'length':
                 raise ModelError('MODEL_OUTPUT_TRUNCATED')
             calls = message.get('tool_calls') or []
-            assistant = {'role': 'assistant', 'content': message.get('content') or ''}
-            if calls:
-                assistant['tool_calls'] = calls
-            messages.append(assistant)
+            # One user turn here, so 'turn' and 'all' keep the same reasoning.
+            messages.append(assistant_message(message, keep_reasoning=(options.reasoning_history != 'none') if options else True))
             if not calls:
                 run['answer'] = message.get('content') or ''
                 break
@@ -183,6 +226,7 @@ async def evaluate(options):
               'baseUrl': options.base_url, 'split': options.split, 'taskFingerprint': fingerprint(options.split),
               'tasks': [item['id'] for item in selected], 'scales': options.scales, 'languages': options.languages,
               'modes': modes, 'repetitions': options.repetitions, 'firstRepetition': options.first_repetition, 'maxToolBytes': options.max_tool_bytes,
+              **model_header(options),
               'searchLimit': options.search_limit, 'hints': options.hints, 'limits': {'turns': MAX_TURNS, 'taskSeconds': TASK_SECONDS},
               'resumedFrom': [str(path) for path in options.resume_from]}
     with output.open('a') as sink:
@@ -218,7 +262,7 @@ async def evaluate(options):
                                 executor = executor_for(mode, scale, spec, origin, app, ops, options)
                                 run = await run_task(executor, item['question'], base_url=options.base_url,
                                                      model=options.model, api_key=os.environ.get(options.api_key_env),
-                                                     request=item['request'])
+                                                     request=item['request'], options=options)
                                 after = admin(origin, 'state')
                                 run.update(type='run', task=item['id'], split=item['split'], kind=item['kind'], scale=scale, waitedForModel=waited,
                                            language=language, mode=mode, repetition=repetition,
@@ -239,6 +283,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', default=os.environ.get('A2API_MODEL_BASE_URL', DEFAULT_BASE_URL))
     parser.add_argument('--model', default=os.environ.get('A2API_MODEL', DEFAULT_MODEL))
+    model_arguments(parser)
     parser.add_argument('--api-key-env', default='A2API_MODEL_API_KEY')
     parser.add_argument('--split', choices=['dev', 'holdout'], required=True)
     parser.add_argument('--tasks', default='')

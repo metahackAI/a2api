@@ -9,6 +9,8 @@ Modes (same model, system prompt, limits and scoring):
   acom-all      every A-Commerce tool as a function (raw catalog; may exceed the model context)
   a2api-acom    the A-Commerce catalog converted by a2api (ToolCatalogImporter) through ToolSession
   a2api-facade  the facade converted by a2api, with the host's legacy metadata (legacy_facade.py)
+  a2api-facade-all  the converted facade, every screen given at once like facade-all (no search): the
+                    conversion's names, words and descriptions against the raw screens, nothing else
   a2api-acom-index  the converted catalog as an index in the system prompt (name + first summary sentence,
                     by domain); the model loads what it needs with a2api_load (ToolSession.index)
   a2api-acom-graph  the index, and each result names functions that take IDs it returned (related=5)
@@ -45,7 +47,8 @@ from a2api.importers import ToolCatalogImporter  # noqa: E402
 from a2api.importers.catalog import snake  # noqa: E402
 from a2api.tool_session import BATCH_NAME, LOAD_NAME, SEARCH_NAME  # noqa: E402
 from legacy_facade import VOCABULARY, WORDS, error_detail, facade_options  # noqa: E402
-from evaluate import DEFAULT_BASE_URL, DEFAULT_MODEL, ModelError, chat, wait_for_model  # noqa: E402
+from evaluate import (DEFAULT_BASE_URL, DEFAULT_MODEL, ModelError, assistant_message, chat, model_arguments,  # noqa: E402
+                      model_header, sampling, wait_for_model)
 from scoring import score  # noqa: E402
 from stack import COMMERCE, REPO, call, token  # noqa: E402
 
@@ -130,10 +133,11 @@ class RawCatalog:
 
 
 class A2APIExecutor:
-    def __init__(self, mode, app, names, host, search_streak=None, index=None, max_tool_bytes=16000, variant_note=None):
+    def __init__(self, mode, app, names, host, search_streak=None, index=None, max_tool_bytes=16000, variant_note=None,
+                 whole=False):
         self.mode, self.app, self.names, self.host = mode, app, names, host
         self.search_streak, self.session, self.max_tool_bytes = search_streak, None, max_tool_bytes
-        self.variant_note = variant_note
+        self.variant_note, self.whole = variant_note, whole
         index = dict(index) if index is not None else None
         self.batch = bool(index and index.pop('batch', False))
         self.index, self.index_text = index, None  # ToolSession.index() options, or None for auto()
@@ -147,7 +151,7 @@ class A2APIExecutor:
             self.index_text = result['text']
             return {'strategy': 'index', 'functions': result['functions'], 'indexChars': len(result['text']),
                     'hostCalls': self.session.stats}
-        result = await self.session.auto(request)
+        result = await (self.session.auto(request, all_bytes=self.max_tool_bytes) if self.whole else self.session.auto(request))
         return {'strategy': result['strategy'], 'functions': len(self.session.tools()), 'hostCalls': self.session.stats}
 
     async def turn(self, line):
@@ -222,6 +226,10 @@ async def run_turns(executor, task, options):
         for number, line in enumerate(task['turns']):
             if number:
                 run.setdefault('turnSelections', []).append(await executor.turn(line))
+            if options.reasoning_history == 'turn':
+                # The model's earlier reasoning goes back within a user turn (its tool loop), not across turns.
+                for earlier in messages:
+                    earlier.pop('reasoning_content', None)
             messages.append({'role': 'user', 'content': line})
             turn_started, tool_calls = time.monotonic(), 0
             for _ in range(LIMITS['model_calls']):
@@ -230,8 +238,10 @@ async def run_turns(executor, task, options):
                     raise ModelError('TURN_TIMEOUT')
                 tick = time.monotonic()
                 try:
-                    response = await asyncio.to_thread(chat, options.base_url, options.model, messages, executor.tools(),
-                                                       timeout=min(120, remaining), max_tokens=options.max_tokens or None)
+                    offered = executor.tools()
+                    response = await asyncio.to_thread(chat, options.base_url, options.model, messages, offered,
+                                                       timeout=min(120, remaining), max_tokens=options.max_tokens or None,
+                                                       sampling=sampling(options))
                 except ModelError as error:
                     # A request cut by the turn's own time limit is that limit, not a provider failure.
                     if str(error) == 'MODEL_CONNECTION_FAILED' and time.monotonic() - turn_started >= LIMITS['seconds'] - 1:
@@ -246,7 +256,8 @@ async def run_turns(executor, task, options):
                                      # returns one), so a trace shows why it called what it called.
                                      'reasoning': (message.get('reasoning') or message.get('reasoning_content') or '')[:3000],
                                      'content': (message.get('content') or '')[:2000],
-                                     'calls': [item['id'] for item in message.get('tool_calls') or []]})
+                                     'calls': [item['id'] for item in message.get('tool_calls') or []],
+                                     'offered': [tool['function']['name'] for tool in offered]})
                 for key in run['usage']:
                     run['usage'][key] += usage.get(key) or 0
                 if choice.get('finish_reason') == 'length':
@@ -256,10 +267,7 @@ async def run_turns(executor, task, options):
                                         'toolCalls': [compact(item.get('function'))[:1500] for item in message.get('tool_calls') or []]}
                     raise ModelError('MODEL_OUTPUT_TRUNCATED')
                 calls = message.get('tool_calls') or []
-                assistant = {'role': 'assistant', 'content': message.get('content') or ''}
-                if calls:
-                    assistant['tool_calls'] = calls
-                messages.append(assistant)
+                messages.append(assistant_message(message, keep_reasoning=options.reasoning_history != 'none'))
                 if not calls:
                     run['replies'].append(message.get('content') or '')
                     break
@@ -331,10 +339,15 @@ async def evaluate(options):
     git = lambda *a: subprocess.run(['git', *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
     header = {'type': 'header', 'startedAt': datetime.now(timezone.utc).isoformat(), 'model': options.model,
               'set': options.set, 'modes': modes, 'tasks': [t['id'] for t in tasks], 'limits': LIMITS,
-              'searchStreak': options.search_streak, 'maxTokens': options.max_tokens or None,
+              'searchStreak': options.search_streak, **model_header(options),
               'maxToolBytes': options.max_tool_bytes, 'indexGroup': options.index_group,
               'resultChars': RESULT_CHARS, 'gitCommit': git('rev-parse', 'HEAD'), 'catalog': {k: len(v) for k, v in manifests.items()},
               'acommerceCommit': subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=REPO, capture_output=True, text=True).stdout.strip()}
+    # The functions the model will see, for call_review.py to judge failed calls against (not what a later
+    # conversion describes).
+    from function_snapshot import model_views
+    Path(str(options.output.with_suffix('')) + '.functions.json').write_text(
+        json.dumps(await model_views(manifests['acom'], manifests['facade']), ensure_ascii=False))
     with options.output.open('a') as sink:
         def write(record):
             sink.write(json.dumps(record, ensure_ascii=False) + '\n')
@@ -354,6 +367,8 @@ async def evaluate(options):
                         guard = mode.endswith('-guard')
                         base = mode[:-len('-guard')] if guard else mode
                         variant = base.split('-', 2)[2] if base.count('-') >= 2 else None
+                        whole = variant == 'all'
+                        variant = None if whole else variant
                         index = None
                         if variant:
                             depth = 2 if options.index_group == 'resource' else 1  # catalog address: domain.resource.verb
@@ -363,7 +378,7 @@ async def evaluate(options):
                             index = {**INDEX_VARIANTS[variant], 'relations': source.relations(),
                                      'group': lambda entry, domains=domains: domains.get(entry['id'], 'other')}
                         executor = A2APIExecutor(mode, app, names, host, options.search_streak, index, options.max_tool_bytes,
-                                                 3 if guard else None)
+                                                 3 if guard else None, whole)
                     else:
                         executor = RawCatalog(mode, items, host, facade)
                     run = await run_turns(executor, task, options)
@@ -394,9 +409,9 @@ def main():
     parser.add_argument('--only', default='')
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--search-streak', type=int, default=None, help='ToolSession max_search_streak for a2api modes')
-    # Runs before 2026-11-01 17:00 used --max-tokens 2048 --max-tool-bytes 16000 --index-group domain.
-    parser.add_argument('--max-tokens', type=int, default=0,
-                        help='output cap per model request; 0 = none, as a-commerce\'s own agent (hidden reasoning counts too)')
+    # Runs before 2026-11-01 17:00 used --max-tokens 2048 --max-tool-bytes 16000 --index-group domain; runs from
+    # then until 2026-11-02 used --max-tokens 0 --temperature 0 --reasoning-history none.
+    model_arguments(parser)
     parser.add_argument('--max-tool-bytes', type=int, default=32000, help='ToolSession max_tool_bytes for a2api modes')
     parser.add_argument('--index-group', choices=['domain', 'resource'], default='resource',
                         help='index headings: catalog domain, or domain.resource')
