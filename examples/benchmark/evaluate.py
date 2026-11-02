@@ -50,9 +50,12 @@ def model_arguments(parser):
     parser.add_argument('--top-p', type=float, default=RECOMMENDED['top_p'])
     parser.add_argument('--top-k', type=int, default=RECOMMENDED['top_k'])
     parser.add_argument('--reasoning-strength', choices=['low', 'medium', 'high', 'xhigh'], default=RECOMMENDED['reasoning_strength'])
-    parser.add_argument('--reasoning-history', choices=['turn', 'all', 'none'], default='turn',
-                        help='earlier reasoning sent back with assistant messages: within the current user turn (default), '
-                             'always, or never (runs before 2026-11-02)')
+    # `recent` cut the reasoning sent back by two thirds but total tokens by only 3-10%, and passed 36 of 112
+    # a-commerce runs against 41 for `turn` (docs/41 5.2), so the whole turn stays the default.
+    parser.add_argument('--reasoning-history', choices=['turn', 'recent', 'all', 'none'], default='turn',
+                        help='earlier reasoning sent back with assistant messages: the current user turn (default), only '
+                             'its last --reasoning-keep steps, always, or never (runs before 2026-11-02)')
+    parser.add_argument('--reasoning-keep', type=int, default=2, help='steps whose reasoning goes back with `recent`')
     parser.add_argument('--max-tokens', type=int, default=MAX_TOKENS, help='output cap per model request; 0 = none')
 
 
@@ -63,7 +66,26 @@ def sampling(options):
 
 
 def model_header(options):
-    return {'sampling': sampling(options), 'reasoningHistory': options.reasoning_history, 'maxTokens': options.max_tokens or None}
+    return {'sampling': sampling(options), 'reasoningHistory': options.reasoning_history,
+            'reasoningKeep': options.reasoning_keep if options.reasoning_history == 'recent' else None,
+            'maxTokens': options.max_tokens or None}
+
+
+def trim_reasoning(messages, policy, keep=2):
+    """Drop the reasoning of assistant messages the policy does not send back (in place).
+
+    turn: those before the last user message; recent: also all but the last `keep` assistant messages
+    after it (each step's reasoning repeats the request and most of the step before, so the whole turn's
+    reasoning makes every later request longer); all: none dropped; none: all dropped."""
+    if policy == 'all':
+        return messages
+    last_user = max((i for i, m in enumerate(messages) if m.get('role') == 'user'), default=-1)
+    current = [i for i, m in enumerate(messages) if m.get('role') == 'assistant' and i > last_user]
+    kept = set() if policy == 'none' else set(current if policy == 'turn' else current[-keep:] if keep > 0 else [])
+    for index, message in enumerate(messages):
+        if message.get('role') == 'assistant' and index not in kept:
+            message.pop('reasoning_content', None)
+    return messages
 
 
 def assistant_message(message, keep_reasoning):
@@ -132,6 +154,8 @@ async def run_task(executor, question, *, base_url, model, api_key=None, request
             if remaining <= 0:
                 raise ModelError('TASK_TIMEOUT')
             tick = time.monotonic()
+            if options:
+                trim_reasoning(messages, options.reasoning_history, options.reasoning_keep)
             response = await asyncio.to_thread(chat, base_url, model, messages, tools, api_key=api_key,
                                                timeout=min(REQUEST_SECONDS, remaining),
                                                max_tokens=(options.max_tokens or None) if options else MAX_TOKENS,

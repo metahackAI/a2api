@@ -62,7 +62,11 @@ a-commerce 과업을 우리 하네스(`examples/acommerce/evaluate.py`)로 실�
 | 7 | [ours-design-facade2-1](ours-design-facade2-1/README.md) | 11/02 15:09 | design | 24 | 4 | 변환 보충 뒤 a2api 파사드. [리뷰](ours-design-facade2-1/review.md) |
 | 7 | [ours-held_out-facade2-1](ours-held_out-facade2-1/README.md) | 11/02 15:37 | held_out | 32 | 12 | 변환 보충 뒤 a2api 파사드. [리뷰](ours-held_out-facade2-1/review.md) |
 | 7 | [ours-held_out-settings-nohistory-1](ours-held_out-settings-nohistory-1/README.md) | 11/02 16:07 | held_out | 64 | 12 | 샘플링만(추론 재전달 없음). [리뷰](ours-held_out-settings-nohistory-1/review.md) |
+| 7 | [ours-design-settings-recent-1](ours-design-settings-recent-1/README.md) | 11/02 22:46 | design | 29 | 11 | 추론 재전달을 최근 2단계로 줄임(`recent`). 23:46 모델 서버 중단으로 멈춤(마지막 실행은 모델 응답 0회라 1b에서 다시 함). [리뷰](ours-design-settings-recent-1/review.md)(1 + 1b) |
+| 7 | [ours-design-settings-recent-1b](ours-design-settings-recent-1b/README.md) | 11/03 06:52 | design | 20 | 9 | 남은 실행. 모델 서버가 출력 토큰당 약 47ms(평소 18ms)여서 턴 시간 한도를 120 → 320초로 같은 비율만큼 늘림(호출 한도는 그대로) |
+| 7 | [ours-held_out-settings-recent-1](ours-held_out-settings-recent-1/README.md) | 11/03 00:07 | held_out | 64 | 15 | `recent`. mgr-weekly-summary 2회차 두 실행은 provider 502로 모델 응답 0회라 1b에서 다시 함. [리뷰](ours-held_out-settings-recent-1/review.md)(1 + 1b) |
+| 7 | [ours-held_out-settings-recent-1b](ours-held_out-settings-recent-1b/README.md) | 11/03 07:33 | held_out | 2 | 1 | 위 두 실행(턴 시간 한도 320초) |
 
-`review.md`는 `call_review.py`가 만든 단계별 리뷰다(처음 막힌 단계, 실패 호출의 원인, 기대와 다른 쓰기 입력).
+`review.md`는 `call_review.py`가 만든 단계별 리뷰다(처음 막힌 단계, 실패 호출의 원인, 기대와 다른 쓰기 입력). `recent` 묶음의 리뷰는 1과 1b를 합친 것이다(모델 응답 0회로 끝나 다시 한 실행은 1b 결과를 쓴다).
 
 자체 에이전트 페이지(`own_traces.py`)는 라우팅, 도구 검색 후보, 계획, 호출과 결과, 답, 화면 블록을 보인다. 그보다 앞선 자체 에이전트 실행(3.7절, 10/31–11/01)은 `--logs` 없이 돌려 보고서의 도구 이름만 남았다.

@@ -2,7 +2,7 @@
 
 판정 기준 함수 정의: `ours-design-settings-1.functions.json`(실행 때 모델이 본 것)
 
-단계: A0 API에 해당 기능 없음 · A 필요한 함수를 받지 못함 · B 받았지만 부르지 않음 · C 불렀지만 성공 못 함 · D 한도·오류로 중단 · E-write 쓰기 입력·change set · E-format 숫자는 있으나 표기 · E-content 답 내용 누락
+단계: A0 API에 해당 기능 없음 · A 필요한 함수를 받지 못함 · B 받았지만 부르지 않음 · C 불렀지만 성공 못 함 · D-before 필요한 함수를 부르기 전 한도·오류로 중단 · D-after 필요한 함수는 모두 성공했는데 답하기 전 한도로 중단 · E-write 쓰기 입력·change set · E-format 숫자는 있으나 표기 · E-content 답 내용 누락
 
 ## 필요한 함수: 확보 → 호출 → 성공
 
@@ -15,12 +15,12 @@
 
 ## 실패한 실행이 처음 막힌 단계
 
-| 방식 | passed | A0 | A | B | C | D | E-write | E-format | E-content |
-|---|---|---|---|---|---|---|---|---|---|
-| a2api-acom | 12 | 0 | 2 | 1 | 0 | 5 | 0 | 2 | 2 |
-| a2api-acom-names-batch | 15 | 0 | 4 | 0 | 0 | 1 | 0 | 1 | 3 |
-| facade-all | 2 | 13 | 0 | 0 | 1 | 8 | 0 | 0 | 0 |
-| a2api-facade-all | 4 | 13 | 0 | 0 | 0 | 7 | 0 | 0 | 0 |
+| 방식 | passed | A0 | A | B | C | D-before | D-after | E-write | E-format | E-content |
+|---|---|---|---|---|---|---|---|---|---|---|
+| a2api-acom | 12 | 0 | 2 | 1 | 0 | 4 | 1 | 0 | 2 | 2 |
+| a2api-acom-names-batch | 15 | 0 | 4 | 0 | 0 | 0 | 1 | 0 | 1 | 3 |
+| facade-all | 2 | 13 | 0 | 0 | 1 | 2 | 6 | 0 | 0 | 0 |
+| a2api-facade-all | 4 | 13 | 0 | 0 | 0 | 2 | 5 | 0 | 0 | 0 |
 
 ## 실패한 업무 호출의 원인
 

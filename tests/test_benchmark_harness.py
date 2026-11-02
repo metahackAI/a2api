@@ -147,6 +147,19 @@ class BenchmarkHarnessTests(unittest.TestCase):
         self.assertEqual(set(diff), {('x', '1'), ('x', '2')})
         self.assertTrue(self.tasks.fingerprint('holdout').startswith('sha256:'))
 
+    def test_reasoning_history_policies(self):
+        def conversation():
+            step = lambda n: {'role': 'assistant', 'content': None, 'reasoning_content': f'r{n}'}
+            return [{'role': 'user', 'content': 'q1'}, step(0), {'role': 'tool', 'content': 'x'},
+                    {'role': 'user', 'content': 'q2'}, step(1), step(2), step(3)]
+        kept = lambda policy, keep=2: [m['reasoning_content'] for m in self.evaluate.trim_reasoning(conversation(), policy, keep)
+                                       if 'reasoning_content' in m]
+        self.assertEqual(kept('all'), ['r0', 'r1', 'r2', 'r3'])
+        self.assertEqual(kept('turn'), ['r1', 'r2', 'r3'])
+        self.assertEqual(kept('recent'), ['r2', 'r3'])
+        self.assertEqual(kept('recent', keep=0), [])
+        self.assertEqual(kept('none'), [])
+
 
 if __name__ == '__main__':
     unittest.main()
