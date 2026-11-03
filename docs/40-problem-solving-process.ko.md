@@ -33,6 +33,8 @@
 | 4 | 11/01 저녁 | 답 잘림, 호출 한도, 이름 못 찾음 | 출력 상한 제거, `a2api_batch`, 목차 제목, 이름 해석, 예산 안내 | [잘림 재현](traces/smoke-diag-truncation/README.md), [제목](traces/smoke-fix-1-headings/README.md), [batch](traces/smoke-fix-2-batch/README.md), [design-10](traces/ours-design-10/README.md), [design-11](traces/ours-design-11/README.md), [held_out 사후](traces/ours-heldout-fix-posthoc-1/README.md) |
 | 5 | 11/01 저녁 | 파사드 22개(PR #103)를 a-commerce 자체 에이전트에 연결 | 게이트웨이, 약어 이름 풀기, 주문 번호 조회 | 5절 |
 | 6 | 11/02 새벽 | 같은 검색을 조건만 바꿔 반복 | 반복 감지 안내(`variant_note`) | [smoke](traces/smoke-guard-1/README.md), design-12(6절) |
+| 7 | 11/02 | 모델 호출 설정, API를 잘 가져왔는지·입력이 누구 탓인지 | 모델 카드 설정, 단계별 리뷰(`call_review.py`), 변환 보충 | 7절, [41 문서](41-call-stage-review.ko.md) |
+| 8 | 11/03 | a-commerce가 지금 쓰는 에이전트로 기존 API와 a2api 평가 | a-commerce main `4c6e415`, 각 3회, 자체 에이전트 단계별 리뷰(`own_review.py`) | 8절, [42 문서](42-own-agent-latest.ko.md) |
 
 ## 1단계 — 첫 비교: 원본 도구 전체, 원본 파사드, a2api
 
@@ -305,6 +307,29 @@ design의 반복은 대부분 다른 유형이었다.
 - 추론을 턴의 최근 2단계만 다시 보내는 옵션(`recent`)은 다시 보내는 추론을 약 2/3 줄였지만, 전체 토큰은 3–10%만 줄였다. 통과는 구별되지 않아(방식마다 56실행, 검색 20 → 17, 목차 + batch 21 → 19) 기본값은 턴 전체로 둔다(41 문서 5.4).
 - held_out 실패의 약 70%는 필요한 함수를 모두 성공적으로 부른 **뒤**에 났다: 확인 호출을 이어 가다 한도(D-after), 또는 답에서 사실 누락·표기(E). 서버의 문맥·출력 상한에 걸린 요청은 없다.
 
+## 8단계 — 지금의 a-commerce 에이전트로 다시 평가(11/03)
+
+**요청**: 현재 a-commerce가 쓰는 에이전트 하네스로 기존 API와 a2api를 평가한다. 모델은 작업·계획 모두 Muse Glimmer다.
+
+**한 것**
+- a-commerce main `4c6e415`를 그대로 빌드했다. `d86a1ff` 뒤 66커밋으로, 에이전트 런타임이 바뀌었고 평가기·과업·파사드는 같다.
+- 네 조건을 각 3회 쟀다: 원본 파사드, a2api 변환, a2api 변환 + 주문 번호 조회, A-Commerce 도구(참고).
+- `own_review.py`로 자체 에이전트 기록을 41 문서와 같은 단계로 판정했다.
+
+**호출 흐름 예**(held_out mk-pause-knit-until-monday, [원본](traces/own-latest-heldout-raw/mk-pause-knit-until-monday.md) · [a2api + 조회](traces/own-latest-heldout-a2api-lookup/mk-pause-knit-until-monday.md))
+- 원본: `getPrmtGridList {"pageNo": 0, "prmtNm": "knit", "pageSize": 20}` ← `Invalid paging.`
+  - 같은 호출을 세 번 다시 계획하다 끝났다. 원본 schema는 0을 허용하고, 화면은 1부터 받는다.
+- a2api: `get_promotion_grid_list {"promotion_name": "knit", "promotion_status": "running"}` ← `promotion_id: promo_autumn_knit`
+  - 다음 `save_promotion_list {"rows": [{"promotion_id": "", …}]}` ← 422. 앞 결과의 ID가 이어지지 않았다.
+  - 파사드 매니페스트에 `consumes`/`produces`가 없어, 런타임이 값을 채우지 못한 것이다.
+  - 다시 계획해 `promo_autumn_knit`로 저장은 성공했다. 하지만 답이 "멈춤에는 끝나는 시각이 없어 월요일(11/9)에 누군가 다시 켜야 한다"를 말하지 않고 재개 시점을 되물어, 채점에서 실패했다(9가 답에 없음).
+
+**결과**는 [42 문서](42-own-agent-latest.ko.md)에 있다.
+- 실패한 호출 77–85% → 8–22%, 필요한 화면 성공 21–33% → 52–88%, 토큰 −27%, 시간 −36–40%
+- 통과 7 → 15/84(p = 0.11)
+- 남은 실패: 파사드에 없는 기능(A0), 답의 사실 누락(E), 빈 ID(원본 정의에 없는 화면 간 관계)
+- 변환에서 정보를 잃어 난 실패는 없다.
+
 ## 지금까지의 결론
 
 - **a2api가 맡는 단계**(함수 찾기, 인자 형식, 결과 전달, 레거시 이름·코드 변환)의 실패는 거의 사라졌다.
@@ -314,3 +339,4 @@ design의 반복은 대부분 다른 유형이었다.
 - **held_out 통과율은 방식 간에 구별되지 않는다.** 사후 확인 세 번의 합은 검색 22/96, 목차 계열 19/96이다(5+9+8, 7+5+7). 목차 계열은 토큰을 절반 정도 쓴다(작업당 중앙값 23.7k–29.3k 대 47.8k–77.9k).
 - **남은 실패**는 이 모델의 행동이다. 세부를 빠뜨린 답, "없다"로 끝내지 못하는 탐색, 긴 숨은 추론으로 인한 시간 초과, 과업 해석이 그것이다. 그리고 채점이 마지막 답의 숫자 표기만 본다.
 - **자체 에이전트**(계획·답 단계 분리, 화면 블록)에 a2api 변환 파사드를 붙이면 held_out 8/32, 원본 파사드는 5/32다.
+  - a-commerce main `4c6e415`(11/03, 각 3회)에서는 원본 7/48, a2api 9/48, a2api + 조회 12/48, A-Commerce 도구 11/48이다. 실패한 호출은 77% → 22%다(42 문서).

@@ -296,6 +296,19 @@ def offered_tools(run, catalog):
 
 def review_run(run, task, catalog, fmap):
     mode = run['mode']
+    offered, exact = offered_tools(run, catalog)
+    if mode in ('acom-all',):
+        offered, exact = set(catalog.acom), True
+    if mode in ('facade-all',):
+        offered, exact = set(catalog.facade), True
+    return judge(run, task, offered, exact, calls_of(run, catalog), lambda tool: catalog.function(mode, tool), fmap)
+
+
+def judge(run, task, offered, exact, calls, function, fmap):
+    """The first stage that went wrong, the attributed failed calls and the write inputs of one run, from the
+    tools given to the model (`offered`), its business calls in order (see calls_of) and `function(tool)`,
+    the definition the model saw."""
+    mode = run['mode']
     facade = 'facade' in mode
     required = list(((task or {}).get('tools') or {}).get('required') or [])
     units = []  # (needed tool, the names that satisfy it)
@@ -304,15 +317,9 @@ def review_run(run, task, catalog, fmap):
             units.append((tool, set(fmap.get(tool) or ())))
         else:
             units.append((tool, {tool}))
-    offered, exact = offered_tools(run, catalog)
-    if mode in ('acom-all',):
-        offered, exact = set(catalog.acom), True
-    if mode in ('facade-all',):
-        offered, exact = set(catalog.facade), True
-    calls = calls_of(run, catalog)
     for call in calls:
         if call['ok'] is False:
-            call['attribution'] = attribute(call, catalog.function(mode, call['tool']), mode)
+            call['attribution'] = attribute(call, function(call['tool']), mode)
     stage = None
     per_unit = []
     for tool, names in units:
