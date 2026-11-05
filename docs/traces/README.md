@@ -67,6 +67,24 @@ a-commerce 과업을 우리 하네스(`examples/acommerce/evaluate.py`)로 실�
 | 7 | [ours-held_out-settings-recent-1](ours-held_out-settings-recent-1/README.md) | 11/03 00:07 | held_out | 64 | 15 | `recent`. mgr-weekly-summary 2회차 두 실행은 provider 502로 모델 응답 0회라 1b에서 다시 함. [리뷰](ours-held_out-settings-recent-1/review.md)(1 + 1b) |
 | 7 | [ours-held_out-settings-recent-1b](ours-held_out-settings-recent-1b/README.md) | 11/03 07:33 | held_out | 2 | 1 | 위 두 실행(턴 시간 한도 320초) |
 
+| 8 | [own-latest-heldout-raw](own-latest-heldout-raw/README.md) | 11/03 09:43 | held_out | 48 | 7 | a-commerce main `4c6e415` 자체 에이전트(작업·계획 모델 모두 Glimmer) + 원본 파사드, 각 3회. [리뷰](own-latest-review-heldout.md) |
+| 8 | [own-latest-design-raw](own-latest-design-raw/README.md) | 11/03 09:56 | design | 36 | 0 | 원본 파사드. [리뷰](own-latest-review-design.md) |
+| 8 | [own-latest-heldout-a2api](own-latest-heldout-a2api/README.md) | 11/03 10:06 | held_out | 48 | 9 | a2api 게이트웨이(주문 번호 조회 없음) |
+| 8 | [own-latest-design-a2api](own-latest-design-a2api/README.md) | 11/03 10:14 | design | 36 | 3 | a2api 게이트웨이(조회 없음) |
+| 8 | [own-latest-heldout-a2api-lookup](own-latest-heldout-a2api-lookup/README.md) | 11/03 10:23 | held_out | 48 | 12 | a2api 게이트웨이 + 주문 번호 조회 |
+| 8 | [own-latest-design-a2api-lookup](own-latest-design-a2api-lookup/README.md) | 11/03 10:32 | design | 36 | 3 | a2api 게이트웨이 + 주문 번호 조회 |
+| 8 | [own-latest-heldout-acom](own-latest-heldout-acom/README.md) | 11/03 10:40 | held_out | 48 | 11 | A-Commerce 도구(참고) |
+| 8 | [own-latest-design-acom](own-latest-design-acom/README.md) | 11/03 10:53 | design | 36 | 15 | A-Commerce 도구(참고) |
+
+| 9 | [luna-heldout-raw](luna-heldout-raw/README.md) | 11/05 11:20 | held_out | 48 | 10 | 자체 에이전트 + **gpt-6-luna**(Codex CLI) + 원본 파사드, 각 3회. [리뷰](luna-review-heldout.md) |
+| 9 | [luna-heldout-a2api](luna-heldout-a2api/README.md) | 11/05 11:38 | held_out | 48 | 11 | gpt-6-luna + a2api 게이트웨이(주문 번호 조회 포함) |
+| 9 | [luna-design-raw](luna-design-raw/README.md) | 11/05 11:51 | design | 36 | 2 | gpt-6-luna + 원본 파사드. [리뷰](luna-review-design.md) |
+| 9 | [luna-design-a2api](luna-design-a2api/README.md) | 11/05 12:09 | design | 36 | 6 | gpt-6-luna + a2api 게이트웨이 |
+| 9 | [luna-heldout-acom](luna-heldout-acom/README.md) | 11/05 12:23 | held_out | 48 | 9 | gpt-6-luna + A-Commerce 도구(참고) |
+| 9 | [luna-design-acom](luna-design-acom/README.md) | 11/05 12:37 | design | 36 | 7 | gpt-6-luna + A-Commerce 도구(참고) |
+
 `review.md`는 `call_review.py`가 만든 단계별 리뷰다(처음 막힌 단계, 실패 호출의 원인, 기대와 다른 쓰기 입력). `recent` 묶음의 리뷰는 1과 1b를 합친 것이다(모델 응답 0회로 끝나 다시 한 실행은 1b 결과를 쓴다).
+
+8–9단계(자체 에이전트, [42](../42-own-agent-latest.ko.md)·[43 문서](../43-own-agent-gpt-6-luna.ko.md))의 리뷰는 `own_review.py`가 자체 에이전트 기록으로 만든다([held_out](own-latest-review-heldout.md), [design](own-latest-review-design.md)).
 
 자체 에이전트 페이지(`own_traces.py`)는 라우팅, 도구 검색 후보, 계획, 호출과 결과, 답, 화면 블록을 보인다. 그보다 앞선 자체 에이전트 실행(3.7절, 10/31–11/01)은 `--logs` 없이 돌려 보고서의 도구 이름만 남았다.

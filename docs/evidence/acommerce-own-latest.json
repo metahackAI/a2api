@@ -1,0 +1,358 @@
+{
+ "aCommerce": "4c6e415 (main, 2026-11-03 08:49 KST)",
+ "harness": "a-commerce xtask eval + its own agent, unchanged",
+ "model": "nvidia/Muse-Glimmer-30B-NVFP4 for every model call (worker and planner: Spark not configured)",
+ "repeat": 3,
+ "reports": {
+  "design/raw": "artifacts/acommerce/runs/own-latest-design-raw.md",
+  "design/a2api": "artifacts/acommerce/runs/own-latest-design-a2api.md",
+  "design/a2api-lookup": "artifacts/acommerce/runs/own-latest-design-a2api-lookup.md",
+  "design/acom": "artifacts/acommerce/runs/own-latest-design-acom.md",
+  "heldout/raw": "artifacts/acommerce/runs/own-latest-heldout-raw.md",
+  "heldout/a2api": "artifacts/acommerce/runs/own-latest-heldout-a2api.md",
+  "heldout/a2api-lookup": "artifacts/acommerce/runs/own-latest-heldout-a2api-lookup.md",
+  "heldout/acom": "artifacts/acommerce/runs/own-latest-heldout-acom.md"
+ },
+ "metrics": {
+  "design/raw": {
+   "runs": 36,
+   "done": 0,
+   "tasks": 12,
+   "pass_all3": 0,
+   "pass_any": 0,
+   "tok_med": 8046.0,
+   "sec_med": 12.1,
+   "model_calls": 4.805555555555555,
+   "tool_calls": 2.361111111111111,
+   "failed": 72,
+   "calls": 85
+  },
+  "design/a2api": {
+   "runs": 36,
+   "done": 3,
+   "tasks": 12,
+   "pass_all3": 1,
+   "pass_any": 1,
+   "tok_med": 6446.0,
+   "sec_med": 7.15,
+   "model_calls": 3.6944444444444446,
+   "tool_calls": 2.138888888888889,
+   "failed": 15,
+   "calls": 77
+  },
+  "design/a2api-lookup": {
+   "runs": 36,
+   "done": 3,
+   "tasks": 12,
+   "pass_all3": 1,
+   "pass_any": 1,
+   "tok_med": 5917.0,
+   "sec_med": 7.75,
+   "model_calls": 3.5555555555555554,
+   "tool_calls": 2.111111111111111,
+   "failed": 6,
+   "calls": 76
+  },
+  "design/acom": {
+   "runs": 36,
+   "done": 15,
+   "tasks": 12,
+   "pass_all3": 4,
+   "pass_any": 6,
+   "tok_med": 15812.0,
+   "sec_med": 9.3,
+   "model_calls": 3.9166666666666665,
+   "tool_calls": 8.055555555555555,
+   "failed": 10,
+   "calls": 290
+  },
+  "heldout/raw": {
+   "runs": 48,
+   "done": 7,
+   "tasks": 16,
+   "pass_all3": 2,
+   "pass_any": 3,
+   "tok_med": 7512.0,
+   "sec_med": 10.0,
+   "model_calls": 3.7291666666666665,
+   "tool_calls": 1.9583333333333333,
+   "failed": 72,
+   "calls": 94
+  },
+  "heldout/a2api": {
+   "runs": 48,
+   "done": 9,
+   "tasks": 16,
+   "pass_all3": 3,
+   "pass_any": 3,
+   "tok_med": 5521.5,
+   "sec_med": 6.199999999999999,
+   "model_calls": 2.8541666666666665,
+   "tool_calls": 1.3958333333333333,
+   "failed": 21,
+   "calls": 67
+  },
+  "heldout/a2api-lookup": {
+   "runs": 48,
+   "done": 12,
+   "tasks": 16,
+   "pass_all3": 4,
+   "pass_any": 4,
+   "tok_med": 5472.0,
+   "sec_med": 6.05,
+   "model_calls": 2.8958333333333335,
+   "tool_calls": 1.4375,
+   "failed": 15,
+   "calls": 69
+  },
+  "heldout/acom": {
+   "runs": 48,
+   "done": 11,
+   "tasks": 16,
+   "pass_all3": 3,
+   "pass_any": 4,
+   "tok_med": 12941.0,
+   "sec_med": 11.55,
+   "model_calls": 3.5,
+   "tool_calls": 3.6875,
+   "failed": 18,
+   "calls": 177
+  }
+ },
+ "review": {
+  "design": [
+   {
+    "mode": "own-facade-raw",
+    "runs": 36,
+    "passed": 0,
+    "needed": 63,
+    "neededAvailable": 42,
+    "given": 30,
+    "called": 15,
+    "succeeded": 9,
+    "businessCalls": 85,
+    "failedCalls": 72,
+    "attribution": {
+     "source:undocumented": 69,
+     "unclear": 3
+    },
+    "stages": {
+     "A": 9,
+     "A0": 21,
+     "E-content": 5,
+     "C": 1
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-facade-a2api",
+    "runs": 36,
+    "passed": 3,
+    "needed": 63,
+    "neededAvailable": 42,
+    "given": 39,
+    "called": 25,
+    "succeeded": 19,
+    "businessCalls": 77,
+    "failedCalls": 15,
+    "attribution": {
+     "model:described": 7,
+     "model:ungrounded": 3,
+     "unclear": 5
+    },
+    "stages": {
+     "A": 3,
+     "A0": 21,
+     "E-content": 6,
+     "passed": 3,
+     "B": 3
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-facade-a2api-lookup",
+    "runs": 36,
+    "passed": 3,
+    "needed": 63,
+    "neededAvailable": 42,
+    "given": 39,
+    "called": 26,
+    "succeeded": 22,
+    "businessCalls": 76,
+    "failedCalls": 6,
+    "attribution": {
+     "model:ungrounded": 3,
+     "unclear": 1,
+     "model:described": 2
+    },
+    "stages": {
+     "A": 3,
+     "A0": 21,
+     "E-content": 5,
+     "B": 2,
+     "passed": 3,
+     "C": 2
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-acom",
+    "runs": 36,
+    "passed": 15,
+    "needed": 63,
+    "neededAvailable": 63,
+    "given": 55,
+    "called": 46,
+    "succeeded": 44,
+    "businessCalls": 290,
+    "failedCalls": 10,
+    "attribution": {
+     "unclear": 3,
+     "model:ungrounded": 2,
+     "source:undocumented": 1,
+     "model:described": 4
+    },
+    "stages": {
+     "A": 6,
+     "B": 3,
+     "passed": 15,
+     "E-format": 2,
+     "E-content": 10
+    },
+    "writeItems": 18,
+    "writeCalled": 2,
+    "writeInputsMatch": 2,
+    "offeredExact": true
+   }
+  ],
+  "heldout": [
+   {
+    "mode": "own-facade-raw",
+    "runs": 48,
+    "passed": 7,
+    "needed": 48,
+    "neededAvailable": 24,
+    "given": 21,
+    "called": 13,
+    "succeeded": 8,
+    "businessCalls": 94,
+    "failedCalls": 72,
+    "attribution": {
+     "source:undocumented": 67,
+     "unclear": 4,
+     "model:ungrounded": 1
+    },
+    "stages": {
+     "B": 8,
+     "A0": 18,
+     "E-content": 7,
+     "C": 5,
+     "passed": 7,
+     "A": 3
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-facade-a2api",
+    "runs": 48,
+    "passed": 9,
+    "needed": 48,
+    "neededAvailable": 24,
+    "given": 24,
+    "called": 21,
+    "succeeded": 15,
+    "businessCalls": 67,
+    "failedCalls": 21,
+    "attribution": {
+     "unclear": 6,
+     "model:ungrounded": 2,
+     "business": 3,
+     "source:undocumented": 4,
+     "model:described": 6
+    },
+    "stages": {
+     "E-content": 12,
+     "B": 3,
+     "A0": 18,
+     "passed": 9,
+     "C": 6
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-facade-a2api-lookup",
+    "runs": 48,
+    "passed": 12,
+    "needed": 48,
+    "neededAvailable": 24,
+    "given": 24,
+    "called": 21,
+    "succeeded": 21,
+    "businessCalls": 69,
+    "failedCalls": 15,
+    "attribution": {
+     "unclear": 6,
+     "model:ungrounded": 2,
+     "business": 3,
+     "source:undocumented": 4
+    },
+    "stages": {
+     "E-content": 12,
+     "B": 3,
+     "A0": 18,
+     "passed": 12,
+     "E-format": 3
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-acom",
+    "runs": 48,
+    "passed": 11,
+    "needed": 48,
+    "neededAvailable": 48,
+    "given": 39,
+    "called": 36,
+    "succeeded": 36,
+    "businessCalls": 177,
+    "failedCalls": 18,
+    "attribution": {
+     "model:described": 5,
+     "model:ungrounded": 10,
+     "unclear": 3
+    },
+    "stages": {
+     "E-content": 20,
+     "A": 9,
+     "passed": 11,
+     "E-format": 4,
+     "E-write": 3,
+     "D-after": 1
+    },
+    "writeItems": 6,
+    "writeCalled": 6,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   }
+  ]
+ },
+ "providerErrors": "reply step answered 500 (or a 1 s timeout) in 12 runs, none of which passed in any condition; leaving them out changes no pass count"
+}

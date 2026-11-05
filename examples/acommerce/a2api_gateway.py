@@ -64,7 +64,8 @@ def forward(origin, method, path, body, headers, timeout=60):
 class Facade:
     """The converted facade: manifest entries and calls, built once from the facade manifest items."""
 
-    def __init__(self, items, commerce):
+    def __init__(self, items, commerce, lookup=True):
+        self.lookup = lookup
         source = ToolCatalogImporter(items, namespace='facade', words=WORDS)
         self.app = convert(source, operations=facade_options(items), vocabulary=VOCABULARY, deployment=HTTPDeployment(
             commerce, credential_provider=lambda context: {'Authorization': CALLER.authorization},
@@ -108,7 +109,8 @@ class Facade:
         if name not in self.ids:
             return 404, {'error': {'code': 'unknown_tool', 'class': 'not_found', 'message': f'There is no tool {name}.'}}
         given = payload.get('input', {}) if isinstance(payload, dict) else {}
-        given = self.resolve(name, given)
+        if self.lookup:
+            given = self.resolve(name, given)
         result = self.app.invoke(self.ids[name], {'body': given}, context=ExecutionContext('agent', 'store', frozenset()))
         if result['status'] == 'succeeded':
             return 200, result['data']
@@ -127,15 +129,15 @@ def read_manifest(commerce, authorization):
     return json.loads(raw)['items']
 
 
-def serve(port, commerce, token=None, host='127.0.0.1'):
+def serve(port, commerce, token=None, host='127.0.0.1', lookup=True):
     lock, state = threading.Lock(), {}
     if token:
-        state['facade'] = Facade(read_manifest(commerce, 'Bearer ' + token), commerce)
+        state['facade'] = Facade(read_manifest(commerce, 'Bearer ' + token), commerce, lookup)
 
     def facade(authorization):
         with lock:
             if 'facade' not in state:
-                state['facade'] = Facade(read_manifest(commerce, authorization), commerce)
+                state['facade'] = Facade(read_manifest(commerce, authorization), commerce, lookup)
             return state['facade']
 
     class Handler(http.server.BaseHTTPRequestHandler):
@@ -179,7 +181,7 @@ def serve(port, commerce, token=None, host='127.0.0.1'):
         do_GET = do_POST = do_PUT = do_PATCH = do_DELETE = handle_any
 
     server = http.server.ThreadingHTTPServer((host, port), Handler)
-    print(json.dumps({'gateway': f'http://{host}:{port}', 'commerce': commerce,
+    print(json.dumps({'gateway': f'http://{host}:{port}', 'commerce': commerce, 'lookup': lookup,
                       'tools': [e['tool'] for e in state['facade'].entries] if 'facade' in state else 'on first request'}),
           flush=True)
     server.serve_forever()
@@ -197,6 +199,8 @@ def main():
     parser.add_argument('--dev-token', action='store_true', help='use the local stack\'s dev token (stack.py)')
     parser.add_argument('--manifest', type=Path, help='with --dump: a facade manifest file instead of the service')
     parser.add_argument('--dump', type=Path, help='write the converted manifest and the tool → screen table, then exit')
+    parser.add_argument('--no-lookup', action='store_true',
+                        help='pass order numbers through as given (no key lookup through the order list screen)')
     options = parser.parse_args()
     token = options.token
     if options.dev_token:
@@ -213,7 +217,7 @@ def main():
         options.dump.write_text(json.dumps({**converted.manifest(), 'screens': converted.screens}, ensure_ascii=False, indent=1))
         print(json.dumps({'dumped': str(options.dump), 'tools': len(converted.entries)}))
         return
-    serve(options.port, options.commerce, token, options.host)
+    serve(options.port, options.commerce, token, options.host, lookup=not options.no_lookup)
 
 
 if __name__ == '__main__':

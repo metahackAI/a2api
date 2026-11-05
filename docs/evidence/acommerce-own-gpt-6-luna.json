@@ -1,0 +1,380 @@
+{
+ "aCommerce": "4c6e415",
+ "harness": "a-commerce xtask eval + its own agent, unchanged limits",
+ "model": "gpt-6-luna (reasoning effort medium) through Codex CLI 0.164.0-alpha.11.1, examples/acommerce/codex_model.py",
+ "codexOverheadTokensPerCall": 4680,
+ "codexCalls": 827,
+ "codexErrors": 0,
+ "repeat": 3,
+ "metrics": {
+  "glimmer/heldout/raw": {
+   "runs": 48,
+   "done": 7,
+   "pass3": 2,
+   "any3": 3,
+   "tasks": 16,
+   "tok_med": 7512.0,
+   "net_med": 7512.0,
+   "sec_med": 10.0,
+   "model_calls": 3.7291666666666665,
+   "tool_calls": 1.9583333333333333,
+   "failed": 72,
+   "calls": 94
+  },
+  "glimmer/heldout/a2api-lookup": {
+   "runs": 48,
+   "done": 12,
+   "pass3": 4,
+   "any3": 4,
+   "tasks": 16,
+   "tok_med": 5472.0,
+   "net_med": 5472.0,
+   "sec_med": 6.05,
+   "model_calls": 2.8958333333333335,
+   "tool_calls": 1.4375,
+   "failed": 15,
+   "calls": 69
+  },
+  "luna/heldout/raw": {
+   "runs": 48,
+   "done": 10,
+   "pass3": 3,
+   "any3": 4,
+   "tasks": 16,
+   "tok_med": 23693.5,
+   "net_med": 8615.0,
+   "sec_med": 22.450000000000003,
+   "model_calls": 3.2916666666666665,
+   "tool_calls": 2.1666666666666665,
+   "failed": 62,
+   "calls": 104
+  },
+  "luna/heldout/a2api": {
+   "runs": 48,
+   "done": 11,
+   "pass3": 3,
+   "any3": 4,
+   "tasks": 16,
+   "tok_med": 21780.0,
+   "net_med": 5717.0,
+   "sec_med": 15.35,
+   "model_calls": 2.8541666666666665,
+   "tool_calls": 2.8541666666666665,
+   "failed": 5,
+   "calls": 137
+  },
+  "glimmer/design/raw": {
+   "runs": 36,
+   "done": 0,
+   "pass3": 0,
+   "any3": 0,
+   "tasks": 12,
+   "tok_med": 8046.0,
+   "net_med": 8046.0,
+   "sec_med": 12.1,
+   "model_calls": 4.805555555555555,
+   "tool_calls": 2.361111111111111,
+   "failed": 72,
+   "calls": 85
+  },
+  "glimmer/design/a2api-lookup": {
+   "runs": 36,
+   "done": 3,
+   "pass3": 1,
+   "any3": 1,
+   "tasks": 12,
+   "tok_med": 5917.0,
+   "net_med": 5917.0,
+   "sec_med": 7.75,
+   "model_calls": 3.5555555555555554,
+   "tool_calls": 2.111111111111111,
+   "failed": 6,
+   "calls": 76
+  },
+  "luna/design/raw": {
+   "runs": 36,
+   "done": 2,
+   "pass3": 0,
+   "any3": 2,
+   "tasks": 12,
+   "tok_med": 26676.0,
+   "net_med": 9408.5,
+   "sec_med": 22.4,
+   "model_calls": 4.222222222222222,
+   "tool_calls": 2.9166666666666665,
+   "failed": 67,
+   "calls": 105
+  },
+  "luna/design/a2api": {
+   "runs": 36,
+   "done": 6,
+   "pass3": 1,
+   "any3": 3,
+   "tasks": 12,
+   "tok_med": 22598.5,
+   "net_med": 7816.5,
+   "sec_med": 14.5,
+   "model_calls": 3.6944444444444446,
+   "tool_calls": 2.8055555555555554,
+   "failed": 2,
+   "calls": 101
+  },
+  "luna/heldout/acom": {
+   "runs": 48,
+   "done": 9,
+   "pass3": 2,
+   "any3": 4,
+   "tasks": 16,
+   "tok_med": 19503.5,
+   "net_med": 8772.0,
+   "sec_med": 16.2,
+   "model_calls": 2.6458333333333335,
+   "tool_calls": 2.6041666666666665,
+   "failed": 3,
+   "calls": 125
+  },
+  "glimmer/heldout/acom": {
+   "runs": 48,
+   "done": 11,
+   "pass3": 3,
+   "any3": 4,
+   "tasks": 16,
+   "tok_med": 12941.0,
+   "net_med": 12941.0,
+   "sec_med": 11.55,
+   "model_calls": 3.5,
+   "tool_calls": 3.6875,
+   "failed": 18,
+   "calls": 177
+  },
+  "luna/design/acom": {
+   "runs": 36,
+   "done": 7,
+   "pass3": 2,
+   "any3": 3,
+   "tasks": 12,
+   "tok_med": 23845.0,
+   "net_med": 10439.5,
+   "sec_med": 15.95,
+   "model_calls": 3.3333333333333335,
+   "tool_calls": 7.638888888888889,
+   "failed": 6,
+   "calls": 275
+  },
+  "glimmer/design/acom": {
+   "runs": 36,
+   "done": 15,
+   "pass3": 4,
+   "any3": 6,
+   "tasks": 12,
+   "tok_med": 15812.0,
+   "net_med": 15812.0,
+   "sec_med": 9.3,
+   "model_calls": 3.9166666666666665,
+   "tool_calls": 8.055555555555555,
+   "failed": 10,
+   "calls": 290
+  }
+ },
+ "review": {
+  "design": [
+   {
+    "mode": "own-facade-raw",
+    "runs": 36,
+    "passed": 2,
+    "needed": 63,
+    "neededAvailable": 42,
+    "given": 30,
+    "called": 19,
+    "succeeded": 11,
+    "businessCalls": 105,
+    "failedCalls": 67,
+    "attribution": {
+     "source:undocumented": 57,
+     "unclear": 7,
+     "model:ungrounded": 3
+    },
+    "stages": {
+     "A": 8,
+     "A0": 21,
+     "E-content": 3,
+     "C": 2,
+     "passed": 2
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-facade-a2api-lookup",
+    "runs": 36,
+    "passed": 6,
+    "needed": 63,
+    "neededAvailable": 42,
+    "given": 39,
+    "called": 25,
+    "succeeded": 25,
+    "businessCalls": 101,
+    "failedCalls": 2,
+    "attribution": {
+     "source:undocumented": 1,
+     "unclear": 1
+    },
+    "stages": {
+     "A": 3,
+     "A0": 21,
+     "E-content": 4,
+     "passed": 6,
+     "B": 2
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-acom",
+    "runs": 36,
+    "passed": 7,
+    "needed": 63,
+    "neededAvailable": 63,
+    "given": 54,
+    "called": 44,
+    "succeeded": 44,
+    "businessCalls": 275,
+    "failedCalls": 6,
+    "attribution": {
+     "unclear": 3,
+     "model:described": 3
+    },
+    "stages": {
+     "A": 6,
+     "B": 5,
+     "E-content": 18,
+     "passed": 7
+    },
+    "writeItems": 18,
+    "writeCalled": 2,
+    "writeInputsMatch": 2,
+    "offeredExact": true
+   }
+  ],
+  "heldout": [
+   {
+    "mode": "own-facade-raw",
+    "runs": 48,
+    "passed": 10,
+    "needed": 48,
+    "neededAvailable": 24,
+    "given": 21,
+    "called": 17,
+    "succeeded": 9,
+    "businessCalls": 104,
+    "failedCalls": 62,
+    "attribution": {
+     "source:undocumented": 55,
+     "unclear": 6,
+     "business": 1
+    },
+    "stages": {
+     "E-content": 8,
+     "passed": 10,
+     "C": 8,
+     "A0": 15,
+     "B": 4,
+     "A": 3
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-facade-a2api-lookup",
+    "runs": 48,
+    "passed": 11,
+    "needed": 48,
+    "neededAvailable": 24,
+    "given": 24,
+    "called": 24,
+    "succeeded": 23,
+    "businessCalls": 137,
+    "failedCalls": 5,
+    "attribution": {
+     "model:described": 3,
+     "unclear": 2
+    },
+    "stages": {
+     "E-content": 21,
+     "passed": 11,
+     "A0": 15,
+     "C": 1
+    },
+    "writeItems": 0,
+    "writeCalled": 0,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   },
+   {
+    "mode": "own-acom",
+    "runs": 48,
+    "passed": 9,
+    "needed": 48,
+    "neededAvailable": 48,
+    "given": 39,
+    "called": 33,
+    "succeeded": 33,
+    "businessCalls": 125,
+    "failedCalls": 3,
+    "attribution": {
+     "unclear": 3
+    },
+    "stages": {
+     "E-content": 22,
+     "A": 9,
+     "B": 3,
+     "E-format": 2,
+     "passed": 9,
+     "E-write": 3
+    },
+    "writeItems": 6,
+    "writeCalled": 5,
+    "writeInputsMatch": 0,
+    "offeredExact": true
+   }
+  ]
+ },
+ "replyOnlyPasses": {
+  "glimmer": {
+   "raw": [
+    7,
+    7
+   ],
+   "a2api": [
+    15,
+    14
+   ],
+   "acom": [
+    26,
+    20
+   ]
+  },
+  "gpt-6-luna": {
+   "raw": [
+    12,
+    8
+   ],
+   "a2api": [
+    17,
+    9
+   ],
+   "acom": [
+    16,
+    8
+   ]
+  },
+  "note": "[passes under a-commerce scoring (reply + blocks), passes whose fact numbers are in the reply text itself]"
+ },
+ "scoringArtifact": "md-best-sellers-this-month passed 6 times for gpt-6-luna only because a product table it showed had stock values 1 and 6; the reply did not state the month window"
+}
